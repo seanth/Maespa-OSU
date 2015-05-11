@@ -1,7 +1,7 @@
 A soil-plant-atmosphere model based on MAESTRA and SPA
 ===================================================
   
-Compiles with:
+Compiles with :
 * Intel Visual Fortran Compiler (version >10). 
 * gfortran
 
