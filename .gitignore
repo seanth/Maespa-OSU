@@ -5,3 +5,5 @@
 .Rproj
 .html
 .git*
+.gitignore
+.gitmodules
