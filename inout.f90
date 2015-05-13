@@ -179,7 +179,8 @@ END SUBROUTINE OPENINPUTF
 !**********************************************************************
 SUBROUTINE open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,&
                             STITLE,MTITLE,VTITLE,WTITLE,    &
-                            NSPECIES,SPECIESNAMES,OUT_PATH,ISMAESPA)
+                            NSPECIES,SPECIESNAMES,OUT_PATH,ISMAESPA,NOLAY)
+! NOLAY added STH 2015.03.30
 ! This routine opens the output files.
 ! The filenames are defined in this routine.
 ! It also writes initial comments to the output files.
@@ -187,7 +188,8 @@ SUBROUTINE open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,&
     USE switches
     USE maestcom
     IMPLICIT NONE
-    INTEGER NSPECIES, IOERROR, DUMMY, ISIMUS
+    !INTEGER NSPECIES, IOERROR, DUMMY, ISIMUS
+    INTEGER NSPECIES, IOERROR, DUMMY, ISIMUS, NOLAY, I
     !CHARACTER(*), INTENT(IN) :: CTITLE,TTITLE,PTITLE,STITLE,MTITLE,WTITLE,VTITLE,out_path
     CHARACTER(*) :: CTITLE,TTITLE,PTITLE,STITLE,MTITLE,WTITLE,VTITLE,OUT_PATH
     LOGICAL ISMAESPA
@@ -276,7 +278,7 @@ SUBROUTINE open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,&
 
     CALL write_header_information(NSPECIES,SPECIESNAMES, &
                                   CTITLE,TTITLE,PTITLE,STITLE, &
-                                  MTITLE,WTITLE,VTITLE,ISMAESPA,ISIMUS)
+                                  MTITLE,WTITLE,VTITLE,ISMAESPA,ISIMUS,nolay) !STH 2015.03.30 added NOLAY
 
     RETURN
 END SUBROUTINE open_output_files
@@ -284,19 +286,18 @@ END SUBROUTINE open_output_files
 !**********************************************************************
 SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
                                     CTITLE,TTITLE,PTITLE,STITLE,MTITLE,WTITLE,VTITLE, &
-                                    ISMAESPA,ISIMUS)
+                                    ISMAESPA,ISIMUS,nolay)
 !**********************************************************************
 
     USE switches
     USE maestcom
     
     IMPLICIT NONE
-    INTEGER I,NSPECIES,ISIMUS
+    INTEGER I,NSPECIES,ISIMUS,nolay
     CHARACTER(*), INTENT(IN) :: CTITLE,TTITLE,PTITLE,STITLE,MTITLE,WTITLE,VTITLE
     CHARACTER SPECIESNAMES(MAXSP)*30
     LOGICAL ISMAESPA
     
-  
     ! write headers to single ascii file
     IF (IOFORMAT .EQ. 0) THEN
         
@@ -425,7 +426,7 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
             WRITE (URESPHR, 990) ' '
             WRITE (URESPHR,307)
           END IF
-    
+
         ! Write comments to layer output file (if required)
         IF (IOHRLY.GT.1) THEN
             WRITE (ULAY, 991) 'Program:    ', VTITLE
@@ -433,7 +434,16 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
             WRITE (ULAY, 802)
             WRITE (ULAY, 803)
             WRITE (ULAY, 804)
-            WRITE (ULAY, *)
+            WRITE (ULAY, 805)
+            WRITE (ULAY, 806)
+            WRITE (ULAY, 807)
+            write (ulay, 808)
+            write (ulay, 809)
+            write (ulay, 810)
+            !****STH 2015.03.30***
+            write (ulay, *) 
+            write(ulay,811) (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY)
+            !***end STH
         END IF
         
         ! Write comments to water balance output file (if required). (RAD).
@@ -639,12 +649,21 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
     
         ! Write comments to layer output file (if required)
         IF (IOHRLY.GT.1) THEN
-            WRITE (ULAYHDR, 991) 'Program:    ', VTITLE
-            WRITE (ULAYHDR, 801)
-            WRITE (ULAYHDR, 802)
-            WRITE (ULAYHDR, 803)
-            WRITE (ULAYHDR, 804)
-            WRITE (ULAYHDR, *)
+            WRITE (ULAY, 991) 'Program:    ', VTITLE
+            WRITE (ULAY, 801)
+            WRITE (ULAY, 802)
+            WRITE (ULAY, 803)
+            WRITE (ULAY, 804)
+            WRITE (ULAY, 805)
+            WRITE (ULAY, 806)
+            WRITE (ULAY, 807)
+            write (ulay, 808)
+            write (ulay, 809)
+            write (ulay, 810)
+            !****STH 2015.03.30***
+            write (ulay, *) 
+            write(ulay,811) (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY)
+            !***end STH
         END IF
     
         ! Write comments to water balance output file (if required). (RAD).
@@ -763,9 +782,17 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
                ' LECAN Gscan Gbhcan hrH TCAN ALMAX PSIL PSILMIN CI TAIR VPD PAR ZEN AZ')   !10E-3*ECANMAX(ITAR,IHOUR),
 
     801 FORMAT(' Fluxes for each layer on an hourly basis')
-    802 FORMAT(' Rows: absorbed PAR (umol m-2 leaf s-1) ')
-    803 FORMAT('       photosynthesis net of Rleaf (umol m-2 leaf s-1) ')
-    804 FORMAT('       transpiration (umol m-2 leaf s-1) ')
+    802 FORMAT(' Columns: ')
+    803 format('       Date: simulation date')
+    804 format('       Hour:  hour of the day')
+    805 format('       Area of given layer(L) (m^2)')
+    806 format('       JMAX(current) in given layer(L) (umol m-2 s-1)')
+    807 format('       VCMAX(current) in given layer(L) (umol m-2 s-1)')
+    808 format('       absorbed PAR for a given layer(L) (umol m-2 leaf s-1) ')
+    809 FORMAT('       photosynthesis net of Rleaf  for a given layer(L)(umol m-2 leaf s-1)')
+    810 FORMAT('       transpiration for a given layer(L) (umol m-2 leaf s-1)')
+    811 format (2x,('Day',1x), ('Hour',1x), ('TreeIndex#',1x), ('SpeciesID#',1x), 6('L',I1,'Area',1x), 6('L',I1,'JMAX',1x), &
+                6('L',I1,'VCMAX',1x), 6('L',I1,'PAR',1x), 6('L',I1,'PNetRleaf',1x), 6('L',I1,'Transpiration',1x))
 
     601 FORMAT('Daily maintenance and growth respiration components')
     602 FORMAT('Rmf: Foliage maintenance resp.    mol m-2 d-1')
@@ -2072,34 +2099,34 @@ SUBROUTINE OUTPUTHR(IDAY,IHOUR,NOTARGETS,ITARGETS,ISPECIES,         &
             END IF                        
         END DO
     END IF
-    IF (IOFORMAT .EQ. 0) THEN
-        IF (IOHRLY.GE.2) THEN
-
-            WRITE (ULAY,610) 'DAY',IDAY,'HOUR',IHOUR
-            610   FORMAT (A5,I5,A5,I5)
-            IF (FOLLAY(1).GT.0.0) THEN
-                WRITE (ULAY,600) (PPAR(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
-                WRITE (ULAY,600) (PPS(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
-                WRITE (ULAY,600) (PTRANSP(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
-                600   FORMAT (10(F10.2,1X))
-            ELSE
-                WRITE (ULAY,*) 'NO FOLIAGE AT THIS TIME'
-            END IF
-        END IF
-    ELSE IF (IOFORMAT .EQ. 1) THEN
-        IF (IOHRLY.GE.2) THEN
-            WRITE (ULAY) REAL(IDAY),REAL(IHOUR)
-        
-            IF (FOLLAY(1).GT.0.0) THEN
-                WRITE (ULAY) (PPAR(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
-                WRITE (ULAY) (PPS(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
-                WRITE (ULAY) (PTRANSP(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
-            ELSE
-                ! No foliage at this time
-                WRITE (ULAY) -999.9
-            END IF
-        END IF
-    END IF    
+!    IF (IOFORMAT .EQ. 0) THEN
+!    !    IF (IOHRLY.GE.2) THEN
+!
+!            WRITE (ULAY,610) 'DAY',IDAY,'HOUR',IHOUR
+!            610   FORMAT (A5,I5,A5,I5)
+!            IF (FOLLAY(1).GT.0.0) THEN
+!                WRITE (ULAY,600) (PPAR(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+!                WRITE (ULAY,600) (PPS(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+!                WRITE (ULAY,600) (PTRANSP(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+!                600   FORMAT (10(F10.2,1X))
+!            ELSE
+!                WRITE (ULAY,*) 'NO FOLIAGE AT THIS TIME'
+!            END IF
+!        END IF
+!    ELSE IF (IOFORMAT .EQ. 1) THEN
+!        IF (IOHRLY.GE.2) THEN
+!            WRITE (ULAY) REAL(IDAY),REAL(IHOUR)
+!        
+!            IF (FOLLAY(1).GT.0.0) THEN
+!                WRITE (ULAY) (PPAR(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+!                WRITE (ULAY) (PPS(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+!                WRITE (ULAY) (PTRANSP(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+!            ELSE
+!                ! No foliage at this time
+!                WRITE (ULAY) -999.9
+!            END IF
+!        END IF
+!    END IF    
     RETURN
 END SUBROUTINE OUTPUTHR
 
@@ -4979,29 +5006,60 @@ SUBROUTINE LADCHOOSE(IDAY,ISTART,NSPECIES,NOLADDATES,DATESLAD,BPTTABLESPEC,BPTSP
 END SUBROUTINE LADCHOOSE
 
 !**********************************************************************
-SUBROUTINE OUTPUTLAY(UFILE,FOLLAY,JMAX25,VCMAX25,NOLAY)
+SUBROUTINE OUTPUTLAY(UFILE,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY,IHOUR,  &
+                        PPAR, PPS,PTRANSP, theTree, iSpecies, theTarget)
 ! Daily output to layer flux file.
 !**********************************************************************
     
     USE switches
     USE maestcom
     IMPLICIT NONE
-    INTEGER UFILE,I,NOLAY
+    INTEGER UFILE,I,NOLAY,IDAY,IHOUR,noTargets
+    integer theTree, iSpecies(MAXT), theSpecies, theTarget
     REAL FOLLAY(MAXLAY)
     REAL JMAX25(MAXLAY,MAXC),VCMAX25(MAXLAY,MAXC)
+    REAL PPAR(MAXT,MAXLAY,MAXHRS)
+    REAL PPS(MAXT,MAXLAY,MAXHRS)
+    REAL PTRANSP(MAXT,MAXLAY,MAXHRS)
+
+    theSpecies=iSpecies(theTree)
     
     IF (IOFORMAT .EQ. 0) THEN
-        WRITE(UFILE,*) 'LEAF AREA OF TARGET TREE IN EACH LAYER IN M2'
-        WRITE(UFILE,500) (FOLLAY(I),I=1,NOLAY)
-        WRITE(UFILE,*)
-        WRITE(UFILE,*) 'JMAX (CURRENT) IN EACH LAYER IN UMOL M-2 S-1'
-        WRITE(UFILE,500) (JMAX25(I,1),I=1,NOLAY)
-        WRITE(UFILE,*)
-        WRITE(UFILE,*) 'VCMAX (CURRENT) IN EACH LAYER IN UMOL M-2 S-1'
-        WRITE(UFILE,500) (VCMAX25(I,1),I=1,NOLAY)
-        WRITE(UFILE,*)
-    
-        500 FORMAT(10(F10.5,1X))
+        !write(ufile,511) IDAY, IHOUR, theTree, theSpecies, (FOLLAY(I),I=1,NOLAY), (JMAX25(I,1),I=1,NOLAY), (VCMAX25(I,1),I=1,NOLAY),      &
+        !                 (PPAR(1,1,25)/FOLLAY(I),I=1,NOLAY), (PPS(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY),                         &
+        !                 (PTRANSP(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+        write(ufile,511) IDAY, IHOUR, theTree, theSpecies, (FOLLAY(I),I=1,NOLAY), (JMAX25(I,1),I=1,NOLAY), (VCMAX25(I,1),I=1,NOLAY),      &
+                         (PPAR(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY), (PPS(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY),                         &
+                         (PTRANSP(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+        511 format((I5,1x),(I5,1x), (I5,1x), (I5,1x), 6(f10.5,1x), 6(f10.5,1x), 6(f10.5,1x), 6(F10.2,1X), 6(F10.2,1X), 6(F10.2,1X))
+        !***Moved by STH 2015.03.27***
+        !IF (IOHRLY.GE.2) THEN
+        !WRITE (UFILE,610) 'DAY',IDAY,'HOUR',IHOUR
+        !610   FORMAT (A5,I5,A5,I5)
+        !IF (FOLLAY(1).GT.0.0) THEN
+        !    WRITE (UFILE,600) (PPAR(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+        !    WRITE (UFILE,600) (PPS(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+        !    WRITE (UFILE,600) (PTRANSP(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+        !    600   FORMAT (10(F10.2,1X))
+        !ELSE
+        !    WRITE (UFILE,*) 'NO FOLIAGE AT THIS TIME'
+        !END IF
+!       ! END IF
+!    ELSE IF (IOFORMAT .EQ. 1) THEN
+!        IF (IOHRLY.GE.2) THEN
+!            WRITE (UFILE) REAL(IDAY),REAL(IHOUR)
+!        
+!            IF (FOLLAY(1).GT.0.0) THEN
+!                WRITE (UFILE) (PPAR(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+!                WRITE (UFILE) (PPS(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+!                WRITE (UFILE) (PTRANSP(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
+!            ELSE
+!                ! No foliage at this time
+!                WRITE (UFILE) -999.9
+!            END IF
+!        END IF
+!    END IF   
+
     ELSE IF (IOFORMAT .EQ. 1) THEN
     
     END IF

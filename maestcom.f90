@@ -5,15 +5,18 @@ MODULE maestcom
     CHARACTER(LEN=3), PARAMETER :: format_binary = 'bin'
     
     ! Maximum dimensions of arrays
-    INTEGER, PARAMETER :: MAXT = 1500        ! Maximum no. of trees in plot
+    INTEGER, PARAMETER :: MAXT = 15000        ! Maximum no. of trees in plot. Changed from 1500 by STH 2015.03.23
     INTEGER, PARAMETER :: MAXLAY = 15         ! Maximum no. of layers for radiation
     INTEGER, PARAMETER :: MAXSOILLAY = 75    ! Maximum no. of layers of soil (RAD)
     INTEGER, PARAMETER :: MAXSP = 3          ! Maximum no. of species (RAD).
     INTEGER, PARAMETER :: MAXP = 1500        ! Maximum no. of gridpoints -- MUST BE EQUAL TO OR LARGER THAN MAXT !!!!
-    INTEGER, PARAMETER :: MAXC = 3           ! Maximum no. of leaf area distributions
-    INTEGER, PARAMETER :: MAXANG = 20        ! Maximum no. of zenith & leaf angles
-    INTEGER, PARAMETER :: MAXD = 13          ! For resp prog
-    INTEGER, PARAMETER :: MAXDATE = 1000        ! Maximum no. of dates for tree or physiol parameters
+    INTEGER, PARAMETER :: MAXC = 3            ! Maximum no. of leaf area distributions
+    INTEGER, PARAMETER :: MAXANG = 20          ! Maximum no. of zenith & leaf angles
+    INTEGER, PARAMETER :: MAXD = 13           ! For resp prog
+    INTEGER, PARAMETER :: MAXDATE = 3      ! Maximum no. of dates for tree or physiol parameters
+    !INTEGER, PARAMETER :: maxdate = 5        ! Maximum no. of dates for physiol parameters
+    !INTEGER, PARAMETER :: MAXMET = 18         ! Maximum columns in met data file
+    ! changed by mgdk, just to try and compile, not 18 but MHET has 20?!!
     INTEGER, PARAMETER :: MAXMET = 20         ! Maximum columns in met data file
     INTEGER, PARAMETER :: MAXHISTO = 200      ! Maximum bins in PAR histogram
     REAL, PARAMETER    :: TOL = 0.02          ! Tolerance for leaf temp iteration
@@ -36,7 +39,7 @@ MODULE maestcom
     REAL, PARAMETER :: TWOPI = 2.0 * PI    ! Two times Pi
     REAL, PARAMETER :: PID2 = PI / 2.0     ! Pi divided by two
     REAL, PARAMETER :: PID180 = PI / 180.0 ! Pi divided by 180 degrees
-    REAL, PARAMETER :: AIRMA = 29.e-3      ! mol mass air (kg/mol)
+    REAL, PARAMETER :: AIRMA = 29.e-3      ! mol mass air (kg/mol) !Was that 'A' a typo? Meant to be a 'W'?-STH 2015.0513
     REAL, PARAMETER :: PATM = 1.0125E5     ! atmospheric pressure - standard condns (Pa)
     REAL, PARAMETER :: CPAIR = 1010.0      ! heat capacity of air (J kg-1 K-1)
     REAL, PARAMETER :: CPH2O = 4.186E06    ! heat capacity of water (J kg-1 K-1)
@@ -57,7 +60,7 @@ MODULE maestcom
     REAL, PARAMETER :: GSVGSC = 1.57       ! Ratio of Gsw:Gsc
     REAL, PARAMETER :: GBVGBH = 1.075      ! Ratio of Gbw:Gbh
     REAL, PARAMETER :: ALPHAQ = 0.425      ! Quantum yield of RuBP regen (mol mol-1)
-    REAL, PARAMETER :: SOLARC = 1370       ! Solar constant (J m-2 s-1)
+    REAL, PARAMETER :: SOLARC = 1370       ! Solar constant (J m-2 s-1) also (W m-2)
     REAL, PARAMETER :: GCPERMOL = 12.0     ! Grams ! per mol !
     REAL, PARAMETER :: CPERDW = 0.5        ! fraction per DW
     REAL, PARAMETER :: VONKARMAN = 0.41    ! von Karman's constant
@@ -97,8 +100,8 @@ MODULE maestcom
     INTEGER, PARAMETER :: UPARUS = 33         ! uspar.dat
     INTEGER, PARAMETER :: UWATDAY = 34        ! watbalday.dat
     INTEGER, PARAMETER :: UDAYHDR = 35        ! Dayflx_hdr.asc
-    INTEGER, PARAMETER :: UMET = 36           ! Met.dat
-    INTEGER, PARAMETER :: UTUTD = 37          ! Tutd.dat
+    INTEGER, PARAMETER :: UMET = 36            ! Met.dat
+    INTEGER, PARAMETER :: UTUTD = 37           ! Tutd.dat
     INTEGER, PARAMETER :: UHRLYHDR = 38 
     INTEGER, PARAMETER :: ULAYHDR = 39 
     INTEGER, PARAMETER :: UHISTHDR = 40
@@ -113,6 +116,8 @@ MODULE maestcom
     INTEGER, PARAMETER :: USUNLA = 49    ! modification Mathias 27/11/12
     INTEGER, PARAMETER :: USWPLAY = 50    ! modification Mathias décembre 2012
     
+    
+
     ! Flags passed to error handling subroutine
     INTEGER, PARAMETER :: IFATAL = 100        ! Error was fatal - stop program
     INTEGER, PARAMETER :: IWARN = 200         ! Error non-fatal: just print warning
@@ -128,7 +133,8 @@ MODULE maestcom
     ! Flags to indicate which program it is
     INTEGER, PARAMETER :: INORMAL = 0         ! Maestra, Maeshr
     INTEGER, PARAMETER :: ITEST = 1           ! Maestest
-  
+
+	  
     !COMMON /HRS/ HHRS, KHRS, SPERHR ! Make KHRS and HHRS available throughout the program
 !    INTEGER, PARAMETER :: KHRS = 24                  ! Number of time intervals in a day
 !    REAL, PARAMETER :: HHRS = (KHRS) / 2.0           ! Half a day length

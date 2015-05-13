@@ -141,7 +141,8 @@ PROGRAM maespa
                     MFLAG,METCOLS,NOMETCOLS,MTITLE,MSTART,in_path)
     
     ! Open output files
-    CALL open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,STITLE,MTITLE,VTITLE,WTITLE,NSPECIES,SPECIESNAMES,out_path,ISMAESPA)
+    !CALL open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,STITLE,MTITLE,VTITLE,WTITLE,NSPECIES,SPECIESNAMES,out_path,ISMAESPA)
+    CALL open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,STITLE,MTITLE,VTITLE,WTITLE,NSPECIES,SPECIESNAMES,out_path,ISMAESPA,NOLAY) !STH 2015.03.30
     
     
     IF(ISIMUS.EQ.1)THEN
@@ -585,7 +586,6 @@ PROGRAM maespa
         !                       Begin hourly loop                              !
         !**********************************************************************!
         DO IHOUR = 1,KHRS
-            
             CALL ZEROFSOIL(FSOIL1,NSUMMED,TOTTMP)
             
             ! Loop over all chosen trees within subplot
@@ -759,7 +759,7 @@ PROGRAM maespa
             
                 CALL POINTSNEW(NOLAY,PPLAY,JLEAF,JSHAPE,SHAPE,RX(1),RY(1),RZ(1),ZBC(1),DXT(1),DYT(1), &
                                 DZT(1),FOLT(1),PROPC,PROPP,BPT,NOAGECT(1),NOAGEP,XL,YL,ZL,VL,DLT,DLI, &
-                                LGP,FOLLAY)          
+                                LGP,FOLLAY)        
                 
                 ! Following functions need FOLLAY. 
                 CALL GETWIND(FOLLAY,FOLT(1),TOTLAI,EXTWIND,WINDLAY)
@@ -776,7 +776,9 @@ PROGRAM maespa
                 RMW = CALCRMW(MODELRW,COLLA,COLLK,STEMSDW,DIAM(1),RZ(1)+ZBC(1),STEMFORM,RMWAREA,WBIOM,RMW)
 
                 ! Output information to layer flux file if required
-                IF (IOHRLY.GT.1) CALL OUTPUTLAY(ULAY,FOLLAY,JMAX25,VCMAX25,NOLAY)
+                !IF (IOHRLY.GT.1) CALL OUTPUTLAY(ULAY,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY,IHOUR,PPAR,PPS,PTRANSP)
+
+                IF (IOHRLY.GT.1) CALL OUTPUTLAY(ULAY,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY+1,IHOUR,PPAR,PPS,PTRANSP, ITREE, iSpecies, ITAR)
                    
                 ! If the diffuse transmittances have changed, must set up the EHC
                 IF (NEWTUTD.EQ.1.AND.TOTLAI.GT.0) THEN
@@ -812,7 +814,7 @@ PROGRAM maespa
                 
                 ! Test to see if daylight hours or if any foliage
                 IF ((ABS(ZEN(IHOUR)) <  PI/2.0 ) .AND. (RADABV(IHOUR,1) > 1.0) .AND. (FOLT(1) > 0.0)) THEN
-                    
+
                     ! Get slope correction factor
                     CALL SLOPES(IHOUR,TTIMD,EQNTIM,ALAT,DEC,XSLOPE,YSLOPE,BEAR,ZEN(IHOUR),BMULT,DMULT2,SOMULT)
 
@@ -875,7 +877,6 @@ PROGRAM maespa
                                             PSUS(IHOUR,IPTUS))
                                 GSIPT = 0.0
                                 ETUS = 0.0
-                                
                             ELSE
                                 
                                 ! Otherwise call BEWDY model to calculate understorey photosynthesis
@@ -920,7 +921,7 @@ PROGRAM maespa
                                 ENDIF
                                 
                                 ! Net photosynthesis
-                                PSUS(IHOUR,IPTUS) = C4FRAC*PSC4 + (1.0 - C4FRAC)*PSC3 - RD0US
+                                PSUS(IHOUR,IPTUS) = PSUS(IHOUR,IPTUS) + C4FRAC*PSC4 + (1.0 - C4FRAC)*PSC3 - RD0US
                                 
                                 ! Transpiration
                                 ETUS(IHOUR,IPTUS) = C4FRAC*ETC4 + (1.0 - C4FRAC)*PSC3
@@ -937,7 +938,7 @@ PROGRAM maespa
                         CALL SUMHRUS(IHOUR,NOUSPOINTS,GRDAREAI,AREAUS,PARUS,PARUSMEAN,PARUSSD,APARUS,PSUS,ETUS,THRABUS,&
                                     FCO2US,FH2OUS)
                     ENDIF ! Understorey calculations
-                    
+                  
                     ! Output PAR transmittance for test points.
                     IF(IPOINTS.EQ.1)THEN      
                         DO IPTEST = 1,NUMTESTPNT
@@ -991,7 +992,6 @@ PROGRAM maespa
                             
                         ENDDO  
                     ENDIF  !MAESTEST          
-   
                     
                     ! Loop over grid points
                     DO IPT = 1,NUMPNT
@@ -1160,7 +1160,6 @@ PROGRAM maespa
                     
                     END DO ! End loop over grid points
                     
-
                     ! Calculate transpiration by applying Penman-Monteith to canopy
                     FH2OCAN(ITAR,IHOUR) = ETCAN(WINDAH(IHOUR),ZHT,Z0HT,ZPD,PRESS(IHOUR),TAIR(IHOUR),    &
                                             THRAB(ITAR,IHOUR,1)+THRAB(ITAR,IHOUR,2)+THRAB(ITAR,IHOUR,3),&
@@ -1349,11 +1348,15 @@ PROGRAM maespa
             ENDIF
 
             ! Output hourly totals
+            !print *, ispecies
+            !print *, PPAR(1,1,12)
+            !print *,"end"
+            !print *, PPAR(1,1,24)
+            !print *, PPAR(1,1,48)
             CALL OUTPUTHR(IDAY+1,IHOUR,NOTARGETS,ITARGETS,ISPECIES,TCAN,NOLAY,PPAR, &
                                 PPS,PTRANSP,FOLLAY,THRAB,FCO2,FRESPF,FRESPW,FRESPB,FH2O,GSCAN,GBHCAN, &
                                 FH2OCAN,FHEAT,VPD,TAIR,UMOLPERJ*RADABV(1:KHRS,1),PSILCAN,PSILCANMIN,CICAN,  &
                                 ECANMAX,ACANMAX,ZEN,AZ)             ! rajout ZEN AZ mathias mars 2013
-
 
    
        
@@ -1671,7 +1674,6 @@ SUBROUTINE SUMDAILY(NOTARGETS,THRAB,FCO2,FRESPF,FRESPW,FRESPB,FRESPCR,FRESPFR,  
     DO ITAR = 1,NOTARGETS
         DO IHOUR = 1,KHRS
             TOTCO2(ITAR) = TOTCO2(ITAR) + FCO2(ITAR,IHOUR)
-            !print *, TOTCO2(ITAR), FCO2(ITAR,IHOUR)
             TOTRESPF(ITAR) = TOTRESPF(ITAR) + FRESPF(ITAR,IHOUR)
             TOTRESPWM(ITAR) = TOTRESPWM(ITAR) + FRESPW(ITAR,IHOUR)
             TOTRESPB(ITAR)  = TOTRESPB(ITAR) + FRESPB(ITAR,IHOUR)
