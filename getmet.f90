@@ -849,7 +849,9 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     ELSE
         print *, "Calculating fraction of incident PAR which is direct-beam..."
         DO IHR = 1,KHRS
-            FBEAM(IHR,1) = CALCFBMH(IDATE,ZEN(IHR),RADABV(IHR,1))
+            !FBEAM(IHR,1) = CALCFBMH(IDATE,ZEN(IHR),RADABV(IHR,1))
+            !***STH 2015-0529. We have RAD. Use it instead of sending PAR and then converting to RAD
+            FBEAM(IHR,1) = CALCFBMH(IDATE,ZEN(IHR),solarRad(IHR,1))
             ! 29/3     FBEAM(IHR,1) = CALCFBMH(IDATE,IHR,ALAT,DEC,RADABV(IHR,1))
             !          FBEAM(IHR,1) = CALCFBMWN(IDATE,IHR,ZEN(IHR),RADABV(IHR,1))
         END DO
@@ -1321,20 +1323,26 @@ SUBROUTINE CALCFBMD(IDATE,ZEN,PAR,FBM)
 END SUBROUTINE CALCFBMD
 
 !**********************************************************************
-FUNCTION CALCFBMH(IDATE,ZEN,RADABV)
+FUNCTION CALCFBMH(IDATE,ZEN,RAD)
 ! Calculate the beam fraction from the hourly incident radiation.
 ! Use the formula of Spitters et al. (1986) Agric For Met 38:217-229.
 ! INPUTS:
 ! IDATE - date in days-since-1950 format
 ! ZEN - hourly sun zenith angle (radians)
-! RADABV - total incident PAR (J m-2 s-1)
+! removed STH 20150528---RADABV - total incident PAR (J m-2 s-1)
+! RAD - total incident RAD (W M-2)
 ! RETURNS:
 ! CALCFBMH - hourly beam fraction
+!
+! The idea is that you calculate the idealized amount of radiation that
+! would hit the Earth's surface (S0). Divide measured RAD by S0 and that
+! gives you an estimate of what is being scattered, i.e. how much is
+! direct beam. -STH 2015.0528
 !**********************************************************************
     USE maestcom
     IMPLICIT NONE
     INTEGER IDATE
-    REAL SINB,ZEN,RADABV
+    REAL SINB,ZEN,RAD
     REAL SPITR,SPITK,TRANS,CALCFBMH,S0,ETRAD,FDIF
 
     print *, "CALCFBMH"
@@ -1343,13 +1351,17 @@ FUNCTION CALCFBMH(IDATE,ZEN,RADABV)
     ! (= SIN(90-ZEN)). For zenith angles > 80 degrees will put FBEAM = 0.
     SINB = SIN(PID2-ZEN)
 
-    ! Calculate extra-terrestrial radiation
+    ! Calculate extra-terrestrial radiation.
+    !***STH 2015-0528: Is this really ET radiation? Calculation looks more
+    !   like it's idealized radiation reaching the Earth's surface at a given 
+    !   latitude.
     S0 = ETRAD(IDATE,SINB)
-    print *, "S0: ",S0
 
     IF (SINB.GT.0.17) THEN
         ! Spitter's formula
-        TRANS = (RADABV/FPAR) / S0
+        !TRANS = (RADABV/FPAR) / S0
+        !***STH 2015-0528: instead of converting PAR to RAD, use RAD
+        TRANS = RAD / S0
         SPITR = 0.847 - 1.61*SINB + 1.04*SINB**2
         SPITK = (1.47 - SPITR)/1.66
         IF (TRANS.LE.0.22) THEN
@@ -1365,7 +1377,6 @@ FUNCTION CALCFBMH(IDATE,ZEN,RADABV)
     ELSE
         CALCFBMH = 0.0
     END IF
-    print *, "Fraction beam: ", CALCFBMH
     RETURN
 END FUNCTION CALCFBMH
 
