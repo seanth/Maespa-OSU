@@ -654,31 +654,47 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     ENDIF
 
     ! Set up pressure array
-    print *, "Reading in atmospheric pressures..."
+
     IF (METCOLS(MHPRESS).NE.MISSING) THEN
+        print *, "Reading in atmospheric pressures..."
         DO IHR = 1,KHRS
             PRESS(IHR) = DATAIN(IHR,METCOLS(MHPRESS))
         END DO
     ELSE
+        print *, "Atmospheric pressure is missing. Setting values to ", PRESSK
         DO IHR = 1,KHRS
             PRESS(IHR) = PRESSK
         END DO
     END IF
 
     ! Set up wind speed array
-    print *, "Reading in wind speeds..."
-    DO IHR = 1,KHRS
-        IF (METCOLS(MHWIND).EQ.MISSING) THEN
-            WINDAH(IHR) = DEFWIND     ! Very default value!!
-        ELSE IF (DATAIN(IHR,METCOLS(MHWIND)).LE.0) THEN
-            WINDAH(IHR) = DEFWIND
-        ELSE
+    IF (METCOLS(MHWIND).NE.MISSING) THEN
+        print *, "Reading in wind speeds..."
+        DO IHR = 1,KHRS
             WINDAH(IHR) = DATAIN(IHR,METCOLS(MHWIND))
-        END IF
-    END DO
+            if (WINDAH(IHR).LE.0) THEN
+                print *, "***Error. Wind speed less than 0. Setting wind speed to ", DEFWIND
+            end if
+        end do
+    else
+        print *, "Setting wind speeds to ", DEFWIND
+        DO IHR = 1,KHRS
+            WINDAH(IHR) = DEFWIND
+        end do
+    end if
+
+    !DO IHR = 1,KHRS
+    !    IF (METCOLS(MHWIND).EQ.MISSING) THEN
+    !        WINDAH(IHR) = DEFWIND     ! Very default value!!
+    !    ELSE IF (DATAIN(IHR,METCOLS(MHWIND)).LE.0) THEN
+    !        WINDAH(IHR) = DEFWIND
+    !    ELSE
+    !        WINDAH(IHR) = DATAIN(IHR,METCOLS(MHWIND))
+    !    END IF
+    !END DO
 
     ! Set hourly air temperatures
-    print *, "Reading max and min temperatures..."
+    print *, "Determining max and min air temperatures..."
     TMIN = DATAIN(1,METCOLS(MHTAIR))
     TMAX = DATAIN(1,METCOLS(MHTAIR))
     DO IHR = 1,KHRS
@@ -688,11 +704,12 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     END DO
 
     ! Set hourly soil temperatures
-    print *, "Reading in soil temperatures..."
     IF (METCOLS(MHTSOIL).EQ.MISSING) THEN
+        print *, "Calculating soil temperature from air temperature...."
         TSOILDATA = 0
         CALL CALCTSOIL(TAIR,TSOIL)
     ELSE
+        print *, "Reading in soil temperatures..."
         DO IHR = 1,KHRS
             TSOIL(IHR) = DATAIN(IHR,METCOLS(MHTSOIL))
             TSOILDATA = 1
@@ -700,33 +717,35 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     END IF
 
     ! Read in RH, VPD, VMFD, Tdew
-    print *, "Reading in relative humidity..."
     IF (METCOLS(MHRH).NE.MISSING) THEN
+        print *, "Reading in relative humidity..."
         DO IHR = 1,KHRS
             RH(IHR) = DATAIN(IHR,METCOLS(MHRH))
         END DO
     ELSE IF (METCOLS(MHRHP).NE.MISSING) THEN
+        print *, "Reading in relative humidity percent..."
         DO IHR = 1,KHRS
             RH(IHR) = DATAIN(IHR,METCOLS(MHRHP))/100.0
         END DO
     END IF
 
-    print *, "Reading in vapour pressure differential..."
     IF (METCOLS(MHVPD).NE.MISSING) THEN
+        print *, "Reading in vapour pressure differential..."
         DO IHR = 1,KHRS
             VPD(IHR) = DATAIN(IHR,METCOLS(MHVPD))
         END DO
     END IF
 
-    print *, "Reading in dew point..."
     IF (METCOLS(MHTDEW).NE.MISSING) THEN
+        print *, "Reading in dew point temperature..."
         DO IHR = 1,KHRS
             TDEW(IHR) = DATAIN(IHR,METCOLS(MHTDEW))
         END DO
     END IF
 
-    print *, "Reading in mole fraction deficit..."
+
     IF (METCOLS(MHMFD).NE.MISSING) THEN
+        print *, "Reading in vapour pressure mole fraction deficit..."
         DO IHR = 1,KHRS
             VMFD(IHR) = DATAIN(IHR,METCOLS(MHMFD))
         END DO
@@ -734,56 +753,65 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
 
     ! Calculate RH if not in file
     IF ((METCOLS(MHRH).EQ.MISSING).AND.(METCOLS(MHRHP).EQ.MISSING)) THEN
+        print *, "***Relative humidity values are missing!"
         IF (METCOLS(MHVPD).NE.MISSING) THEN
+            print *, "     Calculating relative humidity from vapour pressure differential..."
             CALL VPDTORH(VPD,TAIR,RH)
         ELSEIF (METCOLS(MHTDEW).NE.MISSING) THEN
+            print *, "     Calculating relative humidity from dew point temperature..."
             CALL TDEWTORH(TDEW,TAIR,RH)
         ELSEIF (METCOLS(MHMFD).NE.MISSING) THEN
+            print *, "     Calculating relative humidity from vapour pressure mole fraction deficit..."
             CALL MFDTORH(VMFD,PRESS,TAIR,RH)
         ELSE
+            print *, "     Calculating relative humidity from air temp and min air temp..."
             CALL CALCRH(TMIN,TAIR,RH)
         END IF
     END IF
     ! Calculate VPD if not in file
     IF (METCOLS(MHVPD).EQ.MISSING) THEN
+        print *, "     Calculating vapour pressure differential from relative humidity..."
         CALL RHTOVPD(RH,TAIR,VPD)
     END IF
     ! Calculate VMFD if not in file
     IF (METCOLS(MHMFD).EQ.MISSING) THEN
+        print *, "     Calculating vapour pressure mole fraction deficit from vapour pressure differential..."
         CALL VPDTOMFD(VPD,PRESS,VMFD)
     END IF
 
     ! Read in rainfall if present.
     ! Don't convert to mmol m-2 as before (RAD)
-    print *, "Reading in rainfall data..."
 	DAYPPT = 0.0
     IF (METCOLS(MHPPT).NE.MISSING) THEN 
+        print *, "Reading in rainfall data..."
         DO IHR = 1,KHRS
             PPT(IHR) = DATAIN(IHR,METCOLS(MHPPT))   !*1E6/18.
             DAYPPT = DAYPPT+PPT(IHR)
         END DO
     ELSE
+        print *, "Setting rainfall data to zero"
         DO IHR = 1,KHRS
             PPT(IHR) = 0.0
         END DO
     END IF
 
     ! Read in measured ET, if present.
-    print *, "Reading in extra-terrestrial solar irradiation..."
     IF(METCOLS(MHET).NE.MISSING) THEN
+        print *, "Reading in extra-terrestrial solar irradiation..."
         DO IHR = 1,KHRS
             ETMEAS(IHR) = DATAIN(IHR,METCOLS(MHET))
         END DO
     ENDIF
 
     !---STH 2015-0528: Read in the recorded global radiation ( W m-2 )
-    print *, "Reading in RAD..."
     IF (METCOLS(MHRad).NE.MISSING) THEN
+        print *, "Reading in incident total short-wave radiation (RAD)..."
         DO IHR = 1,KHRS
             solarRad(IHR,1) = DATAIN(IHR,METCOLS(MHRad))
             !print *, solarRad(ihr,1)
         END DO
     ELSE IF (METCOLS(MHPAR).NE.MISSING) THEN
+        print *, "Calculating incident total short-wave radiation (RAD) using incident photosynthetically active radiation(PAR)..."
         DO IHR = 1,KHRS
             solarRad(IHR,1) = DATAIN(IHR,METCOLS(MHPAR)) / FPAR
         END DO
@@ -791,18 +819,20 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     !---STH 2015-0528
 
     ! Must have either PAR (umol m-2 s-1) or global radiation (W m-2)
-    print *, "Reading in PAR..."
     IF (METCOLS(MHPAR).NE.MISSING) THEN
+        print *, "Reading in incident photosynthetically active radiation(PAR)..."
         DO IHR = 1,KHRS
             RADABV(IHR,1) = DATAIN(IHR,METCOLS(MHPAR)) / UMOLPERJ
         END DO
     ELSE IF(METCOLS(MHRAD).NE.MISSING) THEN
+        print *, "Calculating incident photosynthetically active radiation(PAR) from incident total short-wave radiation (RAD)..."
         DO IHR = 1,KHRS
             !RADABV(IHR,1) = DATAIN(IHR,METCOLS(MHRAD)) * FPAR
             !Use already read-in data
             RADABV(IHR,1) = solarRad(IHR, 1) * FPAR
         END DO
     ELSE
+        print *, "Calculating incident photosynthetically active radiation(PAR) from latitude and day"
         CALL BRISTO(IDATE,TMAX,TMIN,DAYPPT,DELTAT,ALAT,DEC,DAYL,PAR)
         CALL CALCFBMD(IDATE,ZEN,PAR,FBM)
         RADBM = PAR*FBM
@@ -811,12 +841,13 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     END IF
 
     ! Calculate beam fractions
-    print *, "Reading in direct beam fraction..."
     IF (METCOLS(MHFBEAM).NE.MISSING) THEN
+        print *, "Reading in fraction of incident PAR which is direct-beam..."
         DO IHR = 1,KHRS
             FBEAM(IHR,1) = DATAIN(IHR,METCOLS(MHFBEAM))
         END DO
     ELSE
+        print *, "Calculating fraction of incident PAR which is direct-beam..."
         DO IHR = 1,KHRS
             FBEAM(IHR,1) = CALCFBMH(IDATE,ZEN(IHR),RADABV(IHR,1))
             ! 29/3     FBEAM(IHR,1) = CALCFBMH(IDATE,IHR,ALAT,DEC,RADABV(IHR,1))
@@ -836,29 +867,31 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     ! Calculate thermal radiation
     CALL THERMAL(TAIR,VPD,FSUN,RADABV)
 
-    print *, "Reading in CA..."
     ! Read in values of CA if present
     IF (METCOLS(MHCA).NE.MISSING) THEN
+        print *, "Reading in atmospheric CO2 concentration..."
         DO IHR = 1,KHRS
             CA(IHR) = DATAIN(IHR,METCOLS(MHCA))
         END DO
     ELSE
+        print *, "Atmospheric CO2 concentration is missing. Setting values to ", CAK
         DO IHR = 1,KHRS
             CA(IHR) = CAK
         END DO
     END IF
 
     ! Get soil moisture - either soil water potential or soil moisture deficit
-    print *, "Read in soil water potential..."
     ! Initialize
     SOILMOIST = 0.0  
     SOILDATA = NONE  
     IF (METCOLS(MHSWP).NE.MISSING) THEN
+        print *, "Read in soil water potential..."
         SOILDATA = POTENTIAL
         DO IHR = 1,KHRS
             SOILMOIST(IHR) = DATAIN(IHR,METCOLS(MHSWP))
         END DO
 	ELSE IF (METCOLS(MHSMD).NE.MISSING) THEN
+        print *, "Read in soil water deficit..."
         SOILDATA = DEFICIT
         DO IHR = 1,KHRS
             SOILMOIST(IHR) = DATAIN(IHR,METCOLS(MHSMD))
@@ -867,6 +900,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
             !     &    /(SWMAX - SWMIN)
         END DO
     ELSE IF (METCOLS(MHSWC).NE.MISSING) THEN
+        print *, "Read in soil water content..."
         SOILDATA = CONTENT
         DO IHR = 1,KHRS
             SOILMOIST(IHR) = DATAIN(IHR,METCOLS(MHSWC))
