@@ -85,6 +85,8 @@ SUBROUTINE OPENMETF(ISTART,IEND,CAK,PRESSK,SWMIN,SWMAX,USEMEASET,DIFSKY,ALAT,TTI
     INTEGER DAYORHR,MSTART,MEND,ISTART,IEND,ICOL,MFLAG,I,NOMETCOLS
     NAMELIST /METFORMAT/ DAYORHR, KHRSPERDAY, NOCOLUMNS, COLUMNS, STARTDATE, ENDDATE
     REAL CAK,PRESSK,DIFSKY,SWMIN,SWMAX,ALAT,TTIMD
+
+    print *, "OPENMETF"
      
     990   FORMAT (A60)     ! For reading titles in input files.
     991   FORMAT (A12,A60) ! For writing comments to output files.
@@ -144,7 +146,6 @@ SUBROUTINE OPENMETF(ISTART,IEND,CAK,PRESSK,SWMIN,SWMAX,USEMEASET,DIFSKY,ALAT,TTI
     END DO
 
     MFLAG = DAYORHR
-
     ! If MFLAG = 0, look for daily values; if MFLAG = 1, hourly values
     IF (MFLAG.EQ.0) THEN ! Daily values
         DO I = 1,NOCOLUMNS
@@ -179,6 +180,8 @@ SUBROUTINE OPENMETF(ISTART,IEND,CAK,PRESSK,SWMIN,SWMAX,USEMEASET,DIFSKY,ALAT,TTI
                 ICOL = MDSWC
             ELSEIF (COLUMNS(I).EQ.'ET')  THEN
                 ICOL = MDET
+            !ELSEIF (COLUMNS(I).EQ.'RAD')  THEN
+            !    ICOL = MDRad
             ELSE
                 CALL SUBERROR('ERROR: Header incorrectly specified in Met file',&
                               IFATAL,0) 
@@ -186,6 +189,7 @@ SUBROUTINE OPENMETF(ISTART,IEND,CAK,PRESSK,SWMIN,SWMAX,USEMEASET,DIFSKY,ALAT,TTI
             
             IF (ICOL.NE.MISSING) METCOLS(ICOL) = I
         END DO
+
         ! Check to see if any of the essential information is missing.
         IF (METCOLS(MDTMIN).EQ.MISSING) CALL SUBERROR('ERROR: NEED VALUES OF TMIN IN MET FILE',IFATAL,0)
         IF (METCOLS(MDTMAX).EQ.MISSING) CALL SUBERROR('ERROR: NEED VALUES OF TMAX IN MET FILE',IFATAL,0)
@@ -270,7 +274,9 @@ SUBROUTINE RESTARTMETF(ISTART,MSTART,MFLAG)
     IMPLICIT NONE
     INTEGER IOERROR,MFLAG,LINESTOSKIP,ISTART,MSTART,I
     CHARACTER*60 TMPTXT, DATASTART
-    
+
+    print *, "RESTARTMETF"
+
     DATASTART = 'DATA STARTS'
     REWIND(UMET)
 
@@ -308,7 +314,6 @@ SUBROUTINE READENVIRON(UFILE,CAK,PRESSK,DIFSKYI,SWMINI,SWMAXI)
 ! SWMINI - Minimum soil water content
 ! SWMAXI - Maximum soil water content - in same units as soil water content in met data
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     NAMELIST /ENVIRON/ CA,PRESS,DIFSKY, SWMIN, SWMAX
@@ -316,6 +321,8 @@ SUBROUTINE READENVIRON(UFILE,CAK,PRESSK,DIFSKYI,SWMINI,SWMAXI)
     REAL CA,PRESS,DIFSKY, SWMIN, SWMAX
     REAL CAK,PRESSK,DIFSKYI, SWMINI, SWMAXI
     
+    print *, "READENVIRON"
+
     ! Default values
     PRESS = PATM
     CA = 0
@@ -343,12 +350,13 @@ SUBROUTINE READDELTAT(UFILE,DELTATI,IOERROR)
 ! Needed to calculate incident PAR (if not specified) using routine of Bristow & Campbell 1984
 ! If not present, program will stop (only called if PAR not specified). 
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     NAMELIST /BRISTO/ DELTAT
     REAL DELTAT(12),DELTATI(12)
     INTEGER UFILE,IOERROR,I
+
+    print *, "READDELTAT"
 
     ! Read namelist
     REWIND(UFILE)
@@ -404,18 +412,19 @@ SUBROUTINE GETMET(IDATE,MFLAG,ZEN,METCOLS,NOMETCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTA
 !   SOILDATA - type of soil moisture data
 !   ET - measured evapotranspiration (mm t-1)
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
-
     REAL ZEN(MAXHRS)
     REAL WINDAH(MAXHRS),TSOIL(MAXHRS),TAIR(MAXHRS)
     REAL RADABV(MAXHRS,3),FBEAM(MAXHRS,3)
+    REAL solarRad(MAXHRS,3)
     REAL RH(MAXHRS),VPD(MAXHRS),CA(MAXHRS),VMFD(MAXHRS),PRESS(MAXHRS)
     REAL PPT(MAXHRS), SOILMOIST(MAXHRS), ETMEAS(MAXHRS)
     REAL DELTAT(12)
     INTEGER METCOLS(MAXMET),SOILDATA,TSOILDATA,MFLAG,IDATE,NOMETCOLS
     REAL CAK,PRESSK,SWMIN,SWMAX,ALAT,DEC,DAYL
+
+    print *, "GETMET"
 
     ! Call appropriate function to read met file.
     IF (MFLAG.EQ.0) THEN
@@ -441,7 +450,6 @@ SUBROUTINE GETMETDAY(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,A
                         SOILDATA,TSOILDATA)
 ! Read daily met data: see function GETMET for parameter definitions
 !**********************************************************************
-
     USE maestcom
     USE metcom
     IMPLICIT NONE
@@ -457,6 +465,8 @@ SUBROUTINE GETMETDAY(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,A
     REAL WIND,PRESSK,TMAX,TMIN,DAYL,PRECIP,ALAT,DEC,PAR,FBM
     REAL RADBM,RADDF,SMD,CAK,SWMIN,SWMAX
     
+    print *, "GETMETDAY"
+
     ! Read in day's data
     READ (UMET,*,IOSTAT = IOERROR) (DATAIN(I), I = 1,NOMETCOLS)
     IF (IOERROR.NE.0) CALL SUBERROR('ERROR READING MET DATA',IFATAL,IOERROR)
@@ -606,7 +616,6 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
                     TSOILDATA,ETMEAS)
 ! Read hourly met data: see function GETMET for parameter definitions
 !**********************************************************************
-
     USE maestcom
     USE metcom
     IMPLICIT NONE
@@ -616,13 +625,16 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     REAL DATAIN(MAXHRS,MAXMET)
     REAL WINDAH(MAXHRS),TSOIL(MAXHRS),TAIR(MAXHRS)
     REAL RADABV(MAXHRS,3),FBEAM(MAXHRS,3),FSUN(MAXHRS)
+    REAL solarRad(MAXHRS,3)
     REAL RH(MAXHRS),VPD(MAXHRS),VMFD(MAXHRS),TDEW(MAXHRS)
     REAL ETMEAS(MAXHRS)
     REAL CA(MAXHRS),PRESS(MAXHRS),ZEN(MAXHRS),PPT(MAXHRS)
     REAL SOILMOIST(MAXHRS)
     REAL DELTAT(12),PRESSK,TMIN,TMAX,DAYPPT,ALAT,DEC,DAYL
     REAL PAR,FBM,RADBM,RADDF,CALCFBMH,CAK,SWMIN,SWMAX
-    
+
+    print *, "GETMETHR"
+
     ! Read in one day's worth of data at a time.
     DO IHR = 1,KHRS
         READ (UMET,*,IOSTAT = IOERROR) (DATAIN(IHR,I), I = 1,NOMETCOLS)
@@ -642,6 +654,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     ENDIF
 
     ! Set up pressure array
+    print *, "Reading in atmospheric pressures..."
     IF (METCOLS(MHPRESS).NE.MISSING) THEN
         DO IHR = 1,KHRS
             PRESS(IHR) = DATAIN(IHR,METCOLS(MHPRESS))
@@ -653,6 +666,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     END IF
 
     ! Set up wind speed array
+    print *, "Reading in wind speeds..."
     DO IHR = 1,KHRS
         IF (METCOLS(MHWIND).EQ.MISSING) THEN
             WINDAH(IHR) = DEFWIND     ! Very default value!!
@@ -664,6 +678,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     END DO
 
     ! Set hourly air temperatures
+    print *, "Reading max and min temperatures..."
     TMIN = DATAIN(1,METCOLS(MHTAIR))
     TMAX = DATAIN(1,METCOLS(MHTAIR))
     DO IHR = 1,KHRS
@@ -673,6 +688,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     END DO
 
     ! Set hourly soil temperatures
+    print *, "Reading in soil temperatures..."
     IF (METCOLS(MHTSOIL).EQ.MISSING) THEN
         TSOILDATA = 0
         CALL CALCTSOIL(TAIR,TSOIL)
@@ -684,6 +700,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     END IF
 
     ! Read in RH, VPD, VMFD, Tdew
+    print *, "Reading in relative humidity..."
     IF (METCOLS(MHRH).NE.MISSING) THEN
         DO IHR = 1,KHRS
             RH(IHR) = DATAIN(IHR,METCOLS(MHRH))
@@ -693,16 +710,22 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
             RH(IHR) = DATAIN(IHR,METCOLS(MHRHP))/100.0
         END DO
     END IF
+
+    print *, "Reading in vapour pressure differential..."
     IF (METCOLS(MHVPD).NE.MISSING) THEN
         DO IHR = 1,KHRS
             VPD(IHR) = DATAIN(IHR,METCOLS(MHVPD))
         END DO
     END IF
+
+    print *, "Reading in dew point..."
     IF (METCOLS(MHTDEW).NE.MISSING) THEN
         DO IHR = 1,KHRS
             TDEW(IHR) = DATAIN(IHR,METCOLS(MHTDEW))
         END DO
     END IF
+
+    print *, "Reading in mole fraction deficit..."
     IF (METCOLS(MHMFD).NE.MISSING) THEN
         DO IHR = 1,KHRS
             VMFD(IHR) = DATAIN(IHR,METCOLS(MHMFD))
@@ -732,6 +755,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
 
     ! Read in rainfall if present.
     ! Don't convert to mmol m-2 as before (RAD)
+    print *, "Reading in rainfall data..."
 	DAYPPT = 0.0
     IF (METCOLS(MHPPT).NE.MISSING) THEN 
         DO IHR = 1,KHRS
@@ -745,20 +769,38 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     END IF
 
     ! Read in measured ET, if present.
+    print *, "Reading in extra-terrestrial solar irradiation..."
     IF(METCOLS(MHET).NE.MISSING) THEN
         DO IHR = 1,KHRS
             ETMEAS(IHR) = DATAIN(IHR,METCOLS(MHET))
         END DO
     ENDIF
 
+    !---STH 2015-0528: Read in the recorded global radiation ( W m-2 )
+    print *, "Reading in RAD..."
+    IF (METCOLS(MHRad).NE.MISSING) THEN
+        DO IHR = 1,KHRS
+            solarRad(IHR,1) = DATAIN(IHR,METCOLS(MHRad))
+            !print *, solarRad(ihr,1)
+        END DO
+    ELSE IF (METCOLS(MHPAR).NE.MISSING) THEN
+        DO IHR = 1,KHRS
+            solarRad(IHR,1) = DATAIN(IHR,METCOLS(MHPAR)) / FPAR
+        END DO
+    END IF
+    !---STH 2015-0528
+
     ! Must have either PAR (umol m-2 s-1) or global radiation (W m-2)
+    print *, "Reading in PAR..."
     IF (METCOLS(MHPAR).NE.MISSING) THEN
         DO IHR = 1,KHRS
             RADABV(IHR,1) = DATAIN(IHR,METCOLS(MHPAR)) / UMOLPERJ
         END DO
     ELSE IF(METCOLS(MHRAD).NE.MISSING) THEN
         DO IHR = 1,KHRS
-            RADABV(IHR,1) = DATAIN(IHR,METCOLS(MHRAD)) * FPAR
+            !RADABV(IHR,1) = DATAIN(IHR,METCOLS(MHRAD)) * FPAR
+            !Use already read-in data
+            RADABV(IHR,1) = solarRad(IHR, 1) * FPAR
         END DO
     ELSE
         CALL BRISTO(IDATE,TMAX,TMIN,DAYPPT,DELTAT,ALAT,DEC,DAYL,PAR)
@@ -769,6 +811,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     END IF
 
     ! Calculate beam fractions
+    print *, "Reading in direct beam fraction..."
     IF (METCOLS(MHFBEAM).NE.MISSING) THEN
         DO IHR = 1,KHRS
             FBEAM(IHR,1) = DATAIN(IHR,METCOLS(MHFBEAM))
@@ -781,15 +824,19 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
         END DO
     END IF
 
+    print *, "Calculating NIR..."
     ! Calculate NIR
     CALL CALCNIR(RADABV,FBEAM)
 
+    print *, "Calculating FSUN..."
     ! Calculate FSUN
     CALL CALCFSUN(FBEAM,FSUN)
 
+    print *, "Calculating thermal radiation..."
     ! Calculate thermal radiation
     CALL THERMAL(TAIR,VPD,FSUN,RADABV)
 
+    print *, "Reading in CA..."
     ! Read in values of CA if present
     IF (METCOLS(MHCA).NE.MISSING) THEN
         DO IHR = 1,KHRS
@@ -802,11 +849,10 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     END IF
 
     ! Get soil moisture - either soil water potential or soil moisture deficit
-
+    print *, "Read in soil water potential..."
     ! Initialize
     SOILMOIST = 0.0  
     SOILDATA = NONE  
-     
     IF (METCOLS(MHSWP).NE.MISSING) THEN
         SOILDATA = POTENTIAL
         DO IHR = 1,KHRS
@@ -841,13 +887,14 @@ SUBROUTINE CALCTHRLY(TMAX,TMIN,DAYL,TAIR)
 ! OUTPUTS:
 ! TAIR - array of hourly air temperatures, °C
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
     REAL TAIR(MAXHRS),TMAX,TMIN,DAYL
     REAL TAV,TAMPL,HRTIME,TIME
     
+    print *, "CALCHRLY"
+
     TAV = (TMAX+TMIN)/2.0
     TAMPL = (TMAX-TMIN)/2.0
 
@@ -874,12 +921,13 @@ SUBROUTINE CALCTSOIL(TAIR,TSOIL)
 ! OUTPUTS:
 ! TSOIL - array of hourly soil temperatures, °C
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
     REAL TSOIL(MAXHRS),TAIR(MAXHRS)
     REAL TAV
+
+    print *, "CALCTSOIL"
 
     TAV = 0.0
     DO I = 1,KHRS
@@ -899,7 +947,6 @@ SUBROUTINE ASSIGNRAIN(TOTAL,PPT)
 ! Given daily total of PPT, assign to hours through the day.
 ! Use algorithm from GRAECO (model of D. Loustau).
 !**********************************************************************
-
 !	USE MSFLIB        ! Library required by COMPAQ VISUAL FORTRAN - superseded
  !   USE IFPORT        ! Library required by Intel Visual Fortran 
     USE maestcom
@@ -910,6 +957,8 @@ SUBROUTINE ASSIGNRAIN(TOTAL,PPT)
     REAL(4) RANVAL
     REAL PPT(MAXHRS)    ! Hourly rainfall: assume already set to zero
     REAL TOTAL,RAIN,RATE
+
+    print *, "ASSIGNRAIN"
 
     ! Reset rain array (RAD).
     PPT = 0.
@@ -959,12 +1008,13 @@ END SUBROUTINE ASSIGNRAIN
 ! OUTPUTS:
 ! RH - array of hourly relative humidity, fraction
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
     REAL TAIR(MAXHRS),RH(MAXHRS),TMIN,HUMABS
     REAL, EXTERNAL :: SATUR
+
+    print *, "CALCRH"
 
     HUMABS = SATUR(TMIN)
     DO I = 1,KHRS
@@ -982,12 +1032,13 @@ SUBROUTINE RHTOVPD(RH,TAIR,VPD)
 !   TAIR(KHRS) - hourly air temperature, degrees !
 ! Outputs: VPD(KHRS) - hourly VPD, Pa
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
     REAL TAIR(MAXHRS),RH(MAXHRS),VPD(MAXHRS)
     REAL, EXTERNAL :: SATUR
+
+    print *, "RHTOVPD"
 
     DO I = 1,KHRS
         VPD(I)=(1.0-RH(I))*SATUR(TAIR(I))
@@ -1005,12 +1056,13 @@ SUBROUTINE VPDTORH(VPD,TAIR,RH)
 ! Outputs:
 !   RH(KHRS) - hourly relative humidity, fraction
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
     REAL TAIR(MAXHRS),RH(MAXHRS),VPD(MAXHRS)
     REAL, EXTERNAL :: SATUR
+
+    print *, "VPDTORH"
 
     DO I = 1,KHRS
         RH(I) = 1.0 - VPD(I)/SATUR(TAIR(I))
@@ -1028,13 +1080,14 @@ SUBROUTINE TDEWTORH(TDEW,TAIR,RH)
 ! Outputs:
 !   RH(KHRS) - hourly relative humidity, fraction
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
     REAL, EXTERNAL :: SATUR
 
     REAL TAIR(MAXHRS),RH(MAXHRS),TDEW(MAXHRS)
+
+    print *, "TDEWTORH"
 
     DO I = 1,KHRS
         RH(I) = SATUR(TDEW(I))/SATUR(TAIR(I))
@@ -1054,12 +1107,13 @@ SUBROUTINE MFDTORH(VMFD,PRESS,TAIR,RH)
 ! Outputs:
 !   RH(KHRS) - hourly relative humidity, fraction
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
     REAL VMFD(MAXHRS),PRESS(MAXHRS),RH(MAXHRS),TAIR(MAXHRS)
     REAL, EXTERNAL :: SATUR
+
+    print *, "MFDTORH"
 
     DO I = 1,KHRS
         RH(I) = 1 - VMFD(I)*PRESS(I)*1E-3/SATUR(TAIR(I))
@@ -1078,12 +1132,13 @@ SUBROUTINE VPDTOMFD(VPD,PRESS,VMFD)
 ! Outputs:
 !   VMFD(KHRS) - hourly mole fraction deficit, mmol mol-1
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
 
     REAL VPD(MAXHRS),PRESS(MAXHRS),VMFD(MAXHRS)
+
+    print *, "VPDTOMFD"
 
     DO I = 1,KHRS
         VMFD(I)= VPD(I)/PRESS(I)*1E3
@@ -1098,13 +1153,14 @@ SUBROUTINE BRISTO(IDAY,TMAX,TMIN,PRECIP,DELTAT,ALAT,DEC,DAYL,PAR)
 ! Subroutine implements Bristow & Campbell (1984) Ag For Met 31:159-166
 ! Calculates incident daily radiation from temperature data
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER IDAY,IMON,MONTH
     REAL DELTAT(12)
     REAL TMAX,TMIN,PRECIP,ALAT,DEC,DAYL,PAR,ANGDL
     REAL DELT,BRISTOK,TRANSM,RADCLR,RADTOT
+
+    print *, "BISTRO"
 
     DELT = TMAX - TMIN					!Daily temperature amplitude - should include prev. day but ..
     IF (PRECIP.GT.10.) DELT = DELT*0.75	!Reduce if rainy
@@ -1134,13 +1190,14 @@ SUBROUTINE CALCPARHRLY(RADBM,RADDF,ZEN,RADABV,FBEAM)
 ! RADABV - array of hourly incident PAR (J m-2 s-1)
 ! FBEAM - array of hourly beam fractions
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
     REAL ZEN(MAXHRS),RADABV(MAXHRS,3),FBEAM(MAXHRS,3)
     REAL COSBM(MAXHRS),COSDF(MAXHRS)
     REAL SUMBM,SUMDF,COSZEN,HRTIME,RDBM,RADBM,RDDF,RADDF
+
+    print *, "CALCPARHRLY"
 
     SUMBM = 0.0
     SUMDF = 0.0
@@ -1198,12 +1255,13 @@ SUBROUTINE CALCFBMD(IDATE,ZEN,PAR,FBM)
 ! OUTPUTS:
 ! FBM - daily beam fraction
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER IDATE,IHR
 	REAL ZEN(MAXHRS),PAR,FBM
 	REAL S0,SINB,TRANS,ETRAD,FDIF
+
+    print *, "CALCFBMD"
 
     ! Calculate extra-terrestrial radiation
     S0 = 0.0
@@ -1239,12 +1297,13 @@ FUNCTION CALCFBMH(IDATE,ZEN,RADABV)
 ! RETURNS:
 ! CALCFBMH - hourly beam fraction
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER IDATE
     REAL SINB,ZEN,RADABV
     REAL SPITR,SPITK,TRANS,CALCFBMH,S0,ETRAD,FDIF
+
+    print *, "CALCFBMH"
 
     ! SINB is the sine of the elevation of the sun above the horizon
     ! (= SIN(90-ZEN)). For zenith angles > 80 degrees will put FBEAM = 0.
@@ -1252,6 +1311,7 @@ FUNCTION CALCFBMH(IDATE,ZEN,RADABV)
 
     ! Calculate extra-terrestrial radiation
     S0 = ETRAD(IDATE,SINB)
+    print *, "S0: ",S0
 
     IF (SINB.GT.0.17) THEN
         ! Spitter's formula
@@ -1271,6 +1331,7 @@ FUNCTION CALCFBMH(IDATE,ZEN,RADABV)
     ELSE
         CALCFBMH = 0.0
     END IF
+    print *, "Fraction beam: ", CALCFBMH
     RETURN
 END FUNCTION CALCFBMH
 
@@ -1282,11 +1343,12 @@ SUBROUTINE CALCNIR(RADABV,FBEAM)
 ! RADABV - hourly incident radiation in 3 wavelengths (J m-2 s-1)
 ! FBEAM - beam fraction of incident radiation for 3 wavelengths
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
     REAL RADABV(MAXHRS,3),FBEAM(MAXHRS,3)
+
+    print *, "CALCNIR"
 
     ! Fbeam is assumed the same for NIR as PAR. Amount of NIR is calculated from
     ! amount of PAR & the fraction of total solar that is PAR (FPAR).
@@ -1316,7 +1378,6 @@ SUBROUTINE THERMAL(TAIR,VPD,FSUN,RADABV)
 ! Changed to the formula taking this into account, given by Monteith & Unsworth
 ! 1990 Principles of Environmental Physics 2nd ed p53. 
 !**********************************************************************
-
     USE maestcom
     USE switches
     IMPLICIT NONE
@@ -1326,6 +1387,8 @@ SUBROUTINE THERMAL(TAIR,VPD,FSUN,RADABV)
     REAL, EXTERNAL :: TK
     REAL, EXTERNAL :: SATUR
     
+    print *, "THERMAL"
+
     DO I = 1,KHRS
         ! Brutsaert et al formula
         !        EA = SATUR(TAIR(I)) - VPD(I) !Old formula - see comments
@@ -1361,11 +1424,12 @@ END SUBROUTINE THERMAL
 SUBROUTINE CALCFSUN(FBEAM,FSUN)
 ! Calculates the sunlit time from the beam fraction.
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
     REAL FBEAM(MAXHRS,3),FSUN(MAXHRS)
+
+    print *, "CALCFSUN"
 
     DO I = 1,KHRS
         FSUN(I) = 1.16*FBEAM(I,1)-0.01
@@ -1383,13 +1447,14 @@ REAL FUNCTION ETRAD(IDATE,SINB)
 ! Using formulae from Spitters et al (1986) Agric For Met 38:217
 ! Returns value in J m-2 s-1.
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER IDATE,JDAY
     INTEGER, EXTERNAL :: JDATE
     REAL SINB
-    
+ 
+    print *, "ETRAD"
+
     JDAY = JDATE(IDATE)
 
     ! Spitters' formula
@@ -1407,12 +1472,13 @@ END FUNCTION ETRAD
 SUBROUTINE SKIPMET(MFLAG,NSTEP)
 ! Read data from the met file until in the right position
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER I
     INTEGER MFLAG,NSTEP,LINESTOSKIP
     CHARACTER MTITLE
+
+    print *, "SKIPMET"
 
     IF (MFLAG.EQ.0) THEN
         LINESTOSKIP = NSTEP - 1
@@ -1435,7 +1501,6 @@ SUBROUTINE READLAT(UFILE, ALAT, TTIMD)
 ! TTIMD - time difference between longitude of plot & longitude of time
 !   zone, in hours
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
       
@@ -1444,6 +1509,8 @@ SUBROUTINE READLAT(UFILE, ALAT, TTIMD)
     CHARACTER*1 LATHEM,LONHEM
     REAL TZLONG,ALAT,ALONG,TIMDIF,TTIMD
     NAMELIST /LATLONG/ LATHEM,LAT,LONHEM,LONG,TZLONG
+
+    print *, "READLAT"
 
     REWIND (UFILE)
     READ (UFILE, LATLONG, IOSTAT = IOERROR)
@@ -1476,12 +1543,13 @@ SUBROUTINE GETWIND(FOLLAY,FOLNTR,TOTLAI,EXTWIND,WINDLAY)
 ! OUTPUTS:
 ! WINDLAY - windspeed in each layer of the canopy (m s-1)
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER ILAY
     REAL FOLLAY(MAXLAY),FOLABV(MAXLAY),WINDLAY(MAXLAY)
     REAL TOTLAI,FOLNTR,EXTWIND
+
+    print *, "GETWIND"
     
     ! Calculate approximately LAI above each point (for wind speed)
     FOLABV(1) = FOLLAY(1)/2.
@@ -1511,7 +1579,6 @@ SUBROUTINE ALTERMETCC(CA,TAIR,TSOIL,RH,VPD,VMFD,PRESS,CO2INC,TINC)
 ! The absolute humidity (in g m-3) is maintained constant.
 ! VPD, RH and VMFD are re-calculated if temperature is changed.
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER IHR
@@ -1520,6 +1587,8 @@ SUBROUTINE ALTERMETCC(CA,TAIR,TSOIL,RH,VPD,VMFD,PRESS,CO2INC,TINC)
     REAL VPD(MAXHRS),RH(MAXHRS),VMFD(MAXHRS),PRESS(MAXHRS)
     REAL CO2INC,ABSHUM,TINC
     REAL, EXTERNAL :: AHTORH,RHTOVPD,VPDTOMFD,CALCAH
+
+    print *, "ALTERMETCC"
 
     DO IHR = 1,KHRS
         CA(IHR) = CA(IHR) + CO2INC
@@ -1544,11 +1613,12 @@ REAL FUNCTION CALCAH(RH,TAIR)
 ! Calculate absolute humidity (g m-3) from relative humidity & T.
 ! Conversion from Jones (1992) pp. 109-110.
 !**********************************************************************
-    
     IMPLICIT NONE
     REAL, EXTERNAL :: SATUR,TK
     REAL TAIR,RH
-    
+
+    print *, "CALCAH"
+
     CALCAH = RH*SATUR(TAIR)*2.17/TK(TAIR)
 
     RETURN
@@ -1563,7 +1633,9 @@ REAL FUNCTION AHTORH(ABSHUM,TAIR)
     IMPLICIT NONE
     REAL TAIR,ABSHUM
     REAL, EXTERNAL :: TK,SATUR
-    
+
+    print *, "AHTORH"
+
     AHTORH = ABSHUM*TK(TAIR)/2.17/SATUR(TAIR)
 
     RETURN
@@ -1581,7 +1653,6 @@ SUBROUTINE ALTERMETOTC(TOTC,WINDOTC,PAROTC,FBEAMOTC,TAIR,TSOIL,WINDAH,RADABV,&
 ! The absolute humidity (in g m-3) is maintained constant.
 ! VPD, RH and VMFD are re-calculated if temperature is changed.
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER IHR
@@ -1592,6 +1663,8 @@ SUBROUTINE ALTERMETOTC(TOTC,WINDOTC,PAROTC,FBEAMOTC,TAIR,TSOIL,WINDAH,RADABV,&
     REAL ABSHUM,TOTC,WINDOTC,PAROTC,FBEAMOTC
     REAL ZEN
     REAL, EXTERNAL :: CALCAH,AHTORH,CALCFBMWN
+
+    print *, "ALTERMETOTC"
 
     DO IHR = 1,KHRS
         ABSHUM = CALCAH(RH(IHR),TAIR(IHR))
@@ -1619,13 +1692,14 @@ REAL FUNCTION CALCFBMWN(IDATE,IHR,ZEN,RADABV)
 ! (see CALCFBMD and CALCFBMH).
 ! Assume that pressure = sea level pressure (101.325kPa)
 !**********************************************************************
-
     USE maestcom
     IMPLICIT NONE
     INTEGER NIGHT,IDATE,IHR
     REAL FBEAM(MAXHRS,3),ZEN,RADABV,RBV,RDV,AXLOG
     REAL PARMA,PARMB,PARMC,PARMD,COSZEN,AIRMASS,ADUM,WATABS
     REAL RBN,RDN,RTOTV,RTOTN,RMEAS,RATIO,FSUN
+
+    print *, "CALCFBMWN"
 
     PARMA = 0.90
     PARMB = 0.70
