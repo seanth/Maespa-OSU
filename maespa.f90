@@ -43,7 +43,7 @@ PROGRAM maespa
     
     IMPLICIT NONE
     REAL, EXTERNAL :: AVERAGEVAL,CALCRMW,TK,ETCAN,RESP,GRESP
-   
+
     ! Set program flag
     IPROG = INORMAL
     IPROGUS = ITEST  ! Understorey setting.
@@ -851,6 +851,7 @@ PROGRAM maespa
                                         SUNLA,BEXTUS,BEXTANGTUS,BEXTANGUS)  ! BEXTUS not used...
                 
                             ! Output transmittances (Note IWAVE=1 only).
+                            print *, RADABV(IHOUR,1)
                             PAR = RADABV(IHOUR,1)
                
                             TDIFF = (1-FBEAM(IHOUR,1))*PAR*TDUS(IPTUS)

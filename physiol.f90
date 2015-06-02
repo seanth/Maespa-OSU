@@ -180,7 +180,7 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
     theReflectance=0.2
     theSolarIn=840 !Watts/m2
     theRSolar=theAbsorbance*(1+theReflectance)*theSolarIn                                   !From Nobel 2005
-    print *, "theRSolar (W/m2): ",theRSolar
+    !print *, "theRSolar (W/m2): ",theRSolar
 
     ! ******************STH. CALCULATE ABSORBED IR FROM SURROUNDINGS***
     theTempSurroundings=TAIR+273.16 !assume the surrounds are the same temp as the air
@@ -189,38 +189,38 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
     theLeafUpperAbsorbed=theIRAbsorbance*sigma*(theTempSky**4.0)                            !From Nobel 2005
     theLeafLowerAbsorbed=theIRAbsorbance*sigma*(theTempSurroundings**4.0)                   !From Nobel 2005
     theLeafAbsorbed=theIRAbsorbance*sigma*((theTempSurroundings**4.0)+(theTempSky**4.0))    !From Nobel 2005
-    print *, "IR absorbed by upper surface (W/m2): ", theLeafUpperAbsorbed
-    print *, "IR absorbed by lower surface (W/m2): ", theLeafLowerAbsorbed
-    print *, "IR absorbed by both surfaces (W/m2): ",theLeafAbsorbed
+    !print *, "IR absorbed by upper surface (W/m2): ", theLeafUpperAbsorbed
+    !print *, "IR absorbed by lower surface (W/m2): ", theLeafLowerAbsorbed
+    !print *, "IR absorbed by both surfaces (W/m2): ",theLeafAbsorbed
 
     ! ******************STH. CALCULATE EMITTED IR TO SURROUNDINGS***
     theIREmittance=0.96
     theROut=2*EMLEAF*SIGMA*((TLEAF+273.16)**4.0)                                            !From Nobel 2005
-    print *, "IR emitted by both surfaces (W/m2): ", theROut
+    !print *, "IR emitted by both surfaces (W/m2): ", theROut
 
     ! ******************STH. CALCULATE Rnet***
     STHRnet=theRSolar+theLeafAbsorbed-theROut
-    print *, "STH calculated Rnet (W/m2): ", STHRnet
+    !print *, "STH calculated Rnet (W/m2): ", STHRnet
 
     ! ******************STH. CALCULATE BOUNDARY LAYER THICKNESS***
     theBoundaryLayerThickness=0.004 * SQRT(WLEAF/WIND)                                      !From Nobel 2005
-    print *, "Boundary layer thickness (m): ", theBoundaryLayerThickness
+    !print *, "Boundary layer thickness (m): ", theBoundaryLayerThickness
 
     ! ******************STH. CALCULATE BOUNDARY LAYER CONDUCTANCE***
     theDiffusionCoeffWaterVapour=2.126e-5+(1.48e-7*TAIR)                                    !From Nobel 1982, Appendix I
     theBoundaryLayerConductance=theDiffusionCoeffWaterVapour/theBoundaryLayerThickness
-    print *, "Boundary layer conductance (m s-1): ", theBoundaryLayerConductance
+    !print *, "Boundary layer conductance (m s-1): ", theBoundaryLayerConductance
 
     ! ******************STH. CALCULATE BOUNDARY LAYER CONDUCTANCE HEAT LOSS, FORCED ***   
     !method 1: use thermal conductivity of air at 20-25C and normal pressure and boundary layer thickness
     Kair=0.0259 !W m-1 C-1 for temps 20-25C
     theSensibleForced=2*Kair*(TLEAF-TAIR)/theBoundaryLayerThickness                       !From Nobel 2005
-    print *, "Sensible forced heat loss (W/m2): ", theSensibleForced
+    !print *, "Sensible forced heat loss (W/m2): ", theSensibleForced
 
     ! ******************STH. CALCULATE BOUNDARY LAYER CONDUCTANCE HEAT LOSS, FREE *** 
     !Use maespa's built in method, but multiply by 2 for 2 sided
     GBHF = 2.0* (GBHFREE(TAIR,TLEAF,PRESS,WLEAF)/CMOLAR)
-    print *, "Sensible free heat loss (?have I converted it to W/m2?): ", GBHF 
+    !print *, "Sensible free heat loss (?have I converted it to W/m2?): ", GBHF 
 
     ! ******************STH. CALCULATE LATENT HEAT VIA FICK'S LAW*** 
     !theWaterDiffusion=2.46E-05
@@ -231,13 +231,13 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
                                                                     !Jacobson 1999
     theConcWaterEvap=theEsat / (RCONST * TK(TLEAF))                 !to water vapour content mol/m3 using PV=nRT
     theConcWaterAir=theEair / (RCONST * TK(TAIR))                   !to water vapour content mol/m3 using PV=nRT
-    print *, "RH (fraction): ",RH
-    print *, "theEsat (Pa): ",theEsat
-    print *, "theEair (Pa): ",theEair  
-    print *, "theConcWaterEvap (mol/m3): ",theConcWaterEvap 
-    print *, "theConcWaterAir (mol/m3): ",theConcWaterAir 
+    !print *, "RH (fraction): ",RH
+    !print *, "theEsat (Pa): ",theEsat
+    !print *, "theEair (Pa): ",theEair  
+    !print *, "theConcWaterEvap (mol/m3): ",theConcWaterEvap 
+    !print *, "theConcWaterAir (mol/m3): ",theConcWaterAir 
     theFicksWatts = LHV*DHEAT*(((theConcWaterEvap*0.98)-(theConcWaterAir*RH))/theBoundaryLayerThickness)
-    print *, "Heat lost to evaporation (Fick's Law) (W/m2): ",theFicksWatts 
+    !print *, "Heat lost to evaporation (Fick's Law) (W/m2): ",theFicksWatts 
 
     ! ******************STH. CALCULATE LATENT HEAT VIA PENMAN-MONTEITH*** 
     theLHWV = 2.26e6    !Latent heat of water vaporization (J kg-1). Should be moved into maestcom.f90
@@ -246,15 +246,15 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
     thePartialPressureWaterVapour = theEsat*RH
     thePartialPressureDryAir = PRESS-thePartialPressureWaterVapour
     theCalcAirDensity= (thePartialPressureDryAir/(Rdry*TK(TAIR)))+(thePartialPressureWaterVapour/(Rvapour*TK(TAIR)))
-    print *, "Calculated air density (kg/m3): ", theCalcAirDensity
-    print *, "CPair: ",CPAIR
-    print *, "Press: ",PRESS
-    print *, "AIRMA: ",AIRMA
-    print *, "VPD: ", VPD
+    !print *, "Calculated air density (kg/m3): ", theCalcAirDensity
+    !print *, "CPair: ",CPAIR
+    !print *, "Press: ",PRESS
+    !print *, "AIRMA: ",AIRMA
+    !print *, "VPD: ", VPD
     !***The stock calculation for gamma in maespa is wrong. STH 2015.0513
     !GAMMA = CPAIR*AIRMA*PRESS/LHV
     GAMMA = ((CPAIR)*PRESS)/(theLHWV*(H2OMW/AIRMA)) !CPAIR divided by 1000 to convert to MJ kg-1 C-1
-    print *, "GAMMA: ",GAMMA
+    !print *, "GAMMA: ",GAMMA
     !print *, theEsat*RH
 
     !IF (GV.GT.0.0) THEN
@@ -281,7 +281,7 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
                     WSOILMETHOD,SOILMOISTURE,EMAXLEAF,SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,&
                     G0,D0L,GAMMA,VPDMIN,G1,GK,GSC,ALEAF,RD,MINLEAFWP,KTOT,WEIGHTEDSWP, & 
                     VPARA,VPARB,VPARC,VFUN,SF,PSIV,HMSHAPE,PSILIN,PSIL,CI,ISMAESPA)
-    print *, GSDIVA
+    !print *, GSDIVA
      
     ! Boundary layer conductance for heat - single sided, free convection
     GBHF = GBHFREE(TAIR,TLEAF,PRESS,WLEAF)
@@ -319,7 +319,7 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
     GH = 2.*(GBH + GRADN)
     ! Total conductance for water vapour
     GBV = GBVGBH*GBH
-    print *, GSC
+    !print *, GSC
     GSV = GSVGSC*GSC
     !      GV = NSIDES*(GBV*GSV)/(GBV+GSV) ! already one-sided value
     GV = (GBV*GSV)/(GBV+GSV)
