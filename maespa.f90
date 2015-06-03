@@ -78,6 +78,7 @@ PROGRAM maespa
     VTITLE = VTITLE(1:LEN_TRIM(VTITLE))
    
     ! Get input from control file
+    print *, "***Importing the control file settings****"
     CALL INPUTCON(ISTART, IEND, NSTEP,NUMPNT, NOLAY, PPLAY, NZEN, DIFZEN, NAZ,      &
                     MODELGS, MODELJM, MODELRD, MODELSS, MODELRW, ITERMAX, IOHIST,   &
                     BINSIZE,ICC, CO2INC, TINC,IOTC, TOTC, WINDOTC, PAROTC,          &
@@ -85,6 +86,7 @@ PROGRAM maespa
                     PHYFILES, STRFILES )
     
     ! Get input from canopy structure file
+    print *, "***Importing data from canopy structure file(s)****"
     CALL INPUTSTR(NSPECIES,STRFILES,JLEAFSPEC,BPTTABLESPEC,RANDOMSPEC,NOAGECSPEC,    &
                     JSHAPESPEC,SHAPESPEC,EXTWINDSPEC,NALPHASPEC,ALPHASPEC,      &
                     FALPHATABLESPEC,COEFFTSPEC,EXPONTSPEC,WINTERCSPEC,BCOEFFTSPEC,   &
@@ -92,6 +94,7 @@ PROGRAM maespa
                     FRFRACSPEC,in_path,DATESLIA,NOLIADATES,DATESLAD,NOLADDATES)
     
     ! Get input from physiology file
+    print *, "***Importing data from physiology file(s)****"
     CALL INPUTPHY(NSPECIES,PHYFILES,MODELJM,MODELRD,MODELGS,MODELRW,NOLAY,NOAGECSPEC,           &
                     NOAGEPSPEC,PROPCSPEC,PROPPSPEC,ABSRPSPEC,ARHOSPEC,ATAUSPEC,RHOSOLSPEC,      &
                     JMAXTABLESPEC,DATESJSPEC,NOJDATESSPEC,IECOSPEC,EAVJSPEC,EDVJSPEC,           &
@@ -114,6 +117,7 @@ PROGRAM maespa
     ENDIF
     
     ! Get input from trees file
+    print *, "***Importing data from tree file(s)****"
     CALL INPUTTREE(XSLOPE,YSLOPE,BEAR,X0,Y0,XMAX,YMAX,PLOTAREA,STOCKING,ZHT,Z0HT,ZPD, &
                     NOALLTREES,NOTREES,NOTARGETS,ITARGETS,SHADEHT,NOXDATES, &
                     NOYDATES,NOZDATES,NOTDATES,NOLADATES,NODDATES,DATESX,   &
@@ -123,7 +127,8 @@ PROGRAM maespa
                     APP,EXPAN,WEIGHTS,NSPECIES,ISPECIES)
     
     ! Get input from the water balance file
-    IF(ISMAESPA)THEN        
+    IF(ISMAESPA)THEN
+        print *, "***Importing settings from water balance file****"        
         CALL INPUTWATBAL(BPAR, PSIE, KSAT, ROOTRESIST, ROOTRESFRAC, ROOTRADTABLE, ROOTDENSTABLE,ROOTMASSTOTTABLE,              &
                         MINROOTWP,MINLEAFWPSPEC,PLANTKTABLE,KSCALING,THROUGHFALL,REASSIGNRAIN,RUTTERB,RUTTERD, MAXSTORAGE, &
                         DRAINLIMIT,ROOTXSECAREA,EQUALUPTAKE,NLAYER, NROOTLAYER, LAYTHICK, INITWATER,    & 
@@ -137,11 +142,13 @@ PROGRAM maespa
                 
     
     ! Open met data file (must be done after ISTART & IEND read)
+    print *, "***Opening meterological data file****"  
     CALL OPENMETF(ISTART,IEND,CAK,PRESSK,SWMIN,SWMAX,USEMEASET,DIFSKY,ALAT,TTIMD,DELTAT,&
                     MFLAG,METCOLS,NOMETCOLS,MTITLE,MSTART,in_path)
     
     ! Open output files
     !CALL open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,STITLE,MTITLE,VTITLE,WTITLE,NSPECIES,SPECIESNAMES,out_path,ISMAESPA)
+    print *, "***Generating blank output files****"  
     CALL open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,STITLE,MTITLE,VTITLE,WTITLE,NSPECIES,SPECIESNAMES,out_path,ISMAESPA,NOLAY) !STH 2015.03.30
     
     
@@ -158,6 +165,7 @@ PROGRAM maespa
     ! Read MAESTEST input file.
     ! Open files and read information about points
     IF(IPOINTS .EQ. 1)THEN
+      print *, "***Importing settings from points file****" 
       CALL GETPOINTSF(NUMTESTPNT,XLP,YLP,ZLP,X0,Y0,XMAX,YMAX, &
          CTITLE,TTITLE,MTITLE,STITLE,VTITLE)
     ENDIF
@@ -211,6 +219,7 @@ PROGRAM maespa
         CALL ZEROSTART(HISTO,CANOPYDIMS)
 
         ! Calculate zenith angle of sun
+        print *, "***Calculating sun zenith angle****"
         CALL SUN(IDAY+ISTART,ALAT,TTIMD,DEC,EQNTIM,DAYL,SUNSET)
         CALL ZENAZ(ALAT,TTIMD,BEAR,DEC,EQNTIM,ZEN,AZ)
 
@@ -232,12 +241,11 @@ PROGRAM maespa
            ZEN = ZEN0
            AZ = AZ0
         ENDIF
- 
+        print *, "***Importing meteorological data****"
         ! Get meteorological data
         CALL GETMET(IDAY+ISTART,MFLAG,ZEN,METCOLS,NOMETCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,  &
                     ALAT,DEC,DAYL,WINDAH,TSOIL,TAIR,RADABV,FBEAM,RH,VPD,VMFD,CA,PRESS,      &
-                    PPT,SOILMOIST,SOILDATA,TSOILDATA,ETMEAS)
-
+                    PPT,SOILMOIST,SOILDATA,TSOILDATA,ETMEAS, solarRad)
         ! Moving average air temperature (for acclimation of respiration - not currently documented feature).
         MOVEWINDOW = 7 * KHRS
         TAIRMEM = CSHIFT(TAIRMEM, -KHRS)
@@ -728,6 +736,9 @@ PROGRAM maespa
                 
                 ! Sort the trees every timestep.
                 ! This should be done outside the hourly loop, and stored in an array.
+                !SORTTREES - sorts the trees into order of distance from the target tree
+                !found in inout.f90
+                print *, "calls SORTTREES"
                 CALL SORTTREES(NOALLTREES,NOTREES,ITREE,DXT1,DYT1,DZT1,RXTABLE1,RYTABLE1,RZTABLE1,ZBCTABLE1,&
                                 FOLTABLE1,DIAMTABLE1,DXT,DYT,DZT,RXTABLE,RYTABLE,RZTABLE,FOLTABLE,ZBCTABLE, &
                                 DIAMTABLE,ISPECIES,ISPECIEST,IT)
@@ -745,26 +756,35 @@ PROGRAM maespa
                 
                 ! Interpolate to get daily values of parameters
                 ! This we can probably also do outside the hourly loop.
+                ! INTERPOLATEP - calls the daily interpolation routines for physiology
+                ! found in inout.f90
                 CALL INTERPOLATEP(IDAY,ISTART,NOJDATES,DATESJ,JMAXTABLE,NOVDATES,DATESV,VCMAXTABLE,NORDATES,&
                                     DATESRD,RDTABLE,NOSLADATES,DATESSLA,SLATABLE,NOADATES,DATESA,AJQTABLE,  &
                                     NOFQDATES,DATESFQ,Q10FTABLE,NOWQDATES,DATESWQ,Q10WTABLE,NOLAY,NOAGEP,   &
                                     JMAX25,VCMAX25,RD0,SLA,AJQ,Q10F,Q10W,NOGSDATES,DATESGS,G0TABLE,G1TABLE,G0,G1, &
                                     NOWLEAFDATES,DATESWLEAF,WLEAFTABLE,WLEAF)
                 
+                ! INTERPOLATET - calls the daily interpolation routines for tree dimensions
+                ! found in inout.f90
                 CALL INTERPOLATET(IDAY,ISTART,IHOUR,NOXDATES,DATESX,RXTABLE,NOYDATES,DATESY,RYTABLE,NOZDATES,   &
                                     DATESZ,RZTABLE,NOTDATES,DATEST,ZBCTABLE,NODDATES,DATESD,DIAMTABLE,          &
                                     NOLADATES,DATESLA,FOLTABLE,TOTLAITABLE,NOTREES,RX,RY,RZ,ZBC,FOLT,           &
                                     TOTLAI,DIAM,STOCKING,IFLUSH,DT1,DT2,DT3,DT4,EXPTIME,APP,EXPAN,NEWCANOPY,    &
                                     CANOPYDIMS)
-            
+                
+                ! found in radn.f90
                 CALL POINTSNEW(NOLAY,PPLAY,JLEAF,JSHAPE,SHAPE,RX(1),RY(1),RZ(1),ZBC(1),DXT(1),DYT(1), &
                                 DZT(1),FOLT(1),PROPC,PROPP,BPT,NOAGECT(1),NOAGEP,XL,YL,ZL,VL,DLT,DLI, &
                                 LGP,FOLLAY)        
                 
                 ! Following functions need FOLLAY. 
+                ! GETWIND - calculates wind speed through the canopy using exponential formula
+                ! found in getmet.f90
                 CALL GETWIND(FOLLAY,FOLT(1),TOTLAI,EXTWIND,WINDLAY)
           
                 ! Calculate woody biomass and woody biomass increment
+                ! CALCWBIOM - calculates woody biomass from height & diameter
+                ! found in physiol.f90
                 CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),COEFFT,EXPONT,WINTERC,WBIOM,WBINC)
                 CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),BCOEFFT,BEXPONT,BINTERC,BBIOM,BBINC)
                 CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),RCOEFFT,REXPONT,RINTERC,RBIOM,RBINC)
@@ -816,9 +836,12 @@ PROGRAM maespa
                 IF ((ABS(ZEN(IHOUR)) <  PI/2.0 ) .AND. (RADABV(IHOUR,1) > 1.0) .AND. (FOLT(1) > 0.0)) THEN
 
                     ! Get slope correction factor
+                    ! SLOPES - calculates corrections for slope of plot (to soil reflectance)
                     CALL SLOPES(IHOUR,TTIMD,EQNTIM,ALAT,DEC,XSLOPE,YSLOPE,BEAR,ZEN(IHOUR),BMULT,DMULT2,SOMULT)
 
                     ! Get extinction coefficients
+                    ! EXDIFF, EXBEAM - calculate the extinction coefficients for diffuse and
+                    !   beam radiation, respectively
                     DO I=1,NSPECIES
                         CALL EXDIFF(NALPHASPEC(I),ALPHASPEC(1:MAXANG,I),FALPHASPEC(1:MAXANG,I),NZEN,DIFZEN,&
                                     RANDOMSPEC(I),DEXTSPEC(I,1:MAXANG))
@@ -941,7 +964,7 @@ PROGRAM maespa
                     ENDIF ! Understorey calculations
                   
                     ! Output PAR transmittance for test points.
-                    IF(IPOINTS.EQ.1)THEN      
+                    IF(IPOINTS.EQ.1)THEN   
                         DO IPTEST = 1,NUMTESTPNT
           
                         IPROGCUR = ITEST
@@ -997,6 +1020,8 @@ PROGRAM maespa
                     ! Loop over grid points
                     DO IPT = 1,NUMPNT
                         ! Calculate the weighted pathlengths for beam radiation.
+                        ! TRANSD, TRANSB - calculate the transmittances of diffuse and beam radiation
+                        ! found in radn.f90
                         CALL TRANSB(IHOUR,IPROG,ZEN(IHOUR),AZ(IHOUR),XSLOPE,YSLOPE,FBEAM,BEXTT,XL(IPT),YL(IPT),ZL(IPT), &
                                     RX,RY,RZ,DXT,DYT,DZT,XMAX,YMAX,SHADEHT,FOLT,ZBC,JLEAFT,BPTT,NOAGECT,PROPCT,JSHAPET, &
                                     SHAPET,NOTREES,SUNLA,BEXT,BEXTANGT,BEXTANG)
@@ -1357,7 +1382,7 @@ PROGRAM maespa
             CALL OUTPUTHR(IDAY+1,IHOUR,NOTARGETS,ITARGETS,ISPECIES,TCAN,NOLAY,PPAR, &
                                 PPS,PTRANSP,FOLLAY,THRAB,FCO2,FRESPF,FRESPW,FRESPB,FH2O,GSCAN,GBHCAN, &
                                 FH2OCAN,FHEAT,VPD,TAIR,UMOLPERJ*RADABV(1:KHRS,1),PSILCAN,PSILCANMIN,CICAN,  &
-                                ECANMAX,ACANMAX,ZEN,AZ)             ! rajout ZEN AZ mathias mars 2013
+                                ECANMAX,ACANMAX,ZEN,AZ,solarRad(1:KHRS,1))             ! rajout ZEN AZ mathias mars 2013
 
    
        
