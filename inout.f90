@@ -383,6 +383,7 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
             WRITE (UHRLY,724)
             WRITE (UHRLY,726)
             WRITE (UHRLY,727)
+            WRITE (UHRLY,728)
             WRITE (UHRLY, 990) ' '
             WRITE (UHRLY,725)
         END IF
@@ -777,9 +778,10 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
     724 FORMAT('PAR: Above-canopy incident PAR (umol m-2 s-1)')
     726 FORMAT('ZEN: Zenithal angle (rad)')                      ! mathias mars 2013
     727 FORMAT('AZ: Asimutal angle (rad)')
+    728 FORMAT('RAD: Above-canopy incident RAD (W m-2') !STH 2015-0502
     725 FORMAT('Columns: DOY Tree Spec HOUR hrPAR hrNIR hrTHM', &
                ' hrPs hrRf hrRmW hrLE', &
-               ' LECAN Gscan Gbhcan hrH TCAN ALMAX PSIL PSILMIN CI TAIR VPD PAR ZEN AZ')   !10E-3*ECANMAX(ITAR,IHOUR),
+               ' LECAN Gscan Gbhcan hrH TCAN ALMAX PSIL PSILMIN CI TAIR VPD PAR ZEN AZ RAD')   !10E-3*ECANMAX(ITAR,IHOUR),
 
     801 FORMAT(' Fluxes for each layer on an hourly basis')
     802 FORMAT(' Columns: ')
@@ -2045,7 +2047,7 @@ SUBROUTINE OUTPUTHR(IDAY,IHOUR,NOTARGETS,ITARGETS,ISPECIES,         &
                     TCAN,NOLAY,PPAR,PPS,PTRANSP,FOLLAY,             &
                     THRAB,FCO2,FRESPF,FRESPW,FRESPB,                &
                     FH2OT,GSCAN,GBHCAN,FH2OCAN,FHEAT,VPD,TAIR,PAR,  &
-                    PSILCAN,PSILCANMIN,CICAN,ECANMAX,ACANMAX,ZEN,AZ)
+                    PSILCAN,PSILCANMIN,CICAN,ECANMAX,ACANMAX,ZEN,AZ,solarRad)
 ! Output the hourly totals
 !**********************************************************************
     USE switches
@@ -2067,6 +2069,9 @@ SUBROUTINE OUTPUTHR(IDAY,IHOUR,NOTARGETS,ITARGETS,ISPECIES,         &
     REAL ECANMAX(MAXT,MAXHRS),ACANMAX(MAXT,MAXHRS)
     REAL PSILCAN(MAXT,MAXHRS),PSILCANMIN(MAXT,MAXHRS),CICAN(MAXT,MAXHRS)
     REAL ZEN(MAXHRS), AZ(MAXHRS)
+    REAL solarRad(MAXHRS)
+    !print *, "Writing hourly data to file..."
+    !print *, RADabove(iHour)
 
     IF (IOHRLY.GE.1) THEN
         DO ITAR=1,NOTARGETS
@@ -2083,8 +2088,8 @@ SUBROUTINE OUTPUTHR(IDAY,IHOUR,NOTARGETS,ITARGETS,ISPECIES,         &
                                     ACANMAX(ITAR,IHOUR),                    &   
                                     PSILCAN(ITAR,IHOUR),PSILCANMIN(ITAR,IHOUR),CICAN(ITAR,IHOUR),  &
                                     TAIR(IHOUR),VPD(IHOUR)/1000,PAR(IHOUR), &
-                                    ZEN(IHOUR),AZ(IHOUR)                    !rjout mathias mars 2013
-                500 FORMAT (I7,1X,3(I4,1X),3(F12.5,1X),16(F12.5,1X),2(F12.5,1X))    ! rajout de 2, mathias mars 2013
+                                    ZEN(IHOUR),AZ(IHOUR),solarRad(iHour)                    !rjout mathias mars 2013
+                500 FORMAT (I7,1X,3(I4,1X),3(F12.5,1X),16(F12.5,1X),3(F12.5,1X))    ! rajout de 2, mathias mars 2013
             ELSE IF (IOFORMAT .EQ. 1) THEN
                 WRITE (UHRLY) REAL(IDAY),REAL(ITREE),REAL(ISPEC),REAL(IHOUR),               &
                                 THRAB(ITAR,IHOUR,1)*UMOLPERJ,THRAB(ITAR,IHOUR,2),           &
