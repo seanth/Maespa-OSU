@@ -1,0 +1,26 @@
+Program:    MAESPA                                                                          
+Control:    Run a single tree in a 10x10 stand of trees.                                    
+Trees:       10x10 trees, on one hectare plot.                                              
+Structure:                                                                      Multispecies
+Physiology:                                                                     Multispecies
+Met data:   HFE Met station 2008-2-20 to 2009-3-16                                          
+Water bal.: Example water balance parameters.                                               
+                                                                                
+DOY: simulation date
+Tree: tree number
+Spec: tree species number
+absPAR:   absorbed PAR              MJ tree-1 d-1
+absNIR:   absorbed NIR              MJ  tree-1 d-1
+absTherm: absorbed thermal          MJ tree-1 d-1
+totPs: gross photosynthesis         mol tree-1 d-1
+totRf: daily foliar respiration     mol tree-1 d-1
+netPs: photosyn. net of foliar resp   mol tree-1 d-1
+totLE1: daily transpiration         mol H2O tree-1 d-1
+totLE2: daily transpirn (CANOPY calc) mol H2O m-2 d-1
+totH:  daily sensible heat flux     MJ tree-1 d-1
+                                                                                
+Columns: DOY Tree Spec absPAR absNIR absTherm totPs totRf netPs totLE1 totLE2 totH
+      1   44    1     523.8878     148.8136     128.4672      53.2759       8.7303      44.5456    7306.5596      69.1841     398.8807
+      1   44    1     523.8878     148.8136     128.4672      53.2759       8.7303      44.5456    7306.5596      69.1841     398.8807
+      1   45    1     643.5349     196.0277     204.0729      70.1480      12.6899      57.4581    9652.6846      92.0532     498.8342
+      1   46    1     461.7013     128.8771     105.6385      46.0461       7.3842      38.6619    6323.6714      59.7488     350.0811

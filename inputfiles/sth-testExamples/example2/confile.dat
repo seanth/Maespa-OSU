@@ -1,0 +1,45 @@
+Run a single tree in a 10x10 stand of trees.
+
+&control
+iohrly=2       
+iotutd=1
+ioresp=1       
+iohist=1
+/
+
+&histo
+binsize=25
+/
+
+&dates
+startdate = '20/02/08'
+enddate = '20/02/08'
+/
+
+Middle tree only, use 25 neighbour trees for shading calculations.
+&treescon	
+itargets = 45 46
+notrees = 25
+/		
+
+number of angles and layers to integrate over. 
+&diffang					
+nolay = 6
+nzen = 5
+naz= 11
+/
+
+choice of submodels. 
+&model
+modelgs = 4
+modelrd = 0
+modeljm = 0
+!itermax = 100
+itermax = 100
+modelss = 0
+/
+
+
+
+
+
