@@ -743,7 +743,7 @@ PROGRAM maespa
                 ! This should be done outside the hourly loop, and stored in an array.
                 !SORTTREES - sorts the trees into order of distance from the target tree
                 !found in inout.f90
-                print *, "calls SORTTREES"
+                !print *, "calls SORTTREES"
 
                 CALL SORTTREES(NOALLTREES,NOTREES,ITREE,DXT1,DYT1,DZT1,RXTABLE1,RYTABLE1,RZTABLE1,ZBCTABLE1,&
                                 FOLTABLE1,DIAMTABLE1,DXT,DYT,DZT,RXTABLE,RYTABLE,RZTABLE,FOLTABLE,ZBCTABLE, &
@@ -1071,13 +1071,13 @@ PROGRAM maespa
                             DO ISUNLIT = 1,2 ! Loop over sunlit & shaded leaves
 
                                 IF (ISUNLIT.EQ.1) THEN
-                                    print *, "I am here"
-                                    print *,IPT
-                                    print *,BFLUX(IPT,1)
-                                    print *,BEXT
-                                    print *,DFLUX(IPT,1)
-                                    print *, UMOLPERJ
-                                    print *, SUNLA
+                                    !print *, "I am here"
+                                    !print *,IPT
+                                    !print *,BFLUX(IPT,1)
+                                    !print *,BEXT
+                                    !print *,DFLUX(IPT,1)
+                                    !print *, UMOLPERJ
+                                    !rint *, SUNLA
                                     APAR = (BFLUX(IPT,1)*BEXT + DFLUX(IPT,1))*UMOLPERJ
                                     ANIR = BFLUX(IPT,2)*BEXT + DFLUX(IPT,2)
                                     FAREA = SUNLA
