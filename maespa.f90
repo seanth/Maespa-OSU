@@ -191,7 +191,7 @@ PROGRAM maespa
         105 FORMAT('  DAY:',I5)
        
         !**********************************************************************
-    
+        !found in inout.f90
         CALL INTERPOLATEDIST(IDAY,ISTART,FRACROOTTABLE,NOROOTDATES,NOROOTSPEC,DATESROOT,FRACROOTSPEC,NROOTLAYER, NALPHASPEC, &
                                 FALPHATABLESPEC,DATESLIA,NOLIADATES,FALPHASPEC,NSPECIES, &
                                 ISMAESPA)
@@ -220,8 +220,13 @@ PROGRAM maespa
 
         ! Calculate zenith angle of sun
         print *, "***Calculating sun zenith angle****"
+        ! SUN - calculates the daylength
+        ! found in radn.f90
         CALL SUN(IDAY+ISTART,ALAT,TTIMD,DEC,EQNTIM,DAYL,SUNSET)
+        ! ZENAZ - calculates zenith and azimuth angles
+        ! found in radn.f90
         CALL ZENAZ(ALAT,TTIMD,BEAR,DEC,EQNTIM,ZEN,AZ)
+        !print *, "Zen: ", ZEN, "Az: ", AZ
 
         ! If requested in the confile, reset zenith angle to that read on the first day.
         ! (For simulation experiments; keep day of year the same).
@@ -739,6 +744,7 @@ PROGRAM maespa
                 !SORTTREES - sorts the trees into order of distance from the target tree
                 !found in inout.f90
                 print *, "calls SORTTREES"
+
                 CALL SORTTREES(NOALLTREES,NOTREES,ITREE,DXT1,DYT1,DZT1,RXTABLE1,RYTABLE1,RZTABLE1,ZBCTABLE1,&
                                 FOLTABLE1,DIAMTABLE1,DXT,DYT,DZT,RXTABLE,RYTABLE,RZTABLE,FOLTABLE,ZBCTABLE, &
                                 DIAMTABLE,ISPECIES,ISPECIEST,IT)
@@ -1065,6 +1071,13 @@ PROGRAM maespa
                             DO ISUNLIT = 1,2 ! Loop over sunlit & shaded leaves
 
                                 IF (ISUNLIT.EQ.1) THEN
+                                    print *, "I am here"
+                                    print *,IPT
+                                    print *,BFLUX(IPT,1)
+                                    print *,BEXT
+                                    print *,DFLUX(IPT,1)
+                                    print *, UMOLPERJ
+                                    print *, SUNLA
                                     APAR = (BFLUX(IPT,1)*BEXT + DFLUX(IPT,1))*UMOLPERJ
                                     ANIR = BFLUX(IPT,2)*BEXT + DFLUX(IPT,2)
                                     FAREA = SUNLA
