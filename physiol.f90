@@ -996,7 +996,11 @@ SUBROUTINE CALCWBIOM(IDAY,HT,DIAM,COEFFT,EXPONT,WINTERC,WBIOM,WBINC)
     REAL PREVWBIOM,HT,DIAM,COEFFT,EXPONT,WINTERC,WBIOM,WBINC
     
     PREVWBIOM = WBIOM
-    WBIOM = COEFFT*HT*(DIAM**EXPONT) + WINTERC
+    !WBIOM = COEFFT*HT*(DIAM**EXPONT) + WINTERC
+    !==edited out the exisiting equation. It appears to be quasi-geometric
+    !  with default values, not allometric. It's certainly allometric(scaling)
+    !  in form. Anyway, have woody biomass be proportional to diameter ^~2.6667
+    WBIOM = COEFFT*(DIAM**EXPONT) + WINTERC
     IF (IDAY.EQ.0) PREVWBIOM = WBIOM
     WBINC = (WBIOM - PREVWBIOM)*1E3
 
