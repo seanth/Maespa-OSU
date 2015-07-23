@@ -632,6 +632,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     REAL SOILMOIST(MAXHRS)
     REAL DELTAT(12),PRESSK,TMIN,TMAX,DAYPPT,ALAT,DEC,DAYL
     REAL PAR,FBM,RADBM,RADDF,CALCFBMH,CAK,SWMIN,SWMAX
+    REAL, EXTERNAL :: SATUR
 
     !print *, "GETMETHR"
 
@@ -659,6 +660,13 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
         print *, " Reading in atmospheric pressures..."
         DO IHR = 1,KHRS
             PRESS(IHR) = DATAIN(IHR,METCOLS(MHPRESS))
+            if (PRESS(IHR).eq.-9999) THEN
+                print *, " ***Error. A pressure datum is missing. Setting pressure to ", PRESSK
+                PRESS(ihr)=DEFWIND
+            else if (PRESS(IHR).LE.0) THEN
+                    print *, " ***Error. A pressure datum is less than 0. Setting pressure to ", PRESSK
+                    PRESS(ihr)=PRESSK
+            end if
         END DO
     ELSE
         print *, " Atmospheric pressure is missing. Setting values to ", PRESSK
@@ -672,8 +680,12 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
         print *, " Reading in wind speeds..."
         DO IHR = 1,KHRS
             WINDAH(IHR) = DATAIN(IHR,METCOLS(MHWIND))
-            if (WINDAH(IHR).LE.0) THEN
-                print *, " ***Error. Wind speed less than 0. Setting wind speed to ", DEFWIND
+            if (WINDAH(IHR).eq.-9999) THEN
+                print *, " ***Error. A wind speed datum is missing. Setting wind speed to ", DEFWIND
+                windah(ihr)=DEFWIND
+            else if (WINDAH(IHR).LE.0) THEN
+                    print *, " ***Error. A wind speed datum is less than 0. Setting wind speed to ", DEFWIND
+                    windah(ihr)=DEFWIND
             end if
         end do
     else
@@ -704,16 +716,23 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     END DO
 
     ! Set hourly soil temperatures
-    IF (METCOLS(MHTSOIL).EQ.MISSING) THEN
-        print *, " Calculating soil temperature from air temperature...."
-        TSOILDATA = 0
-        CALL CALCTSOIL(TAIR,TSOIL)
-    ELSE
+    IF (METCOLS(MHTSOIL).NE.MISSING) THEN
         print *, " Reading in soil temperatures..."
         DO IHR = 1,KHRS
             TSOIL(IHR) = DATAIN(IHR,METCOLS(MHTSOIL))
+            if (tSoil(iHR).eq.-9999) THEN
+                print *, " ***Error. A soil temperature datum is missing. Calculating soil temperature from air temperature"
+                ! Like the CALCTSOIL Routine. Set equal to average daily air temperature.
+                ! Does it for a single timepoint and not a day's worth of data
+                tSoil(iHr)=sum(tAir)/khrs
+                !windah(ihr)=DEFWIND
+            end if
             TSOILDATA = 1
         END DO
+    ELSE
+        print *, " Calculating soil temperature from air temperature...."
+        TSOILDATA = 0
+        CALL CALCTSOIL(TAIR,TSOIL)
     END IF
 
     ! Read in RH, VPD, VMFD, Tdew
@@ -728,22 +747,18 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
             RH(IHR) = DATAIN(IHR,METCOLS(MHRHP))/100.0
         END DO
     END IF
-
     IF (METCOLS(MHVPD).NE.MISSING) THEN
         print *, " Reading in vapour pressure differential..."
         DO IHR = 1,KHRS
             VPD(IHR) = DATAIN(IHR,METCOLS(MHVPD))
         END DO
     END IF
-
     IF (METCOLS(MHTDEW).NE.MISSING) THEN
         print *, " Reading in dew point temperature..."
         DO IHR = 1,KHRS
             TDEW(IHR) = DATAIN(IHR,METCOLS(MHTDEW))
         END DO
     END IF
-
-
     IF (METCOLS(MHMFD).NE.MISSING) THEN
         print *, " Reading in vapour pressure mole fraction deficit..."
         DO IHR = 1,KHRS
@@ -751,7 +766,35 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
         END DO
     END IF
 
-    ! Calculate RH if not in file
+    IF (METCOLS(MHRH).NE.MISSING) THEN
+        do iHr = 1, khrs
+            if ((RH(iHR).eq.-9999).AND.(METCOLS(MHRHP).NE.MISSING)) THEN
+                print *, " ***Error. A relative humidity datum is missing."
+                IF ((METCOLS(MHVPD).NE.MISSING).AND.(vpd(iHr).NE.-9999)) then
+                    !try to supply value from VPD
+                    print *, " ***Using vapour pressure differential to supply relative humidity."
+                    RH(iHr) = 1.0 - VPD(iHr)/SATUR(TAIR(iHr))
+                elseIF ((METCOLS(MHtDew).NE.MISSING).AND.(tDew(iHr).NE.-9999)) then
+                    !try to supply value from tDew
+                    print *, " ***Using dew point temperature to supply relative humidity."
+                    RH(iHr) = SATUR(TDEW(iHr))/SATUR(TAIR(iHr))
+                elseIF ((METCOLS(MHMFD).NE.MISSING).AND.(VMFD(iHr).NE.-9999)) then
+                    !try to supply value from VMFD
+                    print *, " ***Using vapour pressure mole fraction deficit to supply relative humidity."
+                    RH(iHr) = 1 - VMFD(iHr)*PRESS(iHr)*1E-3/SATUR(TAIR(iHr))
+                else
+                    !use air temp as last resort 
+                    print *, " ***Using air temp to supply relative humidity"
+                    RH(iHr)=SATUR(tMin)/SATUR(tAir(iHr))
+                end if
+                print *, "    Setting relative humidity to:", RH(iHr)
+            end if
+        end do
+    end if
+
+
+
+    ! Calculate RH column if not in file
     IF ((METCOLS(MHRH).EQ.MISSING).AND.(METCOLS(MHRHP).EQ.MISSING)) THEN
         print *, " ***Relative humidity values are missing!"
         IF (METCOLS(MHVPD).NE.MISSING) THEN
@@ -768,12 +811,12 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
             CALL CALCRH(TMIN,TAIR,RH)
         END IF
     END IF
-    ! Calculate VPD if not in file
+    ! Calculate VPD column if not in file
     IF (METCOLS(MHVPD).EQ.MISSING) THEN
         print *, "     Calculating vapour pressure differential from relative humidity..."
         CALL RHTOVPD(RH,TAIR,VPD)
     END IF
-    ! Calculate VMFD if not in file
+    ! Calculate VMFD column if not in file
     IF (METCOLS(MHMFD).EQ.MISSING) THEN
         print *, "     Calculating vapour pressure mole fraction deficit from vapour pressure differential..."
         CALL VPDTOMFD(VPD,PRESS,VMFD)
@@ -786,6 +829,13 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
         print *, " Reading in rainfall data..."
         DO IHR = 1,KHRS
             PPT(IHR) = DATAIN(IHR,METCOLS(MHPPT))   !*1E6/18.
+            if (PPT(IHR).eq.-9999) THEN
+                print *, " ***Error. A rainfall datum is missing. Setting rainfall to:", 0.0
+                PPT(IHR)=0.0
+            else if (PPT(IHR).LE.0) THEN
+                print *, " ***Error. A rainfall datum is less than 0. Setting rainfall to:", 0.0
+                PPT(IHR)=0.0
+            end if
             DAYPPT = DAYPPT+PPT(IHR)
         END DO
     ELSE
@@ -874,6 +924,10 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
         print *, " Reading in atmospheric CO2 concentration..."
         DO IHR = 1,KHRS
             CA(IHR) = DATAIN(IHR,METCOLS(MHCA))
+            if (CA(IHR).eq.-9999) THEN
+                print *, " ***Error. A atmospheric CO2 concentration datum is missing. Setting [CO2] to ", CAK
+                CA(IHR)=CAK
+            end if
         END DO
     ELSE
         print *, " Atmospheric CO2 concentration is missing. Setting values to ", CAK
@@ -1555,7 +1609,7 @@ SUBROUTINE READLAT(UFILE, ALAT, TTIMD)
     REAL TZLONG,ALAT,ALONG,TIMDIF,TTIMD
     NAMELIST /LATLONG/ LATHEM,LAT,LONHEM,LONG,TZLONG
 
-    !print *, "READLAT"
+    print *, "READLAT"
 
     REWIND (UFILE)
     READ (UFILE, LATLONG, IOSTAT = IOERROR)

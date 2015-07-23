@@ -583,8 +583,14 @@ SUBROUTINE PHOTOSYN(PAR,TLEAF,TMOVE,CS,RH,VPD,VMFD, &
     ! Return CI.
     IF(GS.GT.0.AND.ALEAF.GT.0)THEN
         CI = CS - ALEAF/GS
+        !chris wants a new function here
+        !D13C=a+((b-a)*(CI/CA))
+        !where a=4.4 ppt diffusive fraction of Carbon
+        !where b=27.5 ppt fractionation of Rubisco
+        !define the d13 variable at the very end of physiol.f90 (this file)
     ELSE
         CI = CS
+        !d13c=0.0
     ENDIF
     
     

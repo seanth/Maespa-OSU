@@ -5217,6 +5217,7 @@ SUBROUTINE open_file(fname, unit, action, file_format, status)
 
 ! Read in list of points
       IF (INPUTTYPE.EQ.1) THEN
+        rewind (UPOINTSI)
         READ (UPOINTSI, XYZ, IOSTAT = IOERROR)
         IF (IOERROR.NE.0) &
         CALL SUBERROR('ERROR READING GRID POINTS', &
