@@ -115,6 +115,7 @@ MODULE maestcom
     INTEGER, PARAMETER :: URESPHDR = 48
     INTEGER, PARAMETER :: USUNLA = 49    ! modification Mathias 27/11/12
     INTEGER, PARAMETER :: USWPLAY = 50    ! modification Mathias décembre 2012
+    INTEGER, PARAMETER :: UMETOUT = 51     !STH 2015.0727
     
     
 

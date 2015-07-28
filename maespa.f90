@@ -62,7 +62,7 @@ PROGRAM maespa
     ! Open input files
     CALL OPENINPUTF(CTITLE,TTITLE,PTITLE,STITLE,WTITLE,UTITLE,IWATFILE, &
                     KEEPZEN,IPOINTS,ISIMUS,in_path,out_path)
-   
+
     ! Decide whether to simulate the water balance (MAESPA) or not (MAESTRA)    
     IF(IWATFILE .EQ. 0)THEN
        ISMAESPA = .FALSE.
@@ -250,7 +250,7 @@ PROGRAM maespa
         ! Get meteorological data
         CALL GETMET(IDAY+ISTART,MFLAG,ZEN,METCOLS,NOMETCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,  &
                     ALAT,DEC,DAYL,WINDAH,TSOIL,TAIR,RADABV,FBEAM,RH,VPD,VMFD,CA,PRESS,      &
-                    PPT,SOILMOIST,SOILDATA,TSOILDATA,ETMEAS, solarRad)
+                    PPT,SOILMOIST,SOILDATA,TSOILDATA,ETMEAS, solarRad, iDay)
         ! Moving average air temperature (for acclimation of respiration - not currently documented feature).
         MOVEWINDOW = 7 * KHRS
         TAIRMEM = CSHIFT(TAIRMEM, -KHRS)

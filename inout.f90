@@ -107,9 +107,14 @@ SUBROUTINE OPENINPUTF(CTITLE,TTITLE,PTITLE,STITLE,WTITLE,UTITLE,IWATFILE,KEEPZEN
     
     ! get locations of input files and where to write the output files
     READ (UCONTROL, flocations, IOSTAT=IOERROR)
+    in_path=fin_dir
+    out_path=fout_dir
+    print *, "***input directory set to: "//in_path
+    print *, "***outpuy directory set to: "//out_path
     IF (IOERROR == -1) THEN
         ! i.e. it has reached the end of the file and not found the tag, I am sure 
         ! there is a nicer way to do this
+        ! --This method apparently fails even if there is the tag present--STH 2015.0728
         WRITE(*,*) 'You have chosen not to set the in/out directories, so using current dir'
         REWIND(UCONTROL)
     ENDIF
@@ -195,6 +200,8 @@ SUBROUTINE open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,&
     LOGICAL ISMAESPA
     CHARACTER SPECIESNAMES(MAXSP)*30
     
+    CALL open_file(trim(out_path)//'Met_out.dat', UMETOUT, 'write', 'asc', 'replace')
+
     ! Output file with daily fluxes
     IF (IODAILY .GT. 0 .AND. IOFORMAT .EQ. 0) THEN
         CALL open_file(trim(out_path)//'Dayflx.dat', UDAILY, 'write', 'asc', 'replace')
@@ -298,13 +305,38 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
     CHARACTER SPECIESNAMES(MAXSP)*30
     LOGICAL ISMAESPA
     
+    print *, "***Writing headers to output files..."
     ! write headers to single ascii file
-    IF (IOFORMAT .EQ. 0) THEN
-        
+    IF (IOFORMAT .EQ. 0) THEN        
         IF (ISUNLA.EQ.1) THEN
             WRITE (USUNLA,461)    ! MAthias 27/11/12
         END IF
-        
+
+        WRITE (UMETOUT, 991) 'Program:    ', VTITLE
+        WRITE (UMETOUT, 991) 'Met data:   ', MTITLE
+        write (UMETOUT, 701)
+        write (UMETOUT, 704)
+        write (UMETOUT, 101)
+        write (UMETOUT, 102)
+        write (UMETOUT, 103)
+        write (UMETOUT, 104)
+        !write (UMETOUT, 105)
+        write (UMETOUT, 106)
+        write (UMETOUT, 107)
+        write (UMETOUT, 108)
+        write (UMETOUT, 109)
+        write (UMETOUT, 110)
+        write (UMETOUT, 111)
+        write (UMETOUT, 112)
+        write (UMETOUT, 113)
+        write (UMETOUT, 114)
+        !write (UMETOUT, 115)
+        write (UMETOUT, 116)
+        write (UMETOUT, 117)
+        write (UMETOUT, 118)
+        write (UMETOUT, 125)
+
+
         ! Write headings to daily flux file
         IF (IODAILY.GT.0) THEN
             WRITE (UDAILY, 991) 'Program:    ', VTITLE
@@ -339,7 +371,6 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
             WRITE (UDAILY,990) ' '
             WRITE (UDAILY,513)
         END IF
-        
         ! Comments to hourly output file (if required).
         IF (IOHRLY.gt.0) THEN
             WRITE (UHRLY, 991) 'Program:    ', VTITLE
@@ -386,8 +417,7 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
             WRITE (UHRLY,728)
             WRITE (UHRLY, 990) ' '
             WRITE (UHRLY,725)
-        END IF
-    
+        END IF 
         ! Comments to respiration output file (if required).    
         IF (IORESP.gt.0) THEN
             WRITE (URESP, 991) 'Program:    ', VTITLE
@@ -427,7 +457,6 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
             WRITE (URESPHR, 990) ' '
             WRITE (URESPHR,307)
           END IF
-
         ! Write comments to layer output file (if required)
         IF (IOHRLY.GT.1) THEN
             WRITE (ULAY, 991) 'Program:    ', VTITLE
@@ -445,8 +474,7 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
             write (ulay, *) 
             write(ulay,811) (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY)
             !***end STH
-        END IF
-        
+        END IF         
         ! Write comments to water balance output file (if required). (RAD).
         IF (ISMAESPA) THEN
             WRITE (UWATBAL, 991) 'Program:                  ', VTITLE
@@ -508,8 +536,7 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
             WRITE (UWATDAY, 456)
             WRITE (UWATDAY, 990) '  '
             WRITE (UWATDAY, 457)
-        END IF
-        
+        END IF        
         IF(ISIMUS.EQ.1)THEN
             WRITE(UPARUS, 991) 'Program:                  ', VTITLE
             WRITE(UPARUS, 990) '  '
@@ -528,7 +555,7 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
         
         
     ! write headers to a .hdr file, binary out
-    ELSE IF (IOFORMAT .EQ. 1) THEN      
+    ELSE IF (IOFORMAT .EQ. 1) THEN     
         ! Write headings to daily flux file
         IF (IODAILY.GT.0) THEN
             WRITE (UDAYHDR, 991) 'Program:    ', VTITLE
@@ -729,7 +756,28 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
             WRITE (UWATDAYHDR, 457)
         END IF
     END IF
-    
+
+    101 format('WIND: wind speed above the canopy                           (m s-1)')
+    102 format('TAIR: air temperature                                       (ºC)')
+    103 format('TSOIL: soil temperature                                     (ºC)')
+    104 format('RH: relative humidity                                       (fraction)')
+    105 format('RH%: relative humidity                                      (%)')
+    106 format('VPD: vapour pressure deficit                                (Pa)')
+    107 format('VMFD: vapour pressure mole fraction deficit                 (mmol mol-1)')
+    108 format('CA: atmospheric CO2 concentration                           (ppm)')
+    109 format('PAR: hourly incident photosynthetically active radiation    (mmol m-2s-1)')
+    110 format('RAD: hourly incident total short-wave radiation             (W m-2)')
+    111 format('FBEAM: fraction of incident PAR which is direct-beam        (fraction)')
+    112 format('PRESS: atmospheric pressure                                 (Pa)')
+    113 format('TDEW: dewpoint temperature                                  (ºC)')
+    114 format('SW: soil water content                                      (?)')
+    115 format('SWP: soil water potential                                   (MPa)')
+    116 format('PPT: precipitation                                          (mm)')
+    117 format('TMIN: minimum daily temperature                             (ºC)')
+    118 format('TMAX: maximum daily temperature                             (ºC)')
+    125 format('Columns: DOY HOUR WIND TAIR TSOIL RH VPD VMFD CA PAR RAD FBEAM PRESS TDEW SW PPT TMIN TMAX')
+
+
     461   format('DOY   Hour    Tree    IPT    SUNLA   AREA    BEXT    FBEAM   ZEN  ABSRPPAR  ABSRPNIR ABSRPTH BFPAR DFPAR BFNIR DFNIR DFTHR SCLOSTPAR SCLOSTNIR SCLOSTTH DOWNTH PARABV NIRABV THRABV')   ! Modification Mathias 27/11/12
 
     990 FORMAT (A80)
@@ -873,21 +921,20 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
     455 FORMAT('qc: soil heat transport                     MJ m-2 day-1')
     456 FORMAT('radinterc: total radiation intercepted      MJ m-2 day-1')
 
-457     FORMAT('Columns: day wsoil wsoilroot swp ppt &
+    457     FORMAT('Columns: day wsoil wsoilroot swp ppt &
               &tfall et etmeas discharge soilevap &
               &fsoil qh qe qn qc radinterc')
         
-201           FORMAT('Understorey simulation results by timestep and point')
-202           FORMAT('Columns: day hour point X Y Z PARbeam PARdiffuse PARtotal APAR hrPSus hrETus')
-203           FORMAT('day : day of simulation (1,2,etc.)')
-204           FORMAT('hour: timestep (1,2,etc.)')
-205           FORMAT('X,Y,Z: spatial coordinates of understorey test point (m)')
-206           FORMAT('PARbeam, PARdiffuse, PARtot : PAR reaching the top of the understorey, in direct, diffuse or total (mu mol m-2 s-1)')
-207           FORMAT('APAR : absorbed PAR by the understorey (mu mol m-2 s-1) ')
-208           FORMAT('hrPSus : photosynthesis for the understorey point (mu mol m-2 s-1)')            
-209           FORMAT('hrETus : transpiration for the understorey point (If zero it is not calculated) (mmol m-2 s-1)')
+    201           FORMAT('Understorey simulation results by timestep and point')
+    202           FORMAT('Columns: day hour point X Y Z PARbeam PARdiffuse PARtotal APAR hrPSus hrETus')
+    203           FORMAT('day : day of simulation (1,2,etc.)')
+    204           FORMAT('hour: timestep (1,2,etc.)')
+    205           FORMAT('X,Y,Z: spatial coordinates of understorey test point (m)')
+    206           FORMAT('PARbeam, PARdiffuse, PARtot : PAR reaching the top of the understorey, in direct, diffuse or total (mu mol m-2 s-1)')
+    207           FORMAT('APAR : absorbed PAR by the understorey (mu mol m-2 s-1) ')
+    208           FORMAT('hrPSus : photosynthesis for the understorey point (mu mol m-2 s-1)')            
+    209           FORMAT('hrETus : transpiration for the understorey point (If zero it is not calculated) (mmol m-2 s-1)')
 
-    
 END SUBROUTINE write_header_information
 
 
@@ -900,7 +947,7 @@ SUBROUTINE CLOSEF()
     USE switches
     USE maestcom
     IMPLICIT NONE
-    
+    close(UMETOUT)  !STH 2015.0727
     CLOSE(USUNLA)  ! Mathias 27/11/12
     CLOSE(STDIN)
     CLOSE(UTREES)
