@@ -312,229 +312,229 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
             WRITE (USUNLA,461)    ! MAthias 27/11/12
         END IF
 
-        WRITE (UMETOUT, 991) 'Program:    ', VTITLE
-        WRITE (UMETOUT, 991) 'Met data:   ', MTITLE
-        write (UMETOUT, 701)
-        write (UMETOUT, 704)
-        write (UMETOUT, 101)
-        write (UMETOUT, 102)
-        write (UMETOUT, 103)
-        write (UMETOUT, 104)
-        !write (UMETOUT, 105)
-        write (UMETOUT, 106)
-        write (UMETOUT, 107)
-        write (UMETOUT, 108)
-        write (UMETOUT, 109)
-        write (UMETOUT, 110)
-        write (UMETOUT, 111)
-        write (UMETOUT, 112)
-        write (UMETOUT, 113)
-        write (UMETOUT, 114)
-        !write (UMETOUT, 115)
-        write (UMETOUT, 116)
-        write (UMETOUT, 117)
-        write (UMETOUT, 118)
+        !WRITE (UMETOUT, 991) 'Program:    ', VTITLE
+        !WRITE (UMETOUT, 991) 'Met data:   ', MTITLE
+        !write (UMETOUT, 701)
+        !write (UMETOUT, 704)
+        !write (UMETOUT, 101)
+        !write (UMETOUT, 102)
+        !write (UMETOUT, 103)
+        !write (UMETOUT, 104)
+        !!write (UMETOUT, 105)
+        !write (UMETOUT, 106)
+        !write (UMETOUT, 107)
+        !write (UMETOUT, 108)
+        !write (UMETOUT, 109)
+        !write (UMETOUT, 110)
+        !write (UMETOUT, 111)
+        !write (UMETOUT, 112)
+        !write (UMETOUT, 113)
+        !write (UMETOUT, 114)
+        !!write (UMETOUT, 115)
+        !write (UMETOUT, 116)
+        !write (UMETOUT, 117)
+        !write (UMETOUT, 118)
         write (UMETOUT, 125)
 
 
         ! Write headings to daily flux file
-        IF (IODAILY.GT.0) THEN
-            WRITE (UDAILY, 991) 'Program:    ', VTITLE
-            WRITE (UDAILY, 991) 'Control:    ', CTITLE
-            WRITE (UDAILY, 991) 'Trees:      ', TTITLE
-            WRITE (UDAILY, 991) 'Structure:  ', 'Multispecies' ! STITLE
-            WRITE (UDAILY, 991) 'Physiology: ', 'Multispecies' !PTITLE
-            WRITE (UDAILY, 991) 'Met data:   ', MTITLE
-            IF(IOWATBAL.EQ.1)WRITE (UDAILY, 991) 'Water bal.: ', WTITLE
-            WRITE (UDAILY, 990) ' '
+        ! IF (IODAILY.GT.0) THEN
+        !     WRITE (UDAILY, 991) 'Program:    ', VTITLE
+        !     WRITE (UDAILY, 991) 'Control:    ', CTITLE
+        !     WRITE (UDAILY, 991) 'Trees:      ', TTITLE
+        !     WRITE (UDAILY, 991) 'Structure:  ', 'Multispecies' ! STITLE
+        !     WRITE (UDAILY, 991) 'Physiology: ', 'Multispecies' !PTITLE
+        !     WRITE (UDAILY, 991) 'Met data:   ', MTITLE
+        !     IF(IOWATBAL.EQ.1)WRITE (UDAILY, 991) 'Water bal.: ', WTITLE
+        !     WRITE (UDAILY, 990) ' '
     
-            IF(NSPECIES.GT.1)THEN
-                WRITE(UDAILY, *)'Species codes:'
-                DO I = 1,NSPECIES
-                    WRITE (UDAILY, *) I,  " : " // SPECIESNAMES(I)
-                END DO
-                WRITE(UDAILY,990) ' '
-            ENDIF
+        !     IF(NSPECIES.GT.1)THEN
+        !         WRITE(UDAILY, *)'Species codes:'
+        !         DO I = 1,NSPECIES
+        !             WRITE (UDAILY, *) I,  " : " // SPECIESNAMES(I)
+        !         END DO
+        !         WRITE(UDAILY,990) ' '
+        !     ENDIF
     
-            WRITE (UDAILY,501)
-            WRITE (UDAILY,502)
-            WRITE (UDAILY,503)
-            WRITE (UDAILY,504)
-            WRITE (UDAILY,505)
-            WRITE (UDAILY,506)
-            WRITE (UDAILY,507)
-            WRITE (UDAILY,508)
-            WRITE (UDAILY,509)
-            WRITE (UDAILY,510)
-            WRITE (UDAILY,511)
-            WRITE (UDAILY,512)
-            WRITE (UDAILY,990) ' '
-            WRITE (UDAILY,513)
-        END IF
+        !     WRITE (UDAILY,501)
+        !     WRITE (UDAILY,502)
+        !     WRITE (UDAILY,503)
+        !     WRITE (UDAILY,504)
+        !     WRITE (UDAILY,505)
+        !     WRITE (UDAILY,506)
+        !     WRITE (UDAILY,507)
+        !     WRITE (UDAILY,508)
+        !     WRITE (UDAILY,509)
+        !     WRITE (UDAILY,510)
+        !     WRITE (UDAILY,511)
+        !     WRITE (UDAILY,512)
+        !     WRITE (UDAILY,990) ' '
+        !     WRITE (UDAILY,513)
+        ! END IF
         ! Comments to hourly output file (if required).
         IF (IOHRLY.gt.0) THEN
-            WRITE (UHRLY, 991) 'Program:    ', VTITLE
-            WRITE (UHRLY, 991) 'Control:    ', CTITLE
-            WRITE (UHRLY, 991) 'Trees:      ', TTITLE
-            WRITE (UHRLY, 991) 'Structure:  ', 'Multispecies' !STITLE
-            WRITE (UHRLY, 991) 'Physiology: ', 'Multispecies' !PTITLE
-            WRITE (UHRLY, 991) 'Met data:   ', MTITLE
-            IF(IOWATBAL.EQ.1)WRITE (UHRLY, 991) 'Water bal.: ', WTITLE
-            WRITE (UHRLY, 990) ' '
-            IF(NSPECIES.GT.1)THEN
-                WRITE(UHRLY, *)'Species codes:'
-                DO I = 1,NSPECIES
-                    WRITE (UHRLY, *) I,  " : " // SPECIESNAMES(I)
-                END DO
-                WRITE(UHRLY,990) ' '
-            END IF
-            WRITE (UHRLY,701)
-            WRITE (UHRLY,702)
-            WRITE (UHRLY,703)
-            WRITE (UHRLY,704)
-            WRITE (UHRLY,705)
-            WRITE (UHRLY,706)
-            WRITE (UHRLY,707)
-            WRITE (UHRLY,708)
-            WRITE (UHRLY,709)
-            WRITE (UHRLY,710)
-            WRITE (UHRLY,711)
-            WRITE (UHRLY,712)
-            WRITE (UHRLY,713)
-            WRITE (UHRLY,714)
-            WRITE (UHRLY,715)
-            WRITE (UHRLY,716)
-!            WRITE (UHRLY,717)
-            WRITE (UHRLY,718)
-            WRITE (UHRLY,719)
-            WRITE (UHRLY,720)
-            WRITE (UHRLY,721)
-            WRITE (UHRLY,722)
-            WRITE (UHRLY,723)
-            WRITE (UHRLY,724)
-            WRITE (UHRLY,726)
-            WRITE (UHRLY,727)
-            WRITE (UHRLY,728)
-            WRITE (UHRLY, 990) ' '
+!             WRITE (UHRLY, 991) 'Program:    ', VTITLE
+!             WRITE (UHRLY, 991) 'Control:    ', CTITLE
+!             WRITE (UHRLY, 991) 'Trees:      ', TTITLE
+!             WRITE (UHRLY, 991) 'Structure:  ', 'Multispecies' !STITLE
+!             WRITE (UHRLY, 991) 'Physiology: ', 'Multispecies' !PTITLE
+!             WRITE (UHRLY, 991) 'Met data:   ', MTITLE
+!             IF(IOWATBAL.EQ.1)WRITE (UHRLY, 991) 'Water bal.: ', WTITLE
+!             WRITE (UHRLY, 990) ' '
+!             IF(NSPECIES.GT.1)THEN
+!                 WRITE(UHRLY, *)'Species codes:'
+!                 DO I = 1,NSPECIES
+!                     WRITE (UHRLY, *) I,  " : " // SPECIESNAMES(I)
+!                 END DO
+!                 WRITE(UHRLY,990) ' '
+!             END IF
+!             WRITE (UHRLY,701)
+!             WRITE (UHRLY,702)
+!             WRITE (UHRLY,703)
+!             WRITE (UHRLY,704)
+!             WRITE (UHRLY,705)
+!             WRITE (UHRLY,706)
+!             WRITE (UHRLY,707)
+!             WRITE (UHRLY,708)
+!             WRITE (UHRLY,709)
+!             WRITE (UHRLY,710)
+!             WRITE (UHRLY,711)
+!             WRITE (UHRLY,712)
+!             WRITE (UHRLY,713)
+!             WRITE (UHRLY,714)
+!             WRITE (UHRLY,715)
+!             WRITE (UHRLY,716)
+! !            WRITE (UHRLY,717)
+!             WRITE (UHRLY,718)
+!             WRITE (UHRLY,719)
+!             WRITE (UHRLY,720)
+!             WRITE (UHRLY,721)
+!             WRITE (UHRLY,722)
+!             WRITE (UHRLY,723)
+!             WRITE (UHRLY,724)
+!             WRITE (UHRLY,726)
+!             WRITE (UHRLY,727)
+!             WRITE (UHRLY,728)
+!             WRITE (UHRLY, 990) ' '
             WRITE (UHRLY,725)
         END IF 
         ! Comments to respiration output file (if required).    
         IF (IORESP.gt.0) THEN
-            WRITE (URESP, 991) 'Program:    ', VTITLE
-            WRITE (URESP, 991) 'Control:    ', CTITLE
-            WRITE (URESP, 991) 'Trees:      ', TTITLE
-            WRITE (URESP, 991) 'Structure:  ', 'Multispecies'  !STITLE
-            WRITE (URESP, 991) 'Physiology: ', 'Multispecies' !PTITLE
-            WRITE (URESP, 991) 'Met data:   ', MTITLE
-            WRITE (URESP, 990) ' '
-            WRITE (URESP,601)
-            WRITE (URESP,602)
-            WRITE (URESP,603)
-            WRITE (URESP,604)
-            WRITE (URESP,605)
-            WRITE (URESP,606)
-            WRITE (URESP,607)
-            WRITE (URESP,608)
-            WRITE (URESP,609)
-            WRITE (URESP,610)
-            WRITE (URESP,611)
-            WRITE (URESP, 990) ' '
+            ! WRITE (URESP, 991) 'Program:    ', VTITLE
+            ! WRITE (URESP, 991) 'Control:    ', CTITLE
+            ! WRITE (URESP, 991) 'Trees:      ', TTITLE
+            ! WRITE (URESP, 991) 'Structure:  ', 'Multispecies'  !STITLE
+            ! WRITE (URESP, 991) 'Physiology: ', 'Multispecies' !PTITLE
+            ! WRITE (URESP, 991) 'Met data:   ', MTITLE
+            ! WRITE (URESP, 990) ' '
+            ! WRITE (URESP,601)
+            ! WRITE (URESP,602)
+            ! WRITE (URESP,603)
+            ! WRITE (URESP,604)
+            ! WRITE (URESP,605)
+            ! WRITE (URESP,606)
+            ! WRITE (URESP,607)
+            ! WRITE (URESP,608)
+            ! WRITE (URESP,609)
+            ! WRITE (URESP,610)
+            ! WRITE (URESP,611)
+            ! WRITE (URESP, 990) ' '
             WRITE (URESP,612)
     
-            WRITE (URESPHR, 991) 'Program:    ', VTITLE
-            WRITE (URESPHR, 991) 'Control:    ', CTITLE
-            WRITE (URESPHR, 991) 'Trees:      ', TTITLE
-            WRITE (URESPHR, 991) 'Structure:  ', 'Multispecies' !STITLE
-            WRITE (URESPHR, 991) 'Physiology: ', 'Multispecies' !PTITLE
-            WRITE (URESPHR, 991) 'Met data:   ', MTITLE
-            WRITE (URESPHR, 990) ' '
-            WRITE (URESPHR,301)
-            WRITE (URESPHR,302)
-            WRITE (URESPHR,303)
-            WRITE (URESPHR,304)
-            WRITE (URESPHR,305)
-            WRITE (URESPHR,306)
-            WRITE (URESPHR, 990) ' '
+            ! WRITE (URESPHR, 991) 'Program:    ', VTITLE
+            ! WRITE (URESPHR, 991) 'Control:    ', CTITLE
+            ! WRITE (URESPHR, 991) 'Trees:      ', TTITLE
+            ! WRITE (URESPHR, 991) 'Structure:  ', 'Multispecies' !STITLE
+            ! WRITE (URESPHR, 991) 'Physiology: ', 'Multispecies' !PTITLE
+            ! WRITE (URESPHR, 991) 'Met data:   ', MTITLE
+            ! WRITE (URESPHR, 990) ' '
+            ! WRITE (URESPHR,301)
+            ! WRITE (URESPHR,302)
+            ! WRITE (URESPHR,303)
+            ! WRITE (URESPHR,304)
+            ! WRITE (URESPHR,305)
+            ! WRITE (URESPHR,306)
+            ! WRITE (URESPHR, 990) ' '
             WRITE (URESPHR,307)
           END IF
         ! Write comments to layer output file (if required)
         IF (IOHRLY.GT.1) THEN
-            WRITE (ULAY, 991) 'Program:    ', VTITLE
-            WRITE (ULAY, 801)
-            WRITE (ULAY, 802)
-            WRITE (ULAY, 803)
-            WRITE (ULAY, 804)
-            WRITE (ULAY, 805)
-            WRITE (ULAY, 806)
-            WRITE (ULAY, 807)
-            write (ulay, 808)
-            write (ulay, 809)
-            write (ulay, 810)
-            !****STH 2015.03.30***
-            write (ulay, *) 
+            ! WRITE (ULAY, 991) 'Program:    ', VTITLE
+            ! WRITE (ULAY, 801)
+            ! WRITE (ULAY, 802)
+            ! WRITE (ULAY, 803)
+            ! WRITE (ULAY, 804)
+            ! WRITE (ULAY, 805)
+            ! WRITE (ULAY, 806)
+            ! WRITE (ULAY, 807)
+            ! write (ulay, 808)
+            ! write (ulay, 809)
+            ! write (ulay, 810)
+            ! !****STH 2015.03.30***
+            ! write (ulay, *) 
             write(ulay,811) (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY)
             !***end STH
         END IF         
         ! Write comments to water balance output file (if required). (RAD).
         IF (ISMAESPA) THEN
-            WRITE (UWATBAL, 991) 'Program:                  ', VTITLE
-            WRITE (UWATBAL, 992) 'Water balance parameters: ', WTITLE
-            WRITE (UWATBAL, 990) '  '
-            WRITE (UWATBAL, 401)
-            WRITE (UWATBAL, 402)
-            WRITE (UWATBAL, 403)
-            WRITE (UWATBAL, 404)
-            WRITE (UWATBAL, 405)
-            WRITE (UWATBAL, 406)
-            WRITE (UWATBAL, 407)
-            WRITE (UWATBAL, 408)
-            WRITE (UWATBAL, 409)
-            WRITE (UWATBAL, 410)
-            WRITE (UWATBAL, 411)
-            WRITE (UWATBAL, 412)
-            WRITE (UWATBAL, 413)
-            WRITE (UWATBAL, 414)
-            WRITE (UWATBAL, 415)
-            WRITE (UWATBAL, 416)
-            WRITE (UWATBAL, 417)
-            WRITE (UWATBAL, 418)
-            WRITE (UWATBAL, 419)
-            WRITE (UWATBAL, 420)
-            WRITE (UWATBAL, 421)
-            WRITE (UWATBAL, 422)
-            WRITE (UWATBAL, 423)
-            WRITE (UWATBAL, 424)
-            WRITE (UWATBAL, 425)
-            WRITE (UWATBAL, 426)
-            WRITE (UWATBAL, 427)
-            WRITE (UWATBAL, 428)
-            WRITE (UWATBAL, 429)
-            WRITE (UWATBAL, 430)
-            WRITE (UWATBAL, 432)
-            WRITE (UWATBAL, 990) '  '
+            ! WRITE (UWATBAL, 991) 'Program:                  ', VTITLE
+            ! WRITE (UWATBAL, 992) 'Water balance parameters: ', WTITLE
+            ! WRITE (UWATBAL, 990) '  '
+            ! WRITE (UWATBAL, 401)
+            ! WRITE (UWATBAL, 402)
+            ! WRITE (UWATBAL, 403)
+            ! WRITE (UWATBAL, 404)
+            ! WRITE (UWATBAL, 405)
+            ! WRITE (UWATBAL, 406)
+            ! WRITE (UWATBAL, 407)
+            ! WRITE (UWATBAL, 408)
+            ! WRITE (UWATBAL, 409)
+            ! WRITE (UWATBAL, 410)
+            ! WRITE (UWATBAL, 411)
+            ! WRITE (UWATBAL, 412)
+            ! WRITE (UWATBAL, 413)
+            ! WRITE (UWATBAL, 414)
+            ! WRITE (UWATBAL, 415)
+            ! WRITE (UWATBAL, 416)
+            ! WRITE (UWATBAL, 417)
+            ! WRITE (UWATBAL, 418)
+            ! WRITE (UWATBAL, 419)
+            ! WRITE (UWATBAL, 420)
+            ! WRITE (UWATBAL, 421)
+            ! WRITE (UWATBAL, 422)
+            ! WRITE (UWATBAL, 423)
+            ! WRITE (UWATBAL, 424)
+            ! WRITE (UWATBAL, 425)
+            ! WRITE (UWATBAL, 426)
+            ! WRITE (UWATBAL, 427)
+            ! WRITE (UWATBAL, 428)
+            ! WRITE (UWATBAL, 429)
+            ! WRITE (UWATBAL, 430)
+            ! WRITE (UWATBAL, 432)
+            ! WRITE (UWATBAL, 990) '  '
             WRITE (UWATBAL, 431)
     
             ! Daily water balance output file.
-            WRITE (UWATDAY, 991) 'Program:                  ', VTITLE
-            WRITE (UWATDAY, 992) 'Water balance parameters: ', WTITLE
-            WRITE (UWATDAY, 990) '  '
-            WRITE (UWATDAY, 441)
-            WRITE (UWATDAY, 442)
-            WRITE (UWATDAY, 443)
-            WRITE (UWATDAY, 444)
-            WRITE (UWATDAY, 445)
-            WRITE (UWATDAY, 446)
-            WRITE (UWATDAY, 447)
-            WRITE (UWATDAY, 448)
-            WRITE (UWATDAY, 449)
-            WRITE (UWATDAY, 450)
-            WRITE (UWATDAY, 451)
-            WRITE (UWATDAY, 452)
-            WRITE (UWATDAY, 453)
-            WRITE (UWATDAY, 454)
-            WRITE (UWATDAY, 455)
-            WRITE (UWATDAY, 456)
-            WRITE (UWATDAY, 990) '  '
+            ! WRITE (UWATDAY, 991) 'Program:                  ', VTITLE
+            ! WRITE (UWATDAY, 992) 'Water balance parameters: ', WTITLE
+            ! WRITE (UWATDAY, 990) '  '
+            ! WRITE (UWATDAY, 441)
+            ! WRITE (UWATDAY, 442)
+            ! WRITE (UWATDAY, 443)
+            ! WRITE (UWATDAY, 444)
+            ! WRITE (UWATDAY, 445)
+            ! WRITE (UWATDAY, 446)
+            ! WRITE (UWATDAY, 447)
+            ! WRITE (UWATDAY, 448)
+            ! WRITE (UWATDAY, 449)
+            ! WRITE (UWATDAY, 450)
+            ! WRITE (UWATDAY, 451)
+            ! WRITE (UWATDAY, 452)
+            ! WRITE (UWATDAY, 453)
+            ! WRITE (UWATDAY, 454)
+            ! WRITE (UWATDAY, 455)
+            ! WRITE (UWATDAY, 456)
+            ! WRITE (UWATDAY, 990) '  '
             WRITE (UWATDAY, 457)
         END IF        
         IF(ISIMUS.EQ.1)THEN
@@ -558,201 +558,201 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
     ELSE IF (IOFORMAT .EQ. 1) THEN     
         ! Write headings to daily flux file
         IF (IODAILY.GT.0) THEN
-            WRITE (UDAYHDR, 991) 'Program:    ', VTITLE
-            WRITE (UDAYHDR, 991) 'Control:    ', CTITLE
-            WRITE (UDAYHDR, 991) 'Trees:      ', TTITLE
-            WRITE (UDAYHDR, 991) 'Structure:  ', 'Multispecies' ! STITLE
-            WRITE (UDAYHDR, 991) 'Physiology: ', 'Multispecies' !PTITLE
-            WRITE (UDAYHDR, 991) 'Met data:   ', MTITLE
-            IF(IOWATBAL.EQ.1)WRITE (UDAYHDR, 991) 'Water bal.: ', WTITLE
-            WRITE (UDAYHDR, 990) ' '
+            ! WRITE (UDAYHDR, 991) 'Program:    ', VTITLE
+            ! WRITE (UDAYHDR, 991) 'Control:    ', CTITLE
+            ! WRITE (UDAYHDR, 991) 'Trees:      ', TTITLE
+            ! WRITE (UDAYHDR, 991) 'Structure:  ', 'Multispecies' ! STITLE
+            ! WRITE (UDAYHDR, 991) 'Physiology: ', 'Multispecies' !PTITLE
+            ! WRITE (UDAYHDR, 991) 'Met data:   ', MTITLE
+            ! IF(IOWATBAL.EQ.1)WRITE (UDAYHDR, 991) 'Water bal.: ', WTITLE
+            ! WRITE (UDAYHDR, 990) ' '
     
-            IF(NSPECIES.GT.1)THEN
-                WRITE(UDAYHDR, *)'Species codes:'
-                DO I = 1,NSPECIES
-                    WRITE (UDAYHDR, *) I,  " : " // SPECIESNAMES(I)
-                END DO
-                WRITE(UDAYHDR,990) ' '
-            ENDIF
+            ! IF(NSPECIES.GT.1)THEN
+            !     WRITE(UDAYHDR, *)'Species codes:'
+            !     DO I = 1,NSPECIES
+            !         WRITE (UDAYHDR, *) I,  " : " // SPECIESNAMES(I)
+            !     END DO
+            !     WRITE(UDAYHDR,990) ' '
+            ! ENDIF
     
-            WRITE (UDAYHDR,501)
-            WRITE (UDAYHDR,502)
-            WRITE (UDAYHDR,503)
-            WRITE (UDAYHDR,504)
-            WRITE (UDAYHDR,505)
-            WRITE (UDAYHDR,506)
-            WRITE (UDAYHDR,507)
-            WRITE (UDAYHDR,508)
-            WRITE (UDAYHDR,509)
-            WRITE (UDAYHDR,510)
-            WRITE (UDAYHDR,511)
-            WRITE (UDAYHDR,512)
-            WRITE (UDAYHDR,990) ' '
+            ! WRITE (UDAYHDR,501)
+            ! WRITE (UDAYHDR,502)
+            ! WRITE (UDAYHDR,503)
+            ! WRITE (UDAYHDR,504)
+            ! WRITE (UDAYHDR,505)
+            ! WRITE (UDAYHDR,506)
+            ! WRITE (UDAYHDR,507)
+            ! WRITE (UDAYHDR,508)
+            ! WRITE (UDAYHDR,509)
+            ! WRITE (UDAYHDR,510)
+            ! WRITE (UDAYHDR,511)
+            ! WRITE (UDAYHDR,512)
+            ! WRITE (UDAYHDR,990) ' '
             WRITE (UDAYHDR,513)
         END IF
         
         ! Comments to hourly output file (if required).
         IF (IOHRLY.gt.0) THEN
-            WRITE (UHRLYHDR, 991) 'Program:    ', VTITLE
-            WRITE (UHRLYHDR, 991) 'Control:    ', CTITLE
-            WRITE (UHRLYHDR, 991) 'Trees:      ', TTITLE
-            WRITE (UHRLYHDR, 991) 'Structure:  ', 'Multispecies' !STITLE
-            WRITE (UHRLYHDR, 991) 'Physiology: ', 'Multispecies' !PTITLE
-            WRITE (UHRLYHDR, 991) 'Met data:   ', MTITLE
-            IF(IOWATBAL.EQ.1)WRITE (UHRLYHDR, 991) 'Water bal.: ', WTITLE
-            WRITE (UHRLYHDR, 990) ' '
-            IF(NSPECIES.GT.1)THEN
-                WRITE(UHRLYHDR, *)'Species codes:'
-                DO I = 1,NSPECIES
-                    WRITE (UHRLYHDR, *) I,  " : " // SPECIESNAMES(I)
-                END DO
-                WRITE(UHRLYHDR,990) ' '
-            END IF
-            WRITE (UHRLYHDR,701)
-            WRITE (UHRLYHDR,702)
-            WRITE (UHRLYHDR,703)
-            WRITE (UHRLYHDR,704)
-            WRITE (UHRLYHDR,705)
-            WRITE (UHRLYHDR,706)
-            WRITE (UHRLYHDR,707)
-            WRITE (UHRLYHDR,708)
-            WRITE (UHRLYHDR,709)
-            WRITE (UHRLYHDR,710)
-            WRITE (UHRLYHDR,711)
-            WRITE (UHRLYHDR,712)
-            WRITE (UHRLYHDR,713)
-            WRITE (UHRLYHDR,714)
-            WRITE (UHRLYHDR,715)
-            WRITE (UHRLYHDR,716)
-            !WRITE (UHRLYHDR,717)
-            WRITE (UHRLYHDR,718)
-            WRITE (UHRLYHDR,719)
-            WRITE (UHRLYHDR,720)
-            WRITE (UHRLYHDR,721)
-            WRITE (UHRLYHDR,722)
-            WRITE (UHRLYHDR,724)
-            WRITE (UHRLYHDR, 990) ' '
+            ! WRITE (UHRLYHDR, 991) 'Program:    ', VTITLE
+            ! WRITE (UHRLYHDR, 991) 'Control:    ', CTITLE
+            ! WRITE (UHRLYHDR, 991) 'Trees:      ', TTITLE
+            ! WRITE (UHRLYHDR, 991) 'Structure:  ', 'Multispecies' !STITLE
+            ! WRITE (UHRLYHDR, 991) 'Physiology: ', 'Multispecies' !PTITLE
+            ! WRITE (UHRLYHDR, 991) 'Met data:   ', MTITLE
+            ! IF(IOWATBAL.EQ.1)WRITE (UHRLYHDR, 991) 'Water bal.: ', WTITLE
+            ! WRITE (UHRLYHDR, 990) ' '
+            ! IF(NSPECIES.GT.1)THEN
+            !     WRITE(UHRLYHDR, *)'Species codes:'
+            !     DO I = 1,NSPECIES
+            !         WRITE (UHRLYHDR, *) I,  " : " // SPECIESNAMES(I)
+            !     END DO
+            !     WRITE(UHRLYHDR,990) ' '
+            ! END IF
+            ! WRITE (UHRLYHDR,701)
+            ! WRITE (UHRLYHDR,702)
+            ! WRITE (UHRLYHDR,703)
+            ! WRITE (UHRLYHDR,704)
+            ! WRITE (UHRLYHDR,705)
+            ! WRITE (UHRLYHDR,706)
+            ! WRITE (UHRLYHDR,707)
+            ! WRITE (UHRLYHDR,708)
+            ! WRITE (UHRLYHDR,709)
+            ! WRITE (UHRLYHDR,710)
+            ! WRITE (UHRLYHDR,711)
+            ! WRITE (UHRLYHDR,712)
+            ! WRITE (UHRLYHDR,713)
+            ! WRITE (UHRLYHDR,714)
+            ! WRITE (UHRLYHDR,715)
+            ! WRITE (UHRLYHDR,716)
+            ! !WRITE (UHRLYHDR,717)
+            ! WRITE (UHRLYHDR,718)
+            ! WRITE (UHRLYHDR,719)
+            ! WRITE (UHRLYHDR,720)
+            ! WRITE (UHRLYHDR,721)
+            ! WRITE (UHRLYHDR,722)
+            ! WRITE (UHRLYHDR,724)
+            ! WRITE (UHRLYHDR, 990) ' '
             WRITE (UHRLYHDR,725)
         END IF
     
         ! Comments to respiration output file (if required).    
         IF (IORESP.gt.0) THEN
-            WRITE (URESPHDR, 991) 'Program:    ', VTITLE
-            WRITE (URESPHDR, 991) 'Control:    ', CTITLE
-            WRITE (URESPHDR, 991) 'Trees:      ', TTITLE
-            WRITE (URESPHDR, 991) 'Structure:  ', 'Multispecies'  !STITLE
-            WRITE (URESPHDR, 991) 'Physiology: ', 'Multispecies' !PTITLE
-            WRITE (URESPHDR, 991) 'Met data:   ', MTITLE
-            WRITE (URESPHDR, 990) ' '
-            WRITE (URESPHDR,601)
-            WRITE (URESPHDR,602)
-            WRITE (URESPHDR,603)
-            WRITE (URESPHDR,604)
-            WRITE (URESPHDR,605)
-            WRITE (URESPHDR,606)
-            WRITE (URESPHDR,607)
-            WRITE (URESPHDR,608)
-            WRITE (URESPHDR,609)
-            WRITE (URESPHDR,610)
-            WRITE (URESPHDR,611)
-            WRITE (URESPHDR, 990) ' '
+            ! WRITE (URESPHDR, 991) 'Program:    ', VTITLE
+            ! WRITE (URESPHDR, 991) 'Control:    ', CTITLE
+            ! WRITE (URESPHDR, 991) 'Trees:      ', TTITLE
+            ! WRITE (URESPHDR, 991) 'Structure:  ', 'Multispecies'  !STITLE
+            ! WRITE (URESPHDR, 991) 'Physiology: ', 'Multispecies' !PTITLE
+            ! WRITE (URESPHDR, 991) 'Met data:   ', MTITLE
+            ! WRITE (URESPHDR, 990) ' '
+            ! WRITE (URESPHDR,601)
+            ! WRITE (URESPHDR,602)
+            ! WRITE (URESPHDR,603)
+            ! WRITE (URESPHDR,604)
+            ! WRITE (URESPHDR,605)
+            ! WRITE (URESPHDR,606)
+            ! WRITE (URESPHDR,607)
+            ! WRITE (URESPHDR,608)
+            ! WRITE (URESPHDR,609)
+            ! WRITE (URESPHDR,610)
+            ! WRITE (URESPHDR,611)
+            ! WRITE (URESPHDR, 990) ' '
             WRITE (URESPHDR,612)
     
-            WRITE (URESPHRHDR, 991) 'Program:    ', VTITLE
-            WRITE (URESPHRHDR, 991) 'Control:    ', CTITLE
-            WRITE (URESPHRHDR, 991) 'Trees:      ', TTITLE
-            WRITE (URESPHRHDR, 991) 'Structure:  ', 'Multispecies' !STITLE
-            WRITE (URESPHRHDR, 991) 'Physiology: ', 'Multispecies' !PTITLE
-            WRITE (URESPHRHDR, 991) 'Met data:   ', MTITLE
-            WRITE (URESPHRHDR, 990) ' '
-            WRITE (URESPHRHDR,301)
-            WRITE (URESPHRHDR,302)
-            WRITE (URESPHRHDR,303)
-            WRITE (URESPHRHDR,304)
-            WRITE (URESPHRHDR,305)
-            WRITE (URESPHRHDR,306)
-            WRITE (URESPHRHDR, 990) ' '
+            ! WRITE (URESPHRHDR, 991) 'Program:    ', VTITLE
+            ! WRITE (URESPHRHDR, 991) 'Control:    ', CTITLE
+            ! WRITE (URESPHRHDR, 991) 'Trees:      ', TTITLE
+            ! WRITE (URESPHRHDR, 991) 'Structure:  ', 'Multispecies' !STITLE
+            ! WRITE (URESPHRHDR, 991) 'Physiology: ', 'Multispecies' !PTITLE
+            ! WRITE (URESPHRHDR, 991) 'Met data:   ', MTITLE
+            ! WRITE (URESPHRHDR, 990) ' '
+            ! WRITE (URESPHRHDR,301)
+            ! WRITE (URESPHRHDR,302)
+            ! WRITE (URESPHRHDR,303)
+            ! WRITE (URESPHRHDR,304)
+            ! WRITE (URESPHRHDR,305)
+            ! WRITE (URESPHRHDR,306)
+            ! WRITE (URESPHRHDR, 990) ' '
             WRITE (URESPHRHDR,307)
           END IF
     
         ! Write comments to layer output file (if required)
         IF (IOHRLY.GT.1) THEN
-            WRITE (ULAY, 991) 'Program:    ', VTITLE
-            WRITE (ULAY, 801)
-            WRITE (ULAY, 802)
-            WRITE (ULAY, 803)
-            WRITE (ULAY, 804)
-            WRITE (ULAY, 805)
-            WRITE (ULAY, 806)
-            WRITE (ULAY, 807)
-            write (ulay, 808)
-            write (ulay, 809)
-            write (ulay, 810)
-            !****STH 2015.03.30***
-            write (ulay, *) 
+            ! WRITE (ULAY, 991) 'Program:    ', VTITLE
+            ! WRITE (ULAY, 801)
+            ! WRITE (ULAY, 802)
+            ! WRITE (ULAY, 803)
+            ! WRITE (ULAY, 804)
+            ! WRITE (ULAY, 805)
+            ! WRITE (ULAY, 806)
+            ! WRITE (ULAY, 807)
+            ! write (ulay, 808)
+            ! write (ulay, 809)
+            ! write (ulay, 810)
+            ! !****STH 2015.03.30***
+            ! write (ulay, *) 
             write(ulay,811) (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY), (I, I=1, NOLAY)
             !***end STH
         END IF
     
         ! Write comments to water balance output file (if required). (RAD).
         IF (ISMAESPA) THEN
-            WRITE (UWATBALHDR, 991) 'Program:                  ', VTITLE
-            WRITE (UWATBALHDR, 992) 'Water balance parameters: ', WTITLE
-            WRITE (UWATBALHDR, 990) '  '
-            WRITE (UWATBALHDR, 401)
-            WRITE (UWATBALHDR, 402)
-            WRITE (UWATBALHDR, 403)
-            WRITE (UWATBALHDR, 404)
-            WRITE (UWATBALHDR, 405)
-            WRITE (UWATBALHDR, 406)
-            WRITE (UWATBALHDR, 407)
-            WRITE (UWATBALHDR, 408)
-            WRITE (UWATBALHDR, 409)
-            WRITE (UWATBALHDR, 410)
-            WRITE (UWATBALHDR, 411)
-            WRITE (UWATBALHDR, 412)
-            WRITE (UWATBALHDR, 413)
-            WRITE (UWATBALHDR, 414)
-            WRITE (UWATBALHDR, 415)
-            WRITE (UWATBALHDR, 416)
-            WRITE (UWATBALHDR, 417)
-            WRITE (UWATBALHDR, 418)
-            WRITE (UWATBALHDR, 419)
-            WRITE (UWATBALHDR, 420)
-            WRITE (UWATBALHDR, 421)
-            WRITE (UWATBALHDR, 422)
-            WRITE (UWATBALHDR, 423)
-            WRITE (UWATBALHDR, 424)
-            WRITE (UWATBALHDR, 425)
-            WRITE (UWATBALHDR, 426)
-            WRITE (UWATBALHDR, 427)
-            WRITE (UWATBALHDR, 428)
-            WRITE (UWATBALHDR, 429)
-            WRITE (UWATBALHDR, 430)
-            WRITE (UWATBALHDR, 990) '  '
+            ! WRITE (UWATBALHDR, 991) 'Program:                  ', VTITLE
+            ! WRITE (UWATBALHDR, 992) 'Water balance parameters: ', WTITLE
+            ! WRITE (UWATBALHDR, 990) '  '
+            ! WRITE (UWATBALHDR, 401)
+            ! WRITE (UWATBALHDR, 402)
+            ! WRITE (UWATBALHDR, 403)
+            ! WRITE (UWATBALHDR, 404)
+            ! WRITE (UWATBALHDR, 405)
+            ! WRITE (UWATBALHDR, 406)
+            ! WRITE (UWATBALHDR, 407)
+            ! WRITE (UWATBALHDR, 408)
+            ! WRITE (UWATBALHDR, 409)
+            ! WRITE (UWATBALHDR, 410)
+            ! WRITE (UWATBALHDR, 411)
+            ! WRITE (UWATBALHDR, 412)
+            ! WRITE (UWATBALHDR, 413)
+            ! WRITE (UWATBALHDR, 414)
+            ! WRITE (UWATBALHDR, 415)
+            ! WRITE (UWATBALHDR, 416)
+            ! WRITE (UWATBALHDR, 417)
+            ! WRITE (UWATBALHDR, 418)
+            ! WRITE (UWATBALHDR, 419)
+            ! WRITE (UWATBALHDR, 420)
+            ! WRITE (UWATBALHDR, 421)
+            ! WRITE (UWATBALHDR, 422)
+            ! WRITE (UWATBALHDR, 423)
+            ! WRITE (UWATBALHDR, 424)
+            ! WRITE (UWATBALHDR, 425)
+            ! WRITE (UWATBALHDR, 426)
+            ! WRITE (UWATBALHDR, 427)
+            ! WRITE (UWATBALHDR, 428)
+            ! WRITE (UWATBALHDR, 429)
+            ! WRITE (UWATBALHDR, 430)
+            ! WRITE (UWATBALHDR, 990) '  '
             WRITE (UWATBALHDR, 431)
     
             ! Daily water balance output file.
-            WRITE (UWATDAYHDR, 991) 'Program:                  ', VTITLE
-            WRITE (UWATDAYHDR, 992) 'Water balance parameters: ', WTITLE
-            WRITE (UWATDAYHDR, 990) '  '
-            WRITE (UWATDAYHDR, 441)
-            WRITE (UWATDAYHDR, 442)
-            WRITE (UWATDAYHDR, 443)
-            WRITE (UWATDAYHDR, 444)
-            WRITE (UWATDAYHDR, 445)
-            WRITE (UWATDAYHDR, 446)
-            WRITE (UWATDAYHDR, 447)
-            WRITE (UWATDAYHDR, 448)
-            WRITE (UWATDAYHDR, 449)
-            WRITE (UWATDAYHDR, 450)
-            WRITE (UWATDAYHDR, 451)
-            WRITE (UWATDAYHDR, 452)
-            WRITE (UWATDAYHDR, 453)
-            WRITE (UWATDAYHDR, 454)
-            WRITE (UWATDAYHDR, 455)
-            WRITE (UWATDAYHDR, 456)
-            WRITE (UWATDAYHDR, 990) '  '
+            ! WRITE (UWATDAYHDR, 991) 'Program:                  ', VTITLE
+            ! WRITE (UWATDAYHDR, 992) 'Water balance parameters: ', WTITLE
+            ! WRITE (UWATDAYHDR, 990) '  '
+            ! WRITE (UWATDAYHDR, 441)
+            ! WRITE (UWATDAYHDR, 442)
+            ! WRITE (UWATDAYHDR, 443)
+            ! WRITE (UWATDAYHDR, 444)
+            ! WRITE (UWATDAYHDR, 445)
+            ! WRITE (UWATDAYHDR, 446)
+            ! WRITE (UWATDAYHDR, 447)
+            ! WRITE (UWATDAYHDR, 448)
+            ! WRITE (UWATDAYHDR, 449)
+            ! WRITE (UWATDAYHDR, 450)
+            ! WRITE (UWATDAYHDR, 451)
+            ! WRITE (UWATDAYHDR, 452)
+            ! WRITE (UWATDAYHDR, 453)
+            ! WRITE (UWATDAYHDR, 454)
+            ! WRITE (UWATDAYHDR, 455)
+            ! WRITE (UWATDAYHDR, 456)
+            ! WRITE (UWATDAYHDR, 990) '  '
             WRITE (UWATDAYHDR, 457)
         END IF
     END IF
