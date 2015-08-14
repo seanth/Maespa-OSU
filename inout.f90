@@ -5073,7 +5073,9 @@ SUBROUTINE OUTPUTLAY(UFILE,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY,IHOUR,  &
     REAL PPAR(MAXT,MAXLAY,MAXHRS)
     REAL PPS(MAXT,MAXLAY,MAXHRS)
     REAL PTRANSP(MAXT,MAXLAY,MAXHRS)
-
+    !if (iHour.eq.12)then
+    !    print *, PPAR
+    !end if
     theSpecies=iSpecies(theTree)
     
     IF (IOFORMAT .EQ. 0) THEN

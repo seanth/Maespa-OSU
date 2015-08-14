@@ -803,8 +803,7 @@ PROGRAM maespa
 
                 ! Output information to layer flux file if required
                 !IF (IOHRLY.GT.1) CALL OUTPUTLAY(ULAY,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY,IHOUR,PPAR,PPS,PTRANSP)
-
-                IF (IOHRLY.GT.1) CALL OUTPUTLAY(ULAY,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY+1,IHOUR,PPAR,PPS,PTRANSP, ITREE, iSpecies, ITAR)
+                !IF (IOHRLY.GT.1) CALL OUTPUTLAY(ULAY,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY+1,IHOUR,PPAR,PPS,PTRANSP, ITREE, iSpecies, ITAR)
                    
                 ! If the diffuse transmittances have changed, must set up the EHC
                 IF (NEWTUTD.EQ.1.AND.TOTLAI.GT.0) THEN
@@ -1281,7 +1280,7 @@ PROGRAM maespa
                 FRESPFR(ITAR,IHOUR) = RESP(RMFR,RMFR,TSOIL(IHOUR),TAIR(IHOUR),Q10R,0.0,RTEMPR,1.0,TBELOW) * RBIOM * FRFRAC
                 FRESPCR(ITAR,IHOUR) = RESP(RMCR,RMCR,TSOIL(IHOUR),TAIR(IHOUR),Q10R,0.0,RTEMPR,1.0,TBELOW) * RBIOM * (1. - FRFRAC)
 
-
+                IF (IOHRLY.GT.1) CALL OUTPUTLAY(ULAY,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY+1,IHOUR,PPAR,PPS,PTRANSP, ITREE, iSpecies, ITAR)    
             END DO ! End loop over trees
             
 
