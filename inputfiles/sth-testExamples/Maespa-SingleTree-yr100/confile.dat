@@ -1,0 +1,60 @@
+Vida2Maespa
+
+&flocations
+fout_dir='output_files/SingleTree-yr100-'
+fin_dir='input_files/'
+/
+	
+flags to indicate which input  output files to use.
+&control
+iohrly=2
+iotutd=9       
+ioresp=1      
+iohist=1
+isimus=0
+ipoints=0
+/
+
+&histo
+binsize=25
+/
+
+&species
+nspecies = 1
+speciesnames =  'Pinus ponderosa' 
+phyfiles = 'Pinus_ponderosa_phy.dat' 
+strfiles = 'Pinus_ponderosa_str.dat' 
+/
+
+dates for simulation start and end (must overlap with met file). 
+Date format: DD/MM/YY
+&dates
+startdate = '21/06/14'
+enddate = '21/06/14'
+/
+	
+indicate which target tree(s) to use. 
+&treescon	
+!notrees = 1
+itargets = 1 
+!edgedist= 50.000000
+/							
+
+
+number of angles and layers to integrate over. 
+&diffang					
+nolay = 6
+pplay = 12
+nzen = 5
+naz= 11
+/
+
+choice of submodels. 
+&model
+modelgs = 2
+modelrd = 0
+modeljm = 0
+itermax = 99
+modelss = 0
+/
+

@@ -1,0 +1,23 @@
+Program:    MAESPA                                                                          
+Control:    	                                                                               
+Trees:      !***Plot Details                                                                
+Structure:                                                                      Multispecies
+Physiology:                                                                     Multispecies
+Met data:   Met file for Wind River, Washington, USA                                        
+Water bal.: Tumbarumba example water balance                                                
+                                                                                
+DOY: simulation date
+Tree: tree number
+Spec: tree species number
+absPAR:   absorbed PAR              MJ tree-1 d-1
+absNIR:   absorbed NIR              MJ  tree-1 d-1
+absTherm: absorbed thermal          MJ tree-1 d-1
+totPs: gross photosynthesis         mol tree-1 d-1
+totRf: daily foliar respiration     mol tree-1 d-1
+netPs: photosyn. net of foliar resp   mol tree-1 d-1
+totLE1: daily transpiration         mol H2O tree-1 d-1
+totLE2: daily transpirn (CANOPY calc) mol H2O m-2 d-1
+totH:  daily sensible heat flux     MJ tree-1 d-1
+                                                                                
+Columns: DOY Tree Spec absPAR absNIR absTherm totPs totRf netPs totLE1 totLE2 totH
+      1    1    1    1741.9818     495.4874     291.5670     256.0246      23.2276     232.7970   48245.0117       0.9380     241.2150
