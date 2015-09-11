@@ -13,6 +13,7 @@ ioresp=1
 iohist=1
 isimus=0
 ipoints=0
+ISUNLA=1
 /
 
 &histo

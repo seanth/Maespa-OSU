@@ -39,7 +39,7 @@ SUBROUTINE PSTRANSPIF(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,
                     SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,G0,D0L,GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,   &
                     VPARA,VPARB,VPARC,VFUN,SF,PSIV,ITERMAX,GSC,ALEAF,RD,ET,FHEAT, &
                     TLEAF,GBH,PLANTK,TOTSOILRES,MINLEAFWP,WEIGHTEDSWP,KTOT,HMSHAPE,PSIL,ETEST,CI, &
-                    ISMAESPA)
+                    ISMAESPA, athr)
 !
 ! 'Interface' to PSTRANSP (new subroutine, Feb. 2011). 
 ! Calculates (numericall) the leaf water potential for the Tuzet model; 
@@ -65,6 +65,7 @@ SUBROUTINE PSTRANSPIF(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,
     REAL PSILIN,PLANTK,TOTSOILRES,MINLEAFWP,CI
     REAL TMP,VPARA,VPARB,VPARC,VPDMIN,GK
     LOGICAL ISMAESPA
+    REAL ATHR !STH 2015-0911
 
 
     ! Find leaf water potential that matches Tuzet model (tuzet gs = f(psi), and psi = f(gs)).
@@ -79,13 +80,13 @@ SUBROUTINE PSTRANSPIF(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,
                     WEIGHTEDSWP,HMSHAPE,PSILIN,ETEST, IDAY, IHOUR)  ! modification mathias mars iday ihour
     
     ENDIF
-    
+    !STH including ATHR in what is passed to PSTRANSPIF. 2015-0911
     CALL PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH,VPD,VMFD,PRESS,JMAX25,&
                     IECO,EAVJ,EDVJ,DELSJ,VCMAX25,EAVC,EDVC,DELSC,TVJUP,TVJDN,THETA,AJQ,RD0, &
                     Q10F,K10F,RTEMP,DAYRESP,TBELOW,MODELGS,WSOILMETHOD,EMAXLEAF,SOILMOISTURE,    &
                     SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,G0,D0L,GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,   &
                     VPARA,VPARB,VPARC,VFUN,SF,PSIV,ITERMAX,GSC,ALEAF,RD,ET,FHEAT,TLEAF,GBH,PLANTK,TOTSOILRES,MINLEAFWP,   &
-                    WEIGHTEDSWP,KTOT,HMSHAPE,PSILIN,PSIL,ETEST,CI,ISMAESPA)
+                    WEIGHTEDSWP,KTOT,HMSHAPE,PSILIN,PSIL,ETEST,CI,ISMAESPA,ATHR)
     
 
 END SUBROUTINE PSTRANSPIF
@@ -97,7 +98,7 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
                     SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,G0,D0L,GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,   &
                     VPARA,VPARB,VPARC,VFUN,SF,PSIV,ITERMAX,GSC,ALEAF,RD,ET,FHEAT, &
                     TLEAF,GBH,PLANTK,TOTSOILRES,MINLEAFWP,  &
-                    WEIGHTEDSWP,KTOT,HMSHAPE,PSILIN,PSIL,ETEST,CI,ISMAESPA)
+                    WEIGHTEDSWP,KTOT,HMSHAPE,PSILIN,PSIL,ETEST,CI,ISMAESPA,ATHR)
 ! This subroutine calculates leaf photosynthesis and transpiration.
 ! These may be calculated by
 ! (1) assuming leaf temperature = air temperature, Cs = Ca and Ds = Da
@@ -138,8 +139,8 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
     REAL theEsat, theEair, theConcWaterEvap, theConcWaterAir, theFicksWatts
     REAL theLHWV, thePartialPressureDryAir, thePartialPressureWaterVapour, Rdry, Rvapour, theCalcAirDensity
     REAL GSDIVA
-    !***END STH***
-
+    !***CJS additions
+    REAL t1, t2, ctr, SWdown, alb, LWdown, Ra, tempk, Re, Rn, dR, CPA, H, dH, dLE, Y, Dt, E, LE, ATHR
 
     logical failconv
     LOGICAL ISMAESPA
@@ -162,9 +163,10 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
 
     ! Set initial values of leaf temp and surface CO2 & VPD
     !TLEAF = TAIR !start by assuming temp of leaf is temp of air
-    TLEAF = 25.0
+    TLEAF = TAIR !Original
+    tLeaf = 25.0 !STH Start by assuming temp of leaf is temp of air
     DLEAF = VPD
-    VMLEAF = VMFD
+    VMLEAF = VMFD !Original
     RHLEAF = RH !STH I am not sure why I would assume this!
     RHLEAF = 0.98
     CS = CA
@@ -271,6 +273,29 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
     GBHU = GBHFORCED(TAIR,PRESS,WIND,WLEAF)
     !print *, "GBHU version 1 is: ", GBHU
 
+    !***CJS Code 2015-0818
+    ! Ra = radiation absorbed (W m^-2)
+    !first calculate downwelling shortwave from PAR, as it is not passed in but PAR is
+    SWdown = 1. / FPAR  ! Global SW from fraction of total SW radiation that is PAR, set to 0.5 in Maestcom
+    SWdown = (SWdown / UMOLPERJ)*PAR ! now convert from umol/m2/s to W/m2 using conversion from J to umol quanta
+    print *, "Short wave down: ", SWdown
+             
+    ! not sure where leaf reflectivity in SW (albedo) is, so will specify it here
+    alb = 0.5
+    
+    ! also not sure where downwelling LW but assume it is either 
+    
+    !LWdown = ATHR 
+    
+    ! where DOWNTHAV  is the average downward thermal flux - averaged across trees
+    ! or LWdown = DIFDN 
+    ! where DIFDN: the downwards scattered flux above gridpoint IPT
+    
+    !Ra = SWdown * (1 - alb) + LWdown * EMLEAF 
+    Ra = SWdown * (1 - alb) + ATHR !We think ATHR is long wave down * emleaf STH, CJS
+    print *, "Ra :", Ra
+    !***END CJS Code
+
     !**********************************************************************
     ITER = 0  ! Counter for iterations - finding leaf temperature
     100   CONTINUE  ! Return point for iterations
@@ -306,12 +331,65 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
     ! Otherwise, calculate new TLEAF, DLEAF, RHLEAF & CS
     GBC = GBH/GBHGBC
     CS = CA - ALEAF/GBC
-    TDIFF = (RNET - ET*LHV) / (CPAIR * AIRMA * GH)
-    TLEAF1 = TAIR + TDIFF/4
+
+    !***BEGINS CJS' NEW CODE***
+    !edit out original TDIFF and TLEAF1
+    !TDIFF = (RNET - ET*LHV) / (CPAIR * AIRMA * GH)
+    !TLEAF1 = TAIR + TDIFF/4
+
+    !------------------------------------------------------------
+    ! begin calculation of Tleaf as part of iteration
+    !------------------------------------------------------------
+    !variables required in calcs below - I have tried to find the equivalent constants in Maestcom
+    
+    !start with guessing that t1 = TLEAF = TAIR
+    t1 = TLEAF
+    !initialize t2 to TAIR plus a small offset to prevent escape
+    t2 = TAIR + 0.1 
+    !I think lines 203-204 are a sufficient convergence check so do not need this next line
+    !IF (ABS(t2 - t1).LE.TOL) GOTO 200
+    t1 = (t1 + t2)/2  
+    ! Re = radiation emitted (W m^-2); need to convert to K for S-B calculation
+    tempk = t1 + 273.16
+    !Re = EMLEAF * SIGMA * tempk ** 4   
+    ! Rn = net radiation (Ra - Re); defined here for this calculation
+    !Rn = Ra - Re
+    Rn=RNet
+    ! derivative of radiative dissipation; should be similar to dR = GRADN
+    dR = 4.* EMLEAF * SIGMA * tempk ** 3   
+    ! H = sensible heat transfer to air(W m^-2)
+    ! molar specific heat of air (joules mol^-1 oC^-1)   
+    CPA = 25.9
+    H = CPA * (t1 - TAIR) *2 * GBH   
+    ! dH = derivative of H; GBH should be the same as gb (total conductance to heat); multiply by 2 for 2-sided
+    dH = CPA *2 * GBH   
+    ! gtot should be the same as GV defined above, i.e. gtot = gb .* gsw(n)/(gb + gsw(n))
+    ! E = evaporation rate (mol m^-2 s^-1)
+    !E = GV * (VPD/PATM)    
+    !  LE = latent heat (W m^-2)
+    LE = ET * LHV   
+    !  dle = derivative of LE
+    dLE = GV * LHV * (VPD/PATM)    
+    !  Y = error in energy balance calculation
+    Y = Rn - H - LE        
+    ! t1 = guess for leaf temperature
+    ! Dt = Delta-temperature
+    Dt = Y / (dR + dH + dLE)        
+    !  t2 = new guess for leaf temperature
+    t2 = t1 + Dt    
+    TLEAF1 = t2    
+    !------------------------------------------------------------
+    !  end calculation of Tleaf as part of iteration
+    !------------------------------------------------------------
+
+    !TDIFF = (RNET - ET*LHV) / (CPAIR * AIRMA * GH)
+    !TLEAF1 = TAIR + TDIFF/4
     
     ! on recalcule ET modification mathias avril 2013
     ! Boundary layer conductance for heat - single sided, free convection
-    GBHF = GBHFREE(TAIR,TLEAF,PRESS,WLEAF)
+    !GBHF = GBHFREE(TAIR,TLEAF,PRESS,WLEAF) !original maespa
+    ! note this passed in TLEAF not TLEAF1; changed to pass in TLEAF1 (otherwise just repeats GBHF calculation above)
+    GBHF = GBHFREE(TAIR,TLEAF1,PRESS,WLEAF) !CJS
     ! Total boundary layer conductance for heat
     GBH = GBHU + GBHF
 
@@ -351,7 +429,7 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
 
     200   FHEAT = RNET - LHV*ET
           
-    !      FHEAT = (TLEAF - TAIR)*2.*GBH*CPAIR*AIRMA  !BM 12/05 Not correct - use energy bal instead
+    ! FHEAT = (TLEAF - TAIR)*2.*GBH*CPAIR*AIRMA  !BM 12/05 Not correct - use energy bal instead
     ET = ET*1E6  ! Return ET,EI in umol m-2 s-1
 
     IF(ISMAESPA)THEN
@@ -364,7 +442,6 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
         !IF(MODELGS.EQ.6)THEN
         PSIL = WEIGHTEDSWP - (ETEST/1000)/KTOT
     ENDIF
-    
     RETURN
 END SUBROUTINE PSTRANSP
 
@@ -1318,6 +1395,7 @@ REAL FUNCTION PSILOBJFUN(PSILIN, EXTRAPARS, EXTRAINT)
         REAL ET,RNET,GBC,TDIFF,TLEAF1,FHEAT,ETEST,SF,PSIV,HMSHAPE
         REAL PSILIN,TOTSOILRES,PLANTK,MINLEAFWP,CI,GK
         REAL VPARA,VPARB,VPARC,VPDMIN
+        REAL ATHR !STH 2015-0911
         LOGICAL ISMAESPA
         integer iday,ihour
         REAL EXTRAPARS(EXTRAPARDIM)
@@ -1400,7 +1478,7 @@ REAL FUNCTION PSILOBJFUN(PSILIN, EXTRAPARS, EXTRAINT)
              Q10F,K10F,RTEMP,DAYRESP,TBELOW,MODELGS,WSOILMETHOD,EMAXLEAF,SOILMOISTURE,    &
              SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,G0,D0L,GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,   &
              VPARA,VPARB,VPARC,VFUN,SF,PSIV,ITERMAX,GSC,ALEAF,RD,ET,FHEAT,  &
-             TLEAF,GBH,PLANTK,TOTSOILRES,MINLEAFWP, WEIGHTEDSWP,KTOT,HMSHAPE,PSILIN,PSIL,ETEST,CI,ISMAESPA)
+             TLEAF,GBH,PLANTK,TOTSOILRES,MINLEAFWP, WEIGHTEDSWP,KTOT,HMSHAPE,PSILIN,PSIL,ETEST,CI,ISMAESPA,ATHR)
         
         PSILOBJFUN = PSILIN - PSIL
 

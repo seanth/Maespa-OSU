@@ -43,6 +43,12 @@ PROGRAM maespa
     
     IMPLICIT NONE
     REAL, EXTERNAL :: AVERAGEVAL,CALCRMW,TK,ETCAN,RESP,GRESP
+    REAL tLeafArray(maxLay*72)
+    REAL tCanopyLayerArray(maxhrs,maxLay)
+    integer ii
+    REAL jj
+
+    tLeafArray=-999.99
 
     ! Set program flag
     IPROG = INORMAL
@@ -496,8 +502,6 @@ PROGRAM maespa
                 CALL POINTSNEW(NOLAY,PPLAY,JLEAF,JSHAPE,SHAPE,RX(1),RY(1),RZ(1),ZBC(1),DXT(1),DYT(1),DZT(1),  &
                                 FOLT(1),PROPC,PROPP, &
                                 BPT,NOAGEC,NOAGEP, XL,YL,ZL,VL,DLT,DLI,LGP,FOLLAY)
-            
-                
                 
                 ! Do Maestest calculations (only once - when the loop is at the first tree (ITAR), and on the first day).
                 RANPOINTS = 0
@@ -598,6 +602,7 @@ PROGRAM maespa
         !**********************************************************************!
         !                       Begin hourly loop                              !
         !**********************************************************************!
+        tCanopyLayerArray=-999.9
         DO IHOUR = 1,KHRS
             CALL ZEROFSOIL(FSOIL1,NSUMMED,TOTTMP)
             
@@ -726,6 +731,8 @@ PROGRAM maespa
                 SF = SFSPEC(ISPEC)
                 PSIV = PSIVSPEC(ISPEC)   
                 NSIDES = NSIDESSPEC(ISPEC)
+
+
     
                 ! Assign water balance and hydraulics.
                 MINLEAFWP = MINLEAFWPSPEC(ISPEC)
@@ -781,8 +788,8 @@ PROGRAM maespa
                 ! found in radn.f90
                 CALL POINTSNEW(NOLAY,PPLAY,JLEAF,JSHAPE,SHAPE,RX(1),RY(1),RZ(1),ZBC(1),DXT(1),DYT(1), &
                                 DZT(1),FOLT(1),PROPC,PROPP,BPT,NOAGECT(1),NOAGEP,XL,YL,ZL,VL,DLT,DLI, &
-                                LGP,FOLLAY)        
-                
+                                LGP,FOLLAY)    
+                 
                 ! Following functions need FOLLAY. 
                 ! GETWIND - calculates wind speed through the canopy using exponential formula
                 ! found in getmet.f90
@@ -800,10 +807,6 @@ PROGRAM maespa
                 
                 ! Calculate stem respiration rate per unit biomas
                 RMW = CALCRMW(MODELRW,COLLA,COLLK,STEMSDW,DIAM(1),RZ(1)+ZBC(1),STEMFORM,RMWAREA,WBIOM,RMW)
-
-                ! Output information to layer flux file if required
-                !IF (IOHRLY.GT.1) CALL OUTPUTLAY(ULAY,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY,IHOUR,PPAR,PPS,PTRANSP)
-                !IF (IOHRLY.GT.1) CALL OUTPUTLAY(ULAY,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY+1,IHOUR,PPAR,PPS,PTRANSP, ITREE, iSpecies, ITAR)
                    
                 ! If the diffuse transmittances have changed, must set up the EHC
                 IF (NEWTUTD.EQ.1.AND.TOTLAI.GT.0) THEN
@@ -879,7 +882,7 @@ PROGRAM maespa
                                         SUNLA,BEXTUS,BEXTANGTUS,BEXTANGUS)  ! BEXTUS not used...
                 
                             ! Output transmittances (Note IWAVE=1 only).
-                            print *, RADABV(IHOUR,1)
+                            !print *, RADABV(IHOUR,1)
                             PAR = RADABV(IHOUR,1)
                
                             TDIFF = (1-FBEAM(IHOUR,1))*PAR*TDUS(IPTUS)
@@ -1017,7 +1020,7 @@ PROGRAM maespa
 
                         WRITE (UPOINTSO,501) IDAY,IHOUR,IPTEST,XLP(IPTEST),YLP(IPTEST),ZLP(IPTEST), &
                             PAR,FBEAM(IHOUR,1),SUNLAP,TDP(IPTEST),TSCAT,TTOT,APARSUN,APARSH,APARMEAN
-501                         FORMAT(3(I5,1X),12(F12.5,1X))
+                        501 FORMAT(3(I5,1X),12(F12.5,1X))
                             
                         ENDDO  
                     ENDIF  !MAESTEST          
@@ -1070,13 +1073,6 @@ PROGRAM maespa
                             DO ISUNLIT = 1,2 ! Loop over sunlit & shaded leaves
 
                                 IF (ISUNLIT.EQ.1) THEN
-                                    !print *, "I am here"
-                                    !print *,IPT
-                                    !print *,BFLUX(IPT,1)
-                                    !print *,BEXT
-                                    !print *,DFLUX(IPT,1)
-                                    !print *, UMOLPERJ
-                                    !rint *, SUNLA
                                     APAR = (BFLUX(IPT,1)*BEXT + DFLUX(IPT,1))*UMOLPERJ
                                     ANIR = BFLUX(IPT,2)*BEXT + DFLUX(IPT,2)
                                     FAREA = SUNLA
@@ -1088,11 +1084,10 @@ PROGRAM maespa
                                 ATHR = DFLUX(IPT,3)
                                 RNET = APAR/UMOLPERJ + ANIR + ATHR
 
-
+                                !This get's called 2 times in my vida tests. Why? Look up age classes in maespa
                                 DO IAGE = 1,NOAGEP ! Loop over age classes
                                     AREA = FAREA * DLI(IAGE,IPT) * VL(IPT) ! m2
                                     IF (IOHIST.EQ.1) CALL CATEGO(AREA,APAR,HISTO,BINSIZE,ITAR)
-                                    
                                     ! Call physiology routine
                                     CALL PSTRANSPIF(iday,ihour,RELDF(IPT),TU(IPT),TD(IPT),RNET,WINDAH(IHOUR)*WINDLAY(LGP(IPT)),APAR,         &
                                                     TAIR(IHOUR),TMOVE,CA(IHOUR),RH(IHOUR),VPD(IHOUR),VMFD(IHOUR),PRESS(IHOUR),  &
@@ -1101,9 +1096,10 @@ PROGRAM maespa
                                                     K10F,RTEMP,DAYRESP,TBELOW,MODELGS,WSOILMETHOD,EMAXLEAF,SOILMOISTURE,        &
                                                     SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,G0,D0L,GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,VPARA,VPARB,VPARC,VFUN, &
                                                     SF,PSIV,ITERMAX,GSC,ALEAF,RD,ET,HFX,TLEAF,GBH,PLANTK,TOTSOILRES,MINLEAFWP,WEIGHTEDSWP,KTOT,                    &
-                                                    HMSHAPE,PSIL,ETEST,CI,ISMAESPA)                                    
+                                                    HMSHAPE,PSIL,ETEST,CI,ISMAESPA, athr)
+                                                                   
                                     
-892     FORMAT (1(I10),6(F10.5,1X))
+!892     FORMAT (1(I10),6(F10.5,1X))
                                     ! Sum (or average) outputs for the hour
                                     CALL SUMHR(APAR/UMOLPERJ,ANIR,ATHR,ALEAF,RD,GSC,GBH,ET,HFX,TLEAF,FSOIL,PSIL,CI,AREA,IHOUR,LGP(IPT),ITAR,&
                                                 NOTARGETS,NUMPNT,NSUMMED,TOTTMP,PPAR,PPS,PTRANSP,THRAB,FCO2,FRESPF,GSCAN,GBHCAN,FH2O,  &
@@ -1132,7 +1128,7 @@ PROGRAM maespa
                                                 SOILMOISTURE,SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,G0,D0L,    &
                                                 GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,VPARA,VPARB,VPARC,VFUN,SF,PSIV,            &
                                                 ITERMAX,GSC,ALEAF,RD,ET,HFX,TLEAF,                              &
-                                                GBH,PLANTK,TOTSOILRES,MINLEAFWP,WEIGHTEDSWP,KTOT,HMSHAPE,PSIL,ETEST,CI,ISMAESPA)                                        
+                                                GBH,PLANTK,TOTSOILRES,MINLEAFWP,WEIGHTEDSWP,KTOT,HMSHAPE,PSIL,ETEST,CI,ISMAESPA, athr)                                        
 
                                 ! Sum outputs for the hour
                                 CALL SUMHR(APAR/UMOLPERJ,ANIR,ATHR,ALEAF,RD,GSC,GBH,ET,HFX,TLEAF,FSOIL,PSIL,CI,AREA,IHOUR,LGP(IPT),ITAR,&
@@ -1158,7 +1154,6 @@ PROGRAM maespa
 
                                 ATHR = DFLUX(IPT,3)
                                 RNET = APAR/UMOLPERJ + ANIR + ATHR
-
                                 DO IAGE = 1,NOAGEP ! Loop over age classes
                                     AREA = FAREA * DLI(IAGE,IPT) * VL(IPT) ! m2
                                     IF (IOHIST.EQ.1) CALL CATEGO(AREA,APAR,HISTO,BINSIZE,ITAR)
@@ -1173,7 +1168,7 @@ PROGRAM maespa
                                                         WSOILMETHOD,EMAXLEAF,SOILMOISTURE,SMD1,SMD2,WC1,WC2,            &
                                                         SOILDATA,SWPEXP,FSOIL,G0,D0L,GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,VPARA,VPARB,VPARC,VFUN,SF,PSIV,     &
                                                         ITERMAX,GSC,ALEAF,RD,ET,HFX,TLEAF,GBH,PLANTK,TOTSOILRES,MINLEAFWP,WEIGHTEDSWP,KTOT,   &
-                                                        HMSHAPE,PSIL,ETEST,CI,ISMAESPA)
+                                                        HMSHAPE,PSIL,ETEST,CI,ISMAESPA, athr)
                                     
                                         ! Sum outputs for the hour
                                         CALL SUMHR(APAR/UMOLPERJ,ANIR,ATHR,ALEAF,RD,GSC,GBH,ET,HFX,TLEAF,FSOIL,PSIL,CI,AREA,IHOUR,  &
@@ -1184,20 +1179,45 @@ PROGRAM maespa
                             END DO ! End loop over sunlit / shaded leaves
                         END IF ! Separating sunlit & shaded foliage, or not
 
-                         ! Write sunlit leaf area to file.
-                         IF(ISUNLA.EQ.1)THEN
-                             AREA = DLT(IPT) * VL(IPT)  ! LEAF AREA FOR THIS GRIDPOINT               ! Modification Mathias 27/11/2012
-                             WRITE(USUNLA, 112) IDAY, IHOUR, ITREE, IPT, SUNLA, &
-                                  AREA, BEXT, &
-                                  FBEAM(IHOUR,1), ZEN,ABSRP(LGP(IPT),1),ABSRP(LGP(IPT),2),ABSRP(LGP(IPT),3), &
-                                  BFLUX(IPT,1), DFLUX(IPT,1), BFLUX(IPT,2),DFLUX(IPT,2),DFLUX(IPT,3), &
-                                  SCLOST(IPT,1),SCLOST(IPT,2),SCLOST(IPT,3),DOWNTH(IPT),RADABV(IHOUR,1),RADABV(IHOUR,2),RADABV(IHOUR,3)
-                                    
-                         ENDIF
-112      FORMAT(4(1X,I4), 7(1X,F12.3), 13(1X,F12.3))
-                    
+                        ! Write sunlit leaf area to file.
+                        IF(ISUNLA.EQ.1)THEN
+                            AREA = DLT(IPT) * VL(IPT)  ! LEAF AREA FOR THIS GRIDPOINT                   ! Modification Mathias 27/11/2012
+                            !This should probably be moved to inout.f90 STH 2015-0910
+                            WRITE(USUNLA, 112) &
+                            IDAY, IHOUR, ITREE, IPT, xL(iPT), yL(iPT), zL(iPT), tLeaf, &    !point XYZ included: STH 2015-0910
+                            SUNLA, AREA, BEXT, FBEAM(IHOUR,1), ZEN(iHour), &                            !ZEN by iHour: STH 2015-0910
+                            ABSRP(LGP(IPT),1),ABSRP(LGP(IPT),2), ABSRP(LGP(IPT),3), &
+                            BFLUX(IPT,1), DFLUX(IPT,1), BFLUX(IPT,2),DFLUX(IPT,2),DFLUX(IPT,3), &
+                            SCLOST(IPT,1),SCLOST(IPT,2),SCLOST(IPT,3), &
+                            DOWNTH(IPT),RADABV(IHOUR,1),RADABV(IHOUR,2),RADABV(IHOUR,3)
+                        ENDIF
+                        112      FORMAT(4(1X,I4), 4(1x,F12.3),7(1X,F12.3), 13(1X,F12.3))               !Expanded format to 
+                        tLeafArray(iPT)=tLeaf
+
+                        !This is pretty cludgy. Now that I have this working, I think the better way
+                        !to do this would be to rewrite the routine placing points in the canopy
+                        !so that all points for a layer are placed in sequence instead of the
+                        !current method where points in a line and done, and then there is a jump
+                        !to the next layer. If you have 6 layers and 12 points per layer, 4 lines per
+                        !layer, the points corresponding to the bottom-most layer are 
+                        ![1:3], [19:21], [37:39], [55:57]. That's not straight forward to parse out.
+                        !STH 2015-0911
+                        ii=1
+                        do i=1,(NUMPNT/4),(pplay/4)         !1 to 72/4=18, stepping every 12/4=3
+                            do j=i,pplay*nolay,(NUMPNT/4)   !12*6=72, stepping every 72/4=18
+                                do k=0,(pplay/4)-1
+                                    if (tCanopyLayerArray(ihour,ii).eq.-999.9)then
+                                        tCanopyLayerArray(ihour,ii)=0.0
+                                    endif
+                                    tCanopyLayerArray(ihour,ii)=tCanopyLayerArray(ihour,ii)+tLeafArray(j+k)
+                                enddo
+                            enddo
+                            tCanopyLayerArray(ihour,ii)=tCanopyLayerArray(ihour,ii)/pplay
+                            ii=ii+1
+                        enddo
                     END DO ! End loop over grid points
-                    
+
+
                     ! Calculate transpiration by applying Penman-Monteith to canopy
                     FH2OCAN(ITAR,IHOUR) = ETCAN(WINDAH(IHOUR),ZHT,Z0HT,ZPD,PRESS(IHOUR),TAIR(IHOUR),    &
                                             THRAB(ITAR,IHOUR,1)+THRAB(ITAR,IHOUR,2)+THRAB(ITAR,IHOUR,3),&
@@ -1271,6 +1291,10 @@ PROGRAM maespa
                     END DO
                     
                 END IF ! If day or night
+
+                ! Output information to layer flux file if required
+                !Moved the location of this output to fix a bug in writing PAR, PPS, and PTransp on first tree 
+                IF (IOHRLY.GT.1) CALL OUTPUTLAY(ULAY,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY+1,IHOUR,PPAR,PPS,PTRANSP, ITREE, iSpecies, ITAR, tCanopyLayerArray)
                     
                
                 ! No good (does not run for Tumbarumba, and has not been updated since looping order change).
@@ -1280,7 +1304,7 @@ PROGRAM maespa
                 FRESPFR(ITAR,IHOUR) = RESP(RMFR,RMFR,TSOIL(IHOUR),TAIR(IHOUR),Q10R,0.0,RTEMPR,1.0,TBELOW) * RBIOM * FRFRAC
                 FRESPCR(ITAR,IHOUR) = RESP(RMCR,RMCR,TSOIL(IHOUR),TAIR(IHOUR),Q10R,0.0,RTEMPR,1.0,TBELOW) * RBIOM * (1. - FRFRAC)
 
-                IF (IOHRLY.GT.1) CALL OUTPUTLAY(ULAY,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY+1,IHOUR,PPAR,PPS,PTRANSP, ITREE, iSpecies, ITAR)    
+
             END DO ! End loop over trees
             
 
@@ -1386,11 +1410,6 @@ PROGRAM maespa
             ENDIF
 
             ! Output hourly totals
-            !print *, ispecies
-            !print *, PPAR(1,1,12)
-            !print *,"end"
-            !print *, PPAR(1,1,24)
-            !print *, PPAR(1,1,48)
             CALL OUTPUTHR(IDAY+1,IHOUR,NOTARGETS,ITARGETS,ISPECIES,TCAN,NOLAY,PPAR, &
                                 PPS,PTRANSP,FOLLAY,THRAB,FCO2,FRESPF,FRESPW,FRESPB,FH2O,GSCAN,GBHCAN, &
                                 FH2OCAN,FHEAT,VPD,TAIR,UMOLPERJ*RADABV(1:KHRS,1),PSILCAN,PSILCANMIN,CICAN,  &

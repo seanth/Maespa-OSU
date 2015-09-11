@@ -273,7 +273,7 @@ SUBROUTINE open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,&
     
     ! Write to sunla flux     !!!!!
       IF(ISUNLA.EQ.1)THEN               ! Mathias 27/11/12
-        CALL open_file(trim(out_path)//'sunla.dat', USUNLA, 'write', 'asc', 'replace')
+        CALL open_file(trim(out_path)//'Canopy_points_out.dat', USUNLA, 'write', 'asc', 'replace')
       ENDIF
 
       
@@ -312,28 +312,28 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
             WRITE (USUNLA,461)    ! MAthias 27/11/12
         END IF
 
-        !WRITE (UMETOUT, 991) 'Program:    ', VTITLE
-        !WRITE (UMETOUT, 991) 'Met data:   ', MTITLE
-        !write (UMETOUT, 701)
-        !write (UMETOUT, 704)
-        !write (UMETOUT, 101)
-        !write (UMETOUT, 102)
-        !write (UMETOUT, 103)
-        !write (UMETOUT, 104)
-        !!write (UMETOUT, 105)
-        !write (UMETOUT, 106)
-        !write (UMETOUT, 107)
-        !write (UMETOUT, 108)
-        !write (UMETOUT, 109)
-        !write (UMETOUT, 110)
-        !write (UMETOUT, 111)
-        !write (UMETOUT, 112)
-        !write (UMETOUT, 113)
-        !write (UMETOUT, 114)
-        !!write (UMETOUT, 115)
-        !write (UMETOUT, 116)
-        !write (UMETOUT, 117)
-        !write (UMETOUT, 118)
+        ! WRITE (UMETOUT, 991) 'Program:    ', VTITLE
+        ! WRITE (UMETOUT, 991) 'Met data:   ', MTITLE
+        ! write (UMETOUT, 701)
+        ! write (UMETOUT, 704)
+        ! write (UMETOUT, 101)
+        ! write (UMETOUT, 102)
+        ! write (UMETOUT, 103)
+        ! write (UMETOUT, 104)
+        ! !write (UMETOUT, 105)
+        ! write (UMETOUT, 106)
+        ! write (UMETOUT, 107)
+        ! write (UMETOUT, 108)
+        ! write (UMETOUT, 109)
+        ! write (UMETOUT, 110)
+        ! write (UMETOUT, 111)
+        ! write (UMETOUT, 112)
+        ! write (UMETOUT, 113)
+        ! write (UMETOUT, 114)
+        ! !write (UMETOUT, 115)
+        ! write (UMETOUT, 116)
+        ! write (UMETOUT, 117)
+        ! write (UMETOUT, 118)
         write (UMETOUT, 125)
 
 
@@ -778,7 +778,8 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
     125 format('Columns: DOY HOUR WIND TAIR TSOIL RH VPD VMFD CA PAR RAD FBEAM PRESS TDEW SW PPT TMIN TMAX')
 
 
-    461   format('DOY   Hour    Tree    IPT    SUNLA   AREA    BEXT    FBEAM   ZEN  ABSRPPAR  ABSRPNIR ABSRPTH BFPAR DFPAR BFNIR DFNIR DFTHR SCLOSTPAR SCLOSTNIR SCLOSTTH DOWNTH PARABV NIRABV THRABV')   ! Modification Mathias 27/11/12
+    461 format('Columns: DOY Hour Tree Canopy_Point# Canopy_Point_X Canopy_Point_Y Canopy_Point_Z Canopy_Point_Temp(°C) SUNLA Area BEXT FBeam Zenithal_angle ABSRP_PAR ABSRP_NIR ABSRP_TH &
+    BFPAR DFPAR BFNIR DFNIR DFTHR SCLOSTPAR SCLOSTNIR SCLOSTTH DOWNTH PAR_Above NIR_Above THR_Above') ! Modification Mathias 27/11/12. Canopy XYZ STH 2015-0910
 
     990 FORMAT (A80)
     991 FORMAT (A12,A80) ! For writing comments to output files.
@@ -826,7 +827,7 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
     724 FORMAT('PAR: Above-canopy incident PAR (umol m-2 s-1)')
     726 FORMAT('ZEN: Zenithal angle (rad)')                      ! mathias mars 2013
     727 FORMAT('AZ: Asimutal angle (rad)')
-    728 FORMAT('RAD: Above-canopy incident RAD (W m-2') !STH 2015-0502
+    728 FORMAT('RAD: Above-canopy incident RAD (W m-2)') !STH 2015-0502
     725 FORMAT('Columns: DOY Tree Spec HOUR hrPAR hrNIR hrTHM', &
                ' hrPs hrRf hrRmW hrLE', &
                ' LECAN Gscan Gbhcan hrH TCAN ALMAX PSIL PSILMIN CI TAIR VPD PAR ZEN AZ RAD')   !10E-3*ECANMAX(ITAR,IHOUR),
@@ -842,7 +843,7 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
     809 FORMAT('       photosynthesis net of Rleaf  for a given layer(L)(umol m-2 leaf s-1)')
     810 FORMAT('       transpiration for a given layer(L) (umol m-2 leaf s-1)')
     811 format (2x,('Day',1x), ('Hour',1x), ('TreeIndex#',1x), ('SpeciesID#',1x), 6('L',I1,'Area',1x), 6('L',I1,'JMAX',1x), &
-                6('L',I1,'VCMAX',1x), 6('L',I1,'PAR',1x), 6('L',I1,'PNetRleaf',1x), 6('L',I1,'Transpiration',1x))
+                6('L',I1,'VCMAX',1x), 6('L',I1,'PAR',1x), 6('L',I1,'PNetRleaf',1x), 6('L',I1,'Transpiration',1x), 6('L',I1,'Temperature',1x))
 
     601 FORMAT('Daily maintenance and growth respiration components')
     602 FORMAT('Rmf: Foliage maintenance resp.    mol m-2 d-1')
@@ -5059,7 +5060,7 @@ END SUBROUTINE LADCHOOSE
 
 !**********************************************************************
 SUBROUTINE OUTPUTLAY(UFILE,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY,IHOUR,  &
-                        PPAR, PPS,PTRANSP, theTree, iSpecies, theTarget)
+                        PPAR, PPS,PTRANSP, theTree, iSpecies, theTarget, tCanopyLayerArray)
 ! Daily output to layer flux file.
 !**********************************************************************
     
@@ -5073,9 +5074,8 @@ SUBROUTINE OUTPUTLAY(UFILE,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY,IHOUR,  &
     REAL PPAR(MAXT,MAXLAY,MAXHRS)
     REAL PPS(MAXT,MAXLAY,MAXHRS)
     REAL PTRANSP(MAXT,MAXLAY,MAXHRS)
-    !if (iHour.eq.12)then
-    !    print *, PPAR
-    !end if
+    REAL tCanopyLayerArray(MAXHRS,maxlay)
+
     theSpecies=iSpecies(theTree)
     
     IF (IOFORMAT .EQ. 0) THEN
@@ -5084,8 +5084,8 @@ SUBROUTINE OUTPUTLAY(UFILE,FOLLAY,JMAX25,VCMAX25,NOLAY,IDAY,IHOUR,  &
         !                 (PTRANSP(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
         write(ufile,511) IDAY, IHOUR, theTree, theSpecies, (FOLLAY(I),I=1,NOLAY), (JMAX25(I,1),I=1,NOLAY), (VCMAX25(I,1),I=1,NOLAY),      &
                          (PPAR(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY), (PPS(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY),                         &
-                         (PTRANSP(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY)
-        511 format((I5,1x),(I5,1x), (I5,1x), (I5,1x), 6(f10.5,1x), 6(f10.5,1x), 6(f10.5,1x), 6(F10.2,1X), 6(F10.2,1X), 6(F10.2,1X))
+                         (PTRANSP(1,I,IHOUR)/FOLLAY(I),I=1,NOLAY), (tCanopyLayerArray(iHour,I),I=1,NOLAY)
+        511 format((I5,1x),(I5,1x), (I5,1x), (I5,1x), 6(f10.5,1x), 6(f10.5,1x), 6(f10.5,1x), 6(F10.2,1X), 6(F10.2,1X), 6(F10.2,1X), 6(F10.2,1X))
         !***Moved by STH 2015.03.27***
         !IF (IOHRLY.GE.2) THEN
         !WRITE (UFILE,610) 'DAY',IDAY,'HOUR',IHOUR
