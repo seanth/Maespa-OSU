@@ -47,6 +47,10 @@ PROGRAM maespa
     REAL tCanopyLayerArray(maxhrs,maxLay)
     integer ii
     REAL jj
+    REAL tDiffTwo, tLeafTwo
+
+    tLeafTwo=0.0
+
 
     tLeafArray=-999.99
 
@@ -84,15 +88,21 @@ PROGRAM maespa
     VTITLE = VTITLE(1:LEN_TRIM(VTITLE))
    
     ! Get input from control file
-    print *, "***Importing the control file settings****"
+    if (verbose.ge.1)print *, "***Importing the control file settings****"
     CALL INPUTCON(ISTART, IEND, NSTEP,NUMPNT, NOLAY, PPLAY, NZEN, DIFZEN, NAZ,      &
-                    MODELGS, MODELJM, MODELRD, MODELSS, MODELRW, ITERMAX, IOHIST,   &
+                    MODELGS, MODELJM, MODELRD, MODELSS, MODELRW, ITERMAX, tLeafCalc, IOHIST,   &
                     BINSIZE,ICC, CO2INC, TINC,IOTC, TOTC, WINDOTC, PAROTC,          &
                     FBEAMOTC, IWATFILE, NSPECIES, SPECIESNAMES,   &
                     PHYFILES, STRFILES )
+    if(verbose.ge.1)then
+        if(tLeafCalc.eq.0)print *,"     Using Maestra heat balance method"
+        if(tLeafCalc.eq.1)print *,"     Using Maespa heat balance method"
+        if(tLeafCalc.eq.2)print *,"     Using Maespa w/o 'divide by 4' heat balance method"
+        if(tLeafCalc.eq.3)print *,"     Using Paw U/Berry inspired heat balance method"
+    endif
     
     ! Get input from canopy structure file
-    print *, "***Importing data from canopy structure file(s)****"
+    if (verbose.ge.1)print *, "***Importing data from canopy structure file(s)****"
     CALL INPUTSTR(NSPECIES,STRFILES,JLEAFSPEC,BPTTABLESPEC,RANDOMSPEC,NOAGECSPEC,    &
                     JSHAPESPEC,SHAPESPEC,EXTWINDSPEC,NALPHASPEC,ALPHASPEC,      &
                     FALPHATABLESPEC,COEFFTSPEC,EXPONTSPEC,WINTERCSPEC,BCOEFFTSPEC,   &
@@ -100,7 +110,7 @@ PROGRAM maespa
                     FRFRACSPEC,in_path,DATESLIA,NOLIADATES,DATESLAD,NOLADDATES)
     
     ! Get input from physiology file
-    print *, "***Importing data from physiology file(s)****"
+    if (verbose.ge.1)print *, "***Importing data from physiology file(s)****"
     CALL INPUTPHY(NSPECIES,PHYFILES,MODELJM,MODELRD,MODELGS,MODELRW,NOLAY,NOAGECSPEC,           &
                     NOAGEPSPEC,PROPCSPEC,PROPPSPEC,ABSRPSPEC,ARHOSPEC,ATAUSPEC,RHOSOLSPEC,      &
                     JMAXTABLESPEC,DATESJSPEC,NOJDATESSPEC,IECOSPEC,EAVJSPEC,EDVJSPEC,           &
@@ -123,7 +133,7 @@ PROGRAM maespa
     ENDIF
     
     ! Get input from trees file
-    print *, "***Importing data from tree file(s)****"
+    if (verbose.ge.1)print *, "***Importing data from tree file(s)****"
     CALL INPUTTREE(XSLOPE,YSLOPE,BEAR,X0,Y0,XMAX,YMAX,PLOTAREA,STOCKING,ZHT,Z0HT,ZPD, &
                     NOALLTREES,NOTREES,NOTARGETS,ITARGETS,SHADEHT,NOXDATES, &
                     NOYDATES,NOZDATES,NOTDATES,NOLADATES,NODDATES,DATESX,   &
@@ -134,7 +144,7 @@ PROGRAM maespa
     
     ! Get input from the water balance file
     IF(ISMAESPA)THEN
-        print *, "***Importing settings from water balance file****"        
+        if (verbose.ge.1)print *, "***Importing settings from water balance file****"        
         CALL INPUTWATBAL(BPAR, PSIE, KSAT, ROOTRESIST, ROOTRESFRAC, ROOTRADTABLE, ROOTDENSTABLE,ROOTMASSTOTTABLE,              &
                         MINROOTWP,MINLEAFWPSPEC,PLANTKTABLE,KSCALING,THROUGHFALL,REASSIGNRAIN,RUTTERB,RUTTERD, MAXSTORAGE, &
                         DRAINLIMIT,ROOTXSECAREA,EQUALUPTAKE,NLAYER, NROOTLAYER, LAYTHICK, INITWATER,    & 
@@ -148,13 +158,13 @@ PROGRAM maespa
                 
     
     ! Open met data file (must be done after ISTART & IEND read)
-    print *, "***Opening meterological data file****"  
+    if (verbose.ge.1)print *, "***Opening meterological data file****"  
     CALL OPENMETF(ISTART,IEND,CAK,PRESSK,SWMIN,SWMAX,USEMEASET,DIFSKY,ALAT,TTIMD,DELTAT,&
                     MFLAG,METCOLS,NOMETCOLS,MTITLE,MSTART,in_path)
     
     ! Open output files
     !CALL open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,STITLE,MTITLE,VTITLE,WTITLE,NSPECIES,SPECIESNAMES,out_path,ISMAESPA)
-    print *, "***Generating blank output files****"  
+    if (verbose.ge.1)print *, "***Generating blank output files****" 
     CALL open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,STITLE,MTITLE,VTITLE,WTITLE,NSPECIES,SPECIESNAMES,out_path,ISMAESPA,NOLAY) !STH 2015.03.30
     
     
@@ -171,7 +181,7 @@ PROGRAM maespa
     ! Read MAESTEST input file.
     ! Open files and read information about points
     IF(IPOINTS .EQ. 1)THEN
-      print *, "***Importing settings from points file****" 
+      if (verbose.ge.1)print *, "***Importing settings from points file****" 
       CALL GETPOINTSF(NUMTESTPNT,XLP,YLP,ZLP,X0,Y0,XMAX,YMAX, &
          CTITLE,TTITLE,MTITLE,STITLE,VTITLE)
     ENDIF
@@ -225,7 +235,7 @@ PROGRAM maespa
         CALL ZEROSTART(HISTO,CANOPYDIMS)
 
         ! Calculate zenith angle of sun
-        print *, "***Calculating sun zenith angle****"
+        if (verbose.ge.1)print *, "  ***Calculating sun zenith angle****"
         ! SUN - calculates the daylength
         ! found in radn.f90
         CALL SUN(IDAY+ISTART,ALAT,TTIMD,DEC,EQNTIM,DAYL,SUNSET)
@@ -252,7 +262,7 @@ PROGRAM maespa
            ZEN = ZEN0
            AZ = AZ0
         ENDIF
-        print *, "***Importing meteorological data****"
+        if (verbose.ge.1)print *, "  ***Importing meteorological data****"
         ! Get meteorological data
         CALL GETMET(IDAY+ISTART,MFLAG,ZEN,METCOLS,NOMETCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,  &
                     ALAT,DEC,DAYL,WINDAH,TSOIL,TAIR,RADABV,FBEAM,RH,VPD,VMFD,CA,PRESS,      &
@@ -839,10 +849,11 @@ PROGRAM maespa
                     WEIGHTEDSWP = 0
                 ENDIF
                 
-                
+                !print *, radabv(ihour,1)
                 ! Test to see if daylight hours or if any foliage
-                IF ((ABS(ZEN(IHOUR)) <  PI/2.0 ) .AND. (RADABV(IHOUR,1) > 1.0) .AND. (FOLT(1) > 0.0)) THEN
-
+                !IF ((ABS(ZEN(IHOUR)) <  PI/2.0 ) .AND. (RADABV(IHOUR,1) > 1.0) .AND. (FOLT(1) > 0.0)) THEN
+                IF ((ABS(ZEN(IHOUR)) <  PI/2.0 ) .AND. (FOLT(1) > 0.0)) THEN
+                    isNight=.FALSE.
                     ! Get slope correction factor
                     ! SLOPES - calculates corrections for slope of plot (to soil reflectance)
                     CALL SLOPES(IHOUR,TTIMD,EQNTIM,ALAT,DEC,XSLOPE,YSLOPE,BEAR,ZEN(IHOUR),BMULT,DMULT2,SOMULT)
@@ -1096,7 +1107,7 @@ PROGRAM maespa
                                                     K10F,RTEMP,DAYRESP,TBELOW,MODELGS,WSOILMETHOD,EMAXLEAF,SOILMOISTURE,        &
                                                     SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,G0,D0L,GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,VPARA,VPARB,VPARC,VFUN, &
                                                     SF,PSIV,ITERMAX,GSC,ALEAF,RD,ET,HFX,TLEAF,GBH,PLANTK,TOTSOILRES,MINLEAFWP,WEIGHTEDSWP,KTOT,                    &
-                                                    HMSHAPE,PSIL,ETEST,CI,ISMAESPA, athr)
+                                                    HMSHAPE,PSIL,ETEST,CI,ISMAESPA,isNight,athr,tLeafCalc)
                                                                    
                                     
 !892     FORMAT (1(I10),6(F10.5,1X))
@@ -1126,9 +1137,10 @@ PROGRAM maespa
                                                 K10F,RTEMP,DAYRESP,TBELOW,MODELGS,                              &
                                                 WSOILMETHOD,EMAXLEAF,                                           &
                                                 SOILMOISTURE,SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,G0,D0L,    &
-                                                GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,VPARA,VPARB,VPARC,VFUN,SF,PSIV,            &
+                                                GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,VPARA,VPARB,VPARC,VFUN,SF,PSIV, &
                                                 ITERMAX,GSC,ALEAF,RD,ET,HFX,TLEAF,                              &
-                                                GBH,PLANTK,TOTSOILRES,MINLEAFWP,WEIGHTEDSWP,KTOT,HMSHAPE,PSIL,ETEST,CI,ISMAESPA, athr)                                        
+                                                GBH,PLANTK,TOTSOILRES,MINLEAFWP,WEIGHTEDSWP,KTOT,HMSHAPE,PSIL,  &
+                                                ETEST,CI,ISMAESPA, isNight, athr, tLeafCalc)                                        
 
                                 ! Sum outputs for the hour
                                 CALL SUMHR(APAR/UMOLPERJ,ANIR,ATHR,ALEAF,RD,GSC,GBH,ET,HFX,TLEAF,FSOIL,PSIL,CI,AREA,IHOUR,LGP(IPT),ITAR,&
@@ -1168,7 +1180,7 @@ PROGRAM maespa
                                                         WSOILMETHOD,EMAXLEAF,SOILMOISTURE,SMD1,SMD2,WC1,WC2,            &
                                                         SOILDATA,SWPEXP,FSOIL,G0,D0L,GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,VPARA,VPARB,VPARC,VFUN,SF,PSIV,     &
                                                         ITERMAX,GSC,ALEAF,RD,ET,HFX,TLEAF,GBH,PLANTK,TOTSOILRES,MINLEAFWP,WEIGHTEDSWP,KTOT,   &
-                                                        HMSHAPE,PSIL,ETEST,CI,ISMAESPA, athr)
+                                                        HMSHAPE,PSIL,ETEST,CI,ISMAESPA, isNight, athr, tLeafCalc)
                                     
                                         ! Sum outputs for the hour
                                         CALL SUMHR(APAR/UMOLPERJ,ANIR,ATHR,ALEAF,RD,GSC,GBH,ET,HFX,TLEAF,FSOIL,PSIL,CI,AREA,IHOUR,  &
@@ -1184,7 +1196,7 @@ PROGRAM maespa
                             AREA = DLT(IPT) * VL(IPT)  ! LEAF AREA FOR THIS GRIDPOINT                   ! Modification Mathias 27/11/2012
                             !This should probably be moved to inout.f90 STH 2015-0910
                             WRITE(USUNLA, 112) &
-                            IDAY, IHOUR, ITREE, IPT, xL(iPT), yL(iPT), zL(iPT), tLeaf, &    !point XYZ included: STH 2015-0910
+                            IDAY+1, IHOUR, ITREE, IPT, xL(iPT), yL(iPT), zL(iPT), tLeaf, &    !point XYZ included: STH 2015-0910
                             SUNLA, AREA, BEXT, FBEAM(IHOUR,1), ZEN(iHour), &                            !ZEN by iHour: STH 2015-0910
                             ABSRP(LGP(IPT),1),ABSRP(LGP(IPT),2), ABSRP(LGP(IPT),3), &
                             BFLUX(IPT,1), DFLUX(IPT,1), BFLUX(IPT,2),DFLUX(IPT,2),DFLUX(IPT,3), &
@@ -1233,16 +1245,16 @@ PROGRAM maespa
                     CICAN(ITAR,IHOUR) = CICAN(ITAR,IHOUR)/FOLT(1)
                     
                 ELSE ! Night-time
-    
+                    isNight=.TRUE.
                     ! Canopy T at nighttime is same as air temperature. 
-                    TCAN(ITAR,IHOUR) = TAIR(IHOUR)
+                    !TCAN(ITAR,IHOUR) = TAIR(IHOUR)
                     
                     ! Leaf water potential same as soil water potential
-                    PSILCAN(ITAR,IHOUR) = WEIGHTEDSWP
-                    PSILCANMIN(ITAR,IHOUR) = WEIGHTEDSWP
+                    !PSILCAN(ITAR,IHOUR) = WEIGHTEDSWP
+                    !PSILCANMIN(ITAR,IHOUR) = WEIGHTEDSWP
                     
                     ! And ci the same as ca
-                    CICAN(ITAR,IHOUR) = CA(IHOUR)
+                    !CICAN(ITAR,IHOUR) = CA(IHOUR)
 
                     ! Loop over grid points 
                     DO IPT = 1,NUMPNT
@@ -1257,8 +1269,11 @@ PROGRAM maespa
                         ! RAD June 2008.              
                         SCLOSTTREE(ITAR,1) = SUM(SCLOST(1:NUMPNT,1)) / NUMPNT
                         SCLOSTTREE(ITAR,2) = SUM(SCLOST(1:NUMPNT,2)) / NUMPNT
-                        ! Assume zero reflectance in TR waveband (Norman 1979)
-                        SCLOSTTREE(ITAR,3) = 0.
+                        !! Assume zero reflectance in TR waveband (Norman 1979)
+                        !SCLOSTTREE(ITAR,3) = 0.
+                        !???????
+                        SCLOSTTREE(ITAR,3) = SUM(SCLOST(1:NUMPNT,3)) / NUMPNT!STH 2015-1019
+                        !end ???????
                         ! Downward thermal flux, averaged across grid points in this tree:
                         DOWNTHTREE(ITAR) = SUM(DOWNTH) / NUMPNT
                   
@@ -1268,27 +1283,80 @@ PROGRAM maespa
 
                         ! Absorbed thermal radiation
                         ATHR = DFLUX(IPT,3)
-              
+                        rNet=ATHR!STH 2015-1019!???????
                         DO IAGE = 1,NOAGEP ! Loop over age classes
-                            AREA = DLI(IAGE,IPT) * VL(IPT) ! m2
-                                 
+                            AREA = DLI(IAGE,IPT) * VL(IPT)!m2
+                            ! Call physiology routine
+                            !Need to send some data to PSTRANSPIF to get temp calcs at night  
+                            CALL PSTRANSPIF(iday,ihour,RELDF(IPT),TU(IPT),TD(IPT),RNET,WINDAH(IHOUR)*WINDLAY(LGP(IPT)),  &
+                                        APAR,TAIR(IHOUR),TMOVE,CA(IHOUR),RH(IHOUR),VPD(IHOUR),          &
+                                        VMFD(IHOUR),PRESS(IHOUR),JMAX25(LGP(IPT),IAGE),IECO,            &
+                                        EAVJ,EDVJ,DELSJ,VCMAX25(LGP(IPT),IAGE),                         &
+                                        EAVC,EDVC,DELSC,TVJUP,TVJDN,THETA,AJQ(LGP(IPT),IAGE),           &
+                                        RD0(LGP(IPT),IAGE),Q10F,K10F,RTEMP,DAYRESP,TBELOW,MODELGS,      &
+                                        WSOILMETHOD,EMAXLEAF,SOILMOISTURE,SMD1,SMD2,WC1,WC2,            &
+                                        SOILDATA,SWPEXP,FSOIL,G0,D0L,GAMMA,VPDMIN,G1,GK,WLEAF,NSIDES,VPARA,VPARB,VPARC,VFUN,SF,PSIV,     &
+                                        ITERMAX,GSC,ALEAF,RD,ET,HFX,TLEAF,GBH,PLANTK,TOTSOILRES,MINLEAFWP,WEIGHTEDSWP,KTOT,   &
+                                        HMSHAPE,PSIL,ETEST,CI,ISMAESPA, isNight, athr, tLeafCalc)
                             ! Sum outputs for the hour (Added RAD, Aug. 2008).
-                            CALL SUMHR(0.0,0.0,ATHR,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,AREA,IHOUR,LGP(IPT),&
-                                        ITAR,NOTARGETS,NUMPNT,NSUMMED,TOTTMP,PPAR,PPS,PTRANSP,THRAB,&
-                                        FCO2,FRESPF,GSCAN,GBHCAN,FH2O,FHEAT,TCAN,FSOIL1,PSILCAN,PSILCANMIN,CICAN,  &
-                                        ECANMAX,ACANMAX)
+                            CALL SUMHR(0.0,ANIR,ATHR,ALEAF,RD,GSC,GBH,ET,HFX,TLEAF,FSOIL,PSIL,CI,AREA,IHOUR,&
+                                    LGP(IPT),ITAR,NOTARGETS,NUMPNT,NSUMMED,TOTTMP,PPAR,PPS,PTRANSP,THRAB,&
+                                    FCO2,FRESPF,GSCAN,GBHCAN,FH2O,FHEAT,TCAN,FSOIL1,PSILCAN,PSILCANMIN,CICAN,  &
+                                    ECANMAX,ACANMAX)
                         END DO ! End loop over age classes.
-                    END DO ! Loop over gridpoints (nighttime).
+                        ! Write sunlit leaf area to file.
+                        IF(ISUNLA.EQ.1)THEN
+                            !AREA = DLT(IPT) * VL(IPT)  ! LEAF AREA FOR THIS GRIDPOINT                   ! Modification Mathias 27/11/2012
+                            !This should probably be moved to inout.f90 STH 2015-0910
+                            WRITE(USUNLA, 112) &
+                            IDAY+1, IHOUR, ITREE, IPT, xL(iPT), yL(iPT), zL(iPT), tLeaf, &    !point XYZ included: STH 2015-0910
+                            SUNLA, AREA, BEXT, FBEAM(IHOUR,1), ZEN(iHour), &                  !ZEN by iHour: STH 2015-0910
+                            ABSRP(LGP(IPT),1),ABSRP(LGP(IPT),2), ABSRP(LGP(IPT),3), &
+                            BFLUX(IPT,1), DFLUX(IPT,1), BFLUX(IPT,2),DFLUX(IPT,2),DFLUX(IPT,3), &
+                            SCLOST(IPT,1),SCLOST(IPT,2),SCLOST(IPT,3), &
+                            DOWNTH(IPT),RADABV(IHOUR,1),RADABV(IHOUR,2),RADABV(IHOUR,3)
+                        ENDIF
+                        tLeafArray(iPT)=tLeaf
+
+                        !This is pretty cludgy. Now that I have this working, I think the better way
+                        !to do this would be to rewrite the routine placing points in the canopy
+                        !so that all points for a layer are placed in sequence instead of the
+                        !current method where points in a line and done, and then there is a jump
+                        !to the next layer. If you have 6 layers and 12 points per layer, 4 lines per
+                        !layer, the points corresponding to the bottom-most layer are 
+                        ![1:3], [19:21], [37:39], [55:57]. That's not straight forward to parse out.
+                        !STH 2015-0911
+                        ii=1
+                        do i=1,(NUMPNT/4),(pplay/4)         !1 to 72/4=18, stepping every 12/4=3
+                            do j=i,pplay*nolay,(NUMPNT/4)   !12*6=72, stepping every 72/4=18
+                                do k=0,(pplay/4)-1
+                                    if (tCanopyLayerArray(ihour,ii).eq.-999.9)then
+                                        tCanopyLayerArray(ihour,ii)=0.0
+                                    endif
+                                    tCanopyLayerArray(ihour,ii)=tCanopyLayerArray(ihour,ii)+tLeafArray(j+k)
+                                enddo
+                            enddo
+                            tCanopyLayerArray(ihour,ii)=tCanopyLayerArray(ihour,ii)/pplay
+                            ii=ii+1
+                        enddo
+                    END DO ! End loop over gridpoints (nighttime).
+                    ! Normalise to get average foliage temperature
+                    TCAN(ITAR,IHOUR) = TCAN(ITAR,IHOUR)/FOLT(1)
                     
+                    ! Same for leaf water potential
+                    PSILCAN(ITAR,IHOUR) = PSILCAN(ITAR,IHOUR)/FOLT(1)
+                    
+                    ! And ci
+                    CICAN(ITAR,IHOUR) = CICAN(ITAR,IHOUR)/FOLT(1)
                     ! Calculate night-time foliage respiration
-                    DO IPT = 1,NUMPNT
-                        DO IAGE = 1,NOAGEP
-                            AREA = DLI(IAGE,IPT) * VL(IPT)
-                            RESPF = AREA * RESP(RD0(LGP(IPT),IAGE),RD0ACC,TAIR(IHOUR),TMOVE,Q10F,K10F,RTEMP,1.0,TBELOW)
-                            FCO2(ITAR,IHOUR) = FCO2(ITAR,IHOUR) - RESPF
-                            FRESPF(ITAR,IHOUR) = FRESPF(ITAR,IHOUR) + RESPF 
-                        END DO
-                    END DO
+                    !DO IPT = 1,NUMPNT
+                    !    DO IAGE = 1,NOAGEP
+                    !        AREA = DLI(IAGE,IPT) * VL(IPT)
+                    !        RESPF = AREA * RESP(RD0(LGP(IPT),IAGE),RD0ACC,TAIR(IHOUR),TMOVE,Q10F,K10F,RTEMP,1.0,TBELOW)
+                    !        FCO2(ITAR,IHOUR) = FCO2(ITAR,IHOUR) - RESPF
+                    !        FRESPF(ITAR,IHOUR) = FRESPF(ITAR,IHOUR) + RESPF 
+                    !    END DO
+                    !END DO
                     
                 END IF ! If day or night
 
@@ -1655,7 +1723,11 @@ SUBROUTINE SUMHR(APAR,ANIR,ATHR,ALEAF,RD,GSC,GBH,ET,HFX,TLEAF,FSOIL, PSIL,CI,   
     ! Heat flux in mol tree-1 s-1
     FHEAT(ITAR,IHOUR) = FHEAT(ITAR,IHOUR) + HFX*AREA
     ! Average leaf temperature - will be divided by total leaf area later. 
+    !print *," TCan before:", TCan(iTar,iHour)
+    !print *," tLeaf:", tLeaf
+    !print *," area:", area
     TCAN(ITAR,IHOUR) = TCAN(ITAR,IHOUR) + TLEAF*AREA
+    !print *," TCan after:", TCan(iTar,iHour)
     ! Average leaf water potential
     PSILCAN(ITAR,IHOUR) = PSILCAN(ITAR,IHOUR) + PSIL*AREA
     ! Lowest leaf water potential for the target tree.
