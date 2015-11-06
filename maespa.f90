@@ -1196,14 +1196,15 @@ PROGRAM maespa
                             AREA = DLT(IPT) * VL(IPT)  ! LEAF AREA FOR THIS GRIDPOINT                   ! Modification Mathias 27/11/2012
                             !This should probably be moved to inout.f90 STH 2015-0910
                             WRITE(USUNLA, 112) &
-                            IDAY+1, IHOUR, ITREE, IPT, xL(iPT), yL(iPT), zL(iPT), tLeaf, &    !point XYZ included: STH 2015-0910
+                            IDAY+1, IHOUR, ITREE, IPT, &
+                            xL(iPT), yL(iPT), zL(iPT), tLeaf, WINDAH(IHOUR)*WINDLAY(LGP(IPT)), &        !point XYZ included: STH 2015-0910                           
                             SUNLA, AREA, BEXT, FBEAM(IHOUR,1), ZEN(iHour), &                            !ZEN by iHour: STH 2015-0910
                             ABSRP(LGP(IPT),1),ABSRP(LGP(IPT),2), ABSRP(LGP(IPT),3), &
                             BFLUX(IPT,1), DFLUX(IPT,1), BFLUX(IPT,2),DFLUX(IPT,2),DFLUX(IPT,3), &
                             SCLOST(IPT,1),SCLOST(IPT,2),SCLOST(IPT,3), &
                             DOWNTH(IPT),RADABV(IHOUR,1),RADABV(IHOUR,2),RADABV(IHOUR,3)
                         ENDIF
-                        112      FORMAT(4(1X,I4), 4(1x,F12.3),7(1X,F12.3), 13(1X,F12.3))               !Expanded format to 
+                        112      FORMAT(4(1X,I4), 5(1x,F12.3),7(1X,F12.3), 13(1X,F12.3))               !Expanded format to 
                         tLeafArray(iPT)=tLeaf
 
                         !This is pretty cludgy. Now that I have this working, I think the better way
@@ -1309,8 +1310,9 @@ PROGRAM maespa
                             !AREA = DLT(IPT) * VL(IPT)  ! LEAF AREA FOR THIS GRIDPOINT                   ! Modification Mathias 27/11/2012
                             !This should probably be moved to inout.f90 STH 2015-0910
                             WRITE(USUNLA, 112) &
-                            IDAY+1, IHOUR, ITREE, IPT, xL(iPT), yL(iPT), zL(iPT), tLeaf, &    !point XYZ included: STH 2015-0910
-                            SUNLA, AREA, BEXT, FBEAM(IHOUR,1), ZEN(iHour), &                  !ZEN by iHour: STH 2015-0910
+                            IDAY+1, IHOUR, ITREE, IPT, &
+                            xL(iPT), yL(iPT), zL(iPT), tLeaf, WINDAH(IHOUR)*WINDLAY(LGP(IPT)), &        !point XYZ included: STH 2015-0910                           
+                            SUNLA, AREA, BEXT, FBEAM(IHOUR,1), ZEN(iHour), &                            !ZEN by iHour: STH 2015-0910
                             ABSRP(LGP(IPT),1),ABSRP(LGP(IPT),2), ABSRP(LGP(IPT),3), &
                             BFLUX(IPT,1), DFLUX(IPT,1), BFLUX(IPT,2),DFLUX(IPT,2),DFLUX(IPT,3), &
                             SCLOST(IPT,1),SCLOST(IPT,2),SCLOST(IPT,3), &
