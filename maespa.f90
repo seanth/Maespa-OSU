@@ -808,9 +808,15 @@ PROGRAM maespa
                 ! Calculate woody biomass and woody biomass increment
                 ! CALCWBIOM - calculates woody biomass from height & diameter
                 ! found in physiol.f90
-                CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),COEFFT,EXPONT,WINTERC,WBIOM,WBINC)
-                CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),BCOEFFT,BEXPONT,BINTERC,BBIOM,BBINC)
-                CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),RCOEFFT,REXPONT,RINTERC,RBIOM,RBINC)
+                !This is slightly confusing. This is called to calculate 
+                !   1.) trunk biomass
+                !   2.) branch biomass
+                !   3.) root biomass
+                !Calls the same equation, feeding it different alpha and beta values.
+                !The 7th value in parameters passed to the function is what the end value is written to
+                CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),COEFFT,EXPONT,WINTERC,WBIOM,WBINC)     !Trunk biomass
+                CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),BCOEFFT,BEXPONT,BINTERC,BBIOM,BBINC)   !Branch biomass 
+                CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),RCOEFFT,REXPONT,RINTERC,RBIOM,RBINC)   !Root biomass
                 
                 ! Calculate foliar biomass and increment
                 CALL CALCFBIOM(IDAY,NOSLADATES,FOLLAY,SLA,PROPP,NOLAY,NOAGEP,FBIOM,FBINC)
@@ -1198,13 +1204,13 @@ PROGRAM maespa
                             WRITE(USUNLA, 112) &
                             IDAY+1, IHOUR, ITREE, IPT, &
                             xL(iPT), yL(iPT), zL(iPT), tLeaf, WINDAH(IHOUR)*WINDLAY(LGP(IPT)), &        !point XYZ included: STH 2015-0910                           
-                            SUNLA, AREA, BEXT, FBEAM(IHOUR,1), ZEN(iHour), &                            !ZEN by iHour: STH 2015-0910
+                            GSC, SUNLA, AREA, BEXT, FBEAM(IHOUR,1), ZEN(iHour), &                            !ZEN by iHour: STH 2015-0910
                             ABSRP(LGP(IPT),1),ABSRP(LGP(IPT),2), ABSRP(LGP(IPT),3), &
                             BFLUX(IPT,1), DFLUX(IPT,1), BFLUX(IPT,2),DFLUX(IPT,2),DFLUX(IPT,3), &
                             SCLOST(IPT,1),SCLOST(IPT,2),SCLOST(IPT,3), &
                             DOWNTH(IPT),RADABV(IHOUR,1),RADABV(IHOUR,2),RADABV(IHOUR,3)
                         ENDIF
-                        112      FORMAT(4(1X,I4), 5(1x,F12.3),7(1X,F12.3), 13(1X,F12.3))               !Expanded format to 
+                        112      FORMAT(4(1X,I4), 5(1x,F12.3),1(1X,F12.9),7(1X,F12.3), 13(1X,F12.3))               !Expanded format to 
                         tLeafArray(iPT)=tLeaf
 
                         !This is pretty cludgy. Now that I have this working, I think the better way
@@ -1307,12 +1313,12 @@ PROGRAM maespa
                         END DO ! End loop over age classes.
                         ! Write sunlit leaf area to file.
                         IF(ISUNLA.EQ.1)THEN
-                            !AREA = DLT(IPT) * VL(IPT)  ! LEAF AREA FOR THIS GRIDPOINT                   ! Modification Mathias 27/11/2012
+                            AREA = DLT(IPT) * VL(IPT)  ! LEAF AREA FOR THIS GRIDPOINT                   ! Modification Mathias 27/11/2012
                             !This should probably be moved to inout.f90 STH 2015-0910
                             WRITE(USUNLA, 112) &
                             IDAY+1, IHOUR, ITREE, IPT, &
                             xL(iPT), yL(iPT), zL(iPT), tLeaf, WINDAH(IHOUR)*WINDLAY(LGP(IPT)), &        !point XYZ included: STH 2015-0910                           
-                            SUNLA, AREA, BEXT, FBEAM(IHOUR,1), ZEN(iHour), &                            !ZEN by iHour: STH 2015-0910
+                            GSC, SUNLA, AREA, BEXT, FBEAM(IHOUR,1), ZEN(iHour), &                            !ZEN by iHour: STH 2015-0910
                             ABSRP(LGP(IPT),1),ABSRP(LGP(IPT),2), ABSRP(LGP(IPT),3), &
                             BFLUX(IPT,1), DFLUX(IPT,1), BFLUX(IPT,2),DFLUX(IPT,2),DFLUX(IPT,3), &
                             SCLOST(IPT,1),SCLOST(IPT,2),SCLOST(IPT,3), &
