@@ -136,6 +136,7 @@ SUBROUTINE OPENINPUTF(CTITLE,TTITLE,PTITLE,STITLE,WTITLE,UTITLE,IWATFILE,KEEPZEN
     else 
         in_path=fin_dir
         out_path=fout_dir
+        !call system("mkdir "//trim(out_path))
         if(verbose.ge.1)print *, "***input directory set to: ",in_path
         if(verbose.ge.1)print *, "***output directory set to: ",out_path
     ENDIF
@@ -823,7 +824,7 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
     ! Modification Mathias 27/11/12. 
     ! Canopy XYZ STH 2015-0910. Canopy point temps STH 2015-10. Canopy point wind STH 2015-1106. Canopy point stomatal conductance STH 2015-1106.
     461 format('Columns: DOY Hour Tree Canopy_Point# Canopy_Point_X Canopy_Point_Y Canopy_Point_Z Canopy_Point_Temp(°C) &
-    Canopy_Point_Wind_Speed(m/s) Canopy_Point_Stomatal_Conductance(mol_CO2_s-1) SUNLA Area BEXT FBeam Zenithal_angle &
+    Canopy_Point_Wind_Speed(m/s) Canopy_Point_Stomatal_Conductance(mol_CO2_s-1) CI(ppm) SUNLA Area BEXT FBeam Zenithal_angle &
     ABSRP_PAR ABSRP_NIR ABSRP_TH BFPAR DFPAR BFNIR DFNIR DFTHR SCLOSTPAR SCLOSTNIR SCLOSTTH DOWNTH PAR_Above NIR_Above THR_Above') 
 
     990 FORMAT (A80)
