@@ -204,60 +204,77 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
     ITER = 0  ! Counter for iterations - finding leaf temperature
     100   CONTINUE  ! Return point for iterations
         !Call photosyn to get the stomatal conductance
-        if(.not.isNight)then
-            !in day time
-            CALL PHOTOSYN(PAR,TLEAF,TMOVE,CS,RHLEAF,DLEAF,VMLEAF,JMAX25,IECO,EAVJ,EDVJ,DELSJ,VCMAX25,&
-                            EAVC,EDVC,DELSC,TVJUP,TVJDN,THETA,AJQ,RD0,Q10F,K10F,RTEMP,DAYRESP,TBELOW,&
-                            MODELGS,GSREF,GSMIN,I0,D0,VK1,VK2,VPD1,VPD2,VMFD0,GSJA,GSJB,T0,TREF,TMAX,&
-                            WSOILMETHOD,SOILMOISTURE,EMAXLEAF,SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,&
-                            G0,D0L,GAMMA,VPDMIN,G1,GK,GSC,ALEAF,RD,MINLEAFWP,KTOT,WEIGHTEDSWP, & 
-                            VPARA,VPARB,VPARC,VFUN,SF,PSIV,HMSHAPE,PSILIN,PSIL,CI,ISMAESPA)
-        else
-            !in night time
-            !THIS IS THE REGION TO PUT THE CIRCADIAN STOMATAL OPENING CODE
-            !LOOK AT CURRENT TEIM STEP+1. IF IT HAS LIGHT, USE THAT TO CALCULATE STOMATAL
-            !OPENING, BUT _NOT_ PHOTOSYNTHESIS
-
-
-            !Mostly Ccopied from the photosyn subroutine 2015-1020. STH
-            !GSC is GS in photosyn. STH
-            
-            GSC = 0.01!Not very elegant, but just set it to a value. STH 2015-1019            
-            
-            EMAXLEAF = KTOT * (WEIGHTEDSWP - MINLEAFWP)! Maximum transpiration rate
-            !IF(EMAXLEAF.LT.0.0)then
-            !    EMAXLEAF = 0.0
-            !endif
-            
-            
-            ETEST = 1000 * (VPD/PATM) * GSC * GSVGSC! Leaf transpiration in mmol m-2 s-1  -  ignoring boundary layer effects!
-            
-            IF(ETEST>EMAXLEAF)THEN
-                
-                GSV = 1E-03 * EMAXLEAF / (VPD/PATM)
-                GSC = GSV / GSVGSC! Gsc in mol m-2 s-1
-                
-                
-                IF(GSC.LT.1E-09)THEN
-                    GSC = 1E-09! A very low minimum; for numerical stability.
-                ENDIF
-            ENDIF
-            
-            !IF(GS.GT.0.AND.ALEAF.GT.0)THEN
-            !    CI = CS - ALEAF/GS
-            !    !chris wants a new function here
-            !    !D13C=a+((b-a)*(CI/CA))
-            !    !where a=4.4 ppt diffusive fraction of Carbon
-            !    !where b=27.5 ppt fractionation of Rubisco
-            !    !define the d13 variable at the very end of physiol.f90 (this file)
-            !ELSE
-                CI = CS! Return CI.
-            !    !d13c=0.0
-            !ENDIF        
-            !from start of photosyn. 2015-1019.STH
-            !RD = RESP(RD0,RD0ACC,TLEAF,TMOVE,Q10F,K10F,RTEMP,DAYRESP,TBELOW)
-            ALEAF = -RD!from start of photosyn. 2015-1019.STH
+        if(isNight)then
+            PAR=0.001 !Just assign a very low value. STH 2015-1201
         endif
+        CALL PHOTOSYN(PAR,TLEAF,TMOVE,CS,RHLEAF,DLEAF,VMLEAF,JMAX25,IECO,EAVJ,EDVJ,DELSJ,VCMAX25,&
+                EAVC,EDVC,DELSC,TVJUP,TVJDN,THETA,AJQ,RD0,Q10F,K10F,RTEMP,DAYRESP,TBELOW,&
+                MODELGS,GSREF,GSMIN,I0,D0,VK1,VK2,VPD1,VPD2,VMFD0,GSJA,GSJB,T0,TREF,TMAX,&
+                WSOILMETHOD,SOILMOISTURE,EMAXLEAF,SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,&
+                G0,D0L,GAMMA,VPDMIN,G1,GK,GSC,ALEAF,RD,MINLEAFWP,KTOT,WEIGHTEDSWP, & 
+                VPARA,VPARB,VPARC,VFUN,SF,PSIV,HMSHAPE,PSILIN,PSIL,CI,ISMAESPA)
+
+        ! if(.not.isNight)then
+        !     !in day time
+        !     CALL PHOTOSYN(PAR,TLEAF,TMOVE,CS,RHLEAF,DLEAF,VMLEAF,JMAX25,IECO,EAVJ,EDVJ,DELSJ,VCMAX25,&
+        !                     EAVC,EDVC,DELSC,TVJUP,TVJDN,THETA,AJQ,RD0,Q10F,K10F,RTEMP,DAYRESP,TBELOW,&
+        !                     MODELGS,GSREF,GSMIN,I0,D0,VK1,VK2,VPD1,VPD2,VMFD0,GSJA,GSJB,T0,TREF,TMAX,&
+        !                     WSOILMETHOD,SOILMOISTURE,EMAXLEAF,SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,&
+        !                     G0,D0L,GAMMA,VPDMIN,G1,GK,GSC,ALEAF,RD,MINLEAFWP,KTOT,WEIGHTEDSWP, & 
+        !                     VPARA,VPARB,VPARC,VFUN,SF,PSIV,HMSHAPE,PSILIN,PSIL,CI,ISMAESPA)
+        ! else
+        !    CALL PHOTOSYN(0.0007,TLEAF,TMOVE,CS,RHLEAF,DLEAF,VMLEAF,JMAX25,IECO,EAVJ,EDVJ,DELSJ,VCMAX25,&
+        !             EAVC,EDVC,DELSC,TVJUP,TVJDN,THETA,AJQ,RD0,Q10F,K10F,RTEMP,DAYRESP,TBELOW,&
+        !             MODELGS,GSREF,GSMIN,I0,D0,VK1,VK2,VPD1,VPD2,VMFD0,GSJA,GSJB,T0,TREF,TMAX,&
+        !             WSOILMETHOD,SOILMOISTURE,EMAXLEAF,SMD1,SMD2,WC1,WC2,SOILDATA,SWPEXP,FSOIL,&
+        !             G0,D0L,GAMMA,VPDMIN,G1,GK,GSC,ALEAF,RD,MINLEAFWP,KTOT,WEIGHTEDSWP, & 
+        !             VPARA,VPARB,VPARC,VFUN,SF,PSIV,HMSHAPE,PSILIN,PSIL,CI,ISMAESPA)
+
+            ! !in night time
+            ! !THIS IS THE REGION TO PUT THE CIRCADIAN STOMATAL OPENING CODE
+            ! !LOOK AT CURRENT TEIM STEP+1. IF IT HAS LIGHT, USE THAT TO CALCULATE STOMATAL
+            ! !OPENING, BUT _NOT_ PHOTOSYNTHESIS
+
+
+            ! !Mostly Ccopied from the photosyn subroutine 2015-1020. STH
+            ! !GSC is GS in photosyn. STH
+            
+            ! GSC = 0.05!Not very elegant, but just set it to a value. STH 2015-1019            
+            
+            ! EMAXLEAF = KTOT * (WEIGHTEDSWP - MINLEAFWP)! Maximum transpiration rate
+            ! !IF(EMAXLEAF.LT.0.0)then
+            ! !    EMAXLEAF = 0.0
+            ! !endif
+            
+            
+            ! ETEST = 1000 * (VPD/PATM) * GSC * GSVGSC! Leaf transpiration in mmol m-2 s-1  -  ignoring boundary layer effects!
+            
+            ! IF(ETEST>EMAXLEAF)THEN
+                
+            !     GSV = 1E-03 * EMAXLEAF / (VPD/PATM)
+            !     GSC = GSV / GSVGSC! Gsc in mol m-2 s-1
+                
+                
+            !     IF(GSC.LT.1E-09)THEN
+            !         GSC = 1E-09! A very low minimum; for numerical stability.
+            !     ENDIF
+            ! ENDIF
+            
+            ! !IF(GS.GT.0.AND.ALEAF.GT.0)THEN
+            ! !    CI = CS - ALEAF/GS
+            ! !    !chris wants a new function here
+            ! !    !D13C=a+((b-a)*(CI/CA))
+            ! !    !where a=4.4 ppt diffusive fraction of Carbon
+            ! !    !where b=27.5 ppt fractionation of Rubisco
+            ! !    !define the d13 variable at the very end of physiol.f90 (this file)
+            ! !ELSE
+            !     CI = CS! Return CI.
+            ! !    !d13c=0.0
+            ! !ENDIF        
+            ! !from start of photosyn. 2015-1019.STH
+            ! !RD = RESP(RD0,RD0ACC,TLEAF,TMOVE,Q10F,K10F,RTEMP,DAYRESP,TBELOW)
+            ! ALEAF = -RD!from start of photosyn. 2015-1019.STH
+        !endif
         !this is wasteful in terms of lines of code, but is easier to keep track of this way
         !STH 2015-1008
         if (tLeafCalc.eq.0) then 
@@ -394,6 +411,7 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
             ! Total conductance for water vapour
             GBV = GBVGBH*GBH    !GBVGBH is from maestcom.f90. Ratio of Gbw:Gbh magic number
             !GSC is being modified in the photosyn function call. In photosyn GSC is called GS
+            !GSV should already be calculated elsewhere. STH 2015-1201
             GSV = GSVGSC*GSC    !GSVGSC is from maestcom.f90. Ratio of Gsw:Gsc magic number
             !GV = NSIDES*(GBV*GSV)/(GBV+GSV) ! already one-sided value
             GV = (GBV*GSV)/(GBV+GSV)
@@ -512,7 +530,6 @@ SUBROUTINE PHOTOSYN(PAR,TLEAF,TMOVE,CS,RH,VPD,VMFD, &
     REAL, EXTERNAL :: QUADP
     REAL, EXTERNAL :: FPSIL
     REAL, EXTERNAL :: VJMAXWFN
-
     ! Calculate photosynthetic parameters from leaf temperature.
     GAMMASTAR = GAMMAFN(TLEAF,IECO)                   ! CO2 compensati
     KM = KMFN(TLEAF,IECO)                             ! Michaelis-Ment
@@ -538,7 +555,6 @@ SUBROUTINE PHOTOSYN(PAR,TLEAF,TMOVE,CS,RH,VPD,VMFD, &
         ALEAF = -RD
         
         GS = G0
-
         RETURN
     END IF
 
@@ -692,7 +708,6 @@ SUBROUTINE PHOTOSYN(PAR,TLEAF,TMOVE,CS,RH,VPD,VMFD, &
         CI = CS
         !d13c=0.0
     ENDIF
-    
     
     RETURN
 END SUBROUTINE PHOTOSYN
