@@ -136,7 +136,7 @@ SUBROUTINE OPENINPUTF(CTITLE,TTITLE,PTITLE,STITLE,WTITLE,UTITLE,IWATFILE,KEEPZEN
     else 
         in_path=fin_dir
         out_path=fout_dir
-        !call system("mkdir "//trim(out_path))
+        call system("mkdir "//trim(out_path))
         if(verbose.ge.1)print *, "***input directory set to: ",in_path
         if(verbose.ge.1)print *, "***output directory set to: ",out_path
     ENDIF

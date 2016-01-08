@@ -1085,7 +1085,7 @@ PROGRAM maespa
                         ! Calculation of photosynthesis may be done for sunlit & shaded leaves
                         ! separately, or by averaging PAR over the total leaf area
                         IF ((MODELSS.EQ.0).AND.(FBEAM(IHOUR,1).NE.0.0)) THEN 
-
+                            !print *, "method 1"
                             ! Do calculations separately for sunlit & shaded leaves
                             DO ISUNLIT = 1,2 ! Loop over sunlit & shaded leaves
 
@@ -1124,7 +1124,7 @@ PROGRAM maespa
                                 END DO
                             END DO ! End loop over sunlit / shaded leaves
                         ELSE IF ((MODELSS.EQ.1).OR.(FBEAM(IHOUR,1).EQ.0.0)) THEN 
-                            
+                            !print *, "method 2"
                             ! Do calculations for PAR averaged over all leaf area
                             APAR = (BFLUX(IPT,1)*BEXT*SUNLA + DFLUX(IPT,1))*UMOLPERJ
                             ANIR = BFLUX(IPT,2)*BEXT*SUNLA + DFLUX(IPT,2)
@@ -1156,7 +1156,7 @@ PROGRAM maespa
                      
                             END DO ! End loop over age classes
                         ELSE IF ((MODELSS.EQ.2).AND.(FBEAM(IHOUR,1).NE.0.0)) THEN 
-                            
+                            !print *, "method 3"
                             ! Do calculations separately for sunlit & shaded. Further separate sunlit
                             ! into leaf angle classes.
                             DO ISUNLIT = 1,NALPHA+1
@@ -1266,32 +1266,78 @@ PROGRAM maespa
 
                     ! Loop over grid points 
                     DO IPT = 1,NUMPNT
-                        ! Calculate the scattered radiation, for thermal only.
-                        CALL SCATTER(IPT,3,MLAYER(IPT),LAYER(IPT),DLAI,EXPDIF,ZEN(IHOUR),BEXT,DMULT2,SOMULT,&
-                                        BMULT,RADABV(IHOUR,3),                                              &
-                                        FBEAM(IHOUR,3),TAIR(IHOUR),PREVTSOIL, ARHO(LGP(IPT),3),             &
-                                        ATAU(LGP(IPT),3),RHOSOL(3),DIFUP,                                   &
-                                        DIFDN,SCLOST,DOWNTH)
-                  
-                        ! Lost scattered radiation for each tree (W m-2), averaged over the grid points.
-                        ! RAD June 2008.              
-                        SCLOSTTREE(ITAR,1) = SUM(SCLOST(1:NUMPNT,1)) / NUMPNT
-                        SCLOSTTREE(ITAR,2) = SUM(SCLOST(1:NUMPNT,2)) / NUMPNT
-                        !! Assume zero reflectance in TR waveband (Norman 1979)
-                        !SCLOSTTREE(ITAR,3) = 0.
-                        !???????
-                        SCLOSTTREE(ITAR,3) = SUM(SCLOST(1:NUMPNT,3)) / NUMPNT!STH 2015-1019
-                        !end ???????
-                        ! Downward thermal flux, averaged across grid points in this tree:
-                        DOWNTHTREE(ITAR) = SUM(DOWNTH) / NUMPNT
-                  
-                        ! Calculate absorbed radiation
-                        CALL ABSRAD(IPT,3,NZEN,DEXT,BEXT,BMULT,RELDF(IPT),RADABV(IHOUR,3),FBEAM(IHOUR,3),ZEN(IHOUR),&
-                                    ABSRP(LGP(IPT),3),DIFDN(IPT,3),DIFUP(IPT,3),DFLUX,BFLUX,SCATFX)
+                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        !copied from daytime calc. STH 2015-1210
+                        CALL TRANSB(IHOUR,IPROG,ZEN(IHOUR),AZ(IHOUR),XSLOPE,YSLOPE,FBEAM,BEXTT,XL(IPT),YL(IPT),ZL(IPT), &
+                                    RX,RY,RZ,DXT,DYT,DZT,XMAX,YMAX,SHADEHT,FOLT,ZBC,JLEAFT,BPTT,NOAGECT,PROPCT,JSHAPET, &
+                                    SHAPET,NOTREES,SUNLA,BEXT,BEXTANGT,BEXTANG)
+                        ! Assign plant hydraulic conductance
+                        !PLANTK = PLANTKCR(ITAR,IPT)
+                        
 
-                        ! Absorbed thermal radiation
+                        ! Loop over the 3 wavelengths
+                        DO IWAVE = 1,3
+                            
+                            ! Calculate the scattered radiation
+                            CALL SCATTER(IPT,IWAVE,MLAYER(IPT),LAYER(IPT),DLAI,EXPDIF,ZEN(IHOUR),BEXT,DMULT2,SOMULT,BMULT,&
+                                            RADABV(IHOUR,IWAVE),FBEAM(IHOUR,IWAVE),TAIR(IHOUR),PREVTSOIL,ARHO(LGP(IPT),IWAVE),&
+                                            ATAU(LGP(IPT),IWAVE),RHOSOL(IWAVE),DIFUP,DIFDN,SCLOST,DOWNTH)
+
+                            ! Lost scattered radiation for each tree (W m-2), averaged over the grid points.
+                            ! RAD June 2008.              
+                            SCLOSTTREE(ITAR,1) = SUM(SCLOST(1:NUMPNT,1)) / NUMPNT
+                            SCLOSTTREE(ITAR,2) = SUM(SCLOST(1:NUMPNT,2)) / NUMPNT
+                            
+                            ! Assume zero reflectance in TR waveband (Norman 1979)
+                            ! But store in the same array the lost tranmission at top of canopy.
+                            SCLOSTTREE(ITAR,3) = SUM(SCLOST(1:NUMPNT,2)) / NUMPNT
+
+                            ! Downwelling longwave radiation (calculated for each gridpoint
+                            ! with the EHC) averaged across the grid points.
+                            IF(IWAVE.EQ.3)DOWNTHTREE(ITAR) = SUM(DOWNTH) / NUMPNT
+                  
+                            ! Calculate absorbed radiation
+                            CALL ABSRAD(IPT,IWAVE,NZEN,DEXT,BEXT,BMULT,RELDF(IPT),RADABV(IHOUR,IWAVE),&
+                                        FBEAM(IHOUR,IWAVE),ZEN(IHOUR),ABSRP(LGP(IPT),IWAVE),DIFDN(IPT,IWAVE),&
+                                        DIFUP(IPT,IWAVE),DFLUX,BFLUX,SCATFX)
+
+                        END DO
+                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+                        ! ! Calculate the scattered radiation, for thermal only.
+                        ! CALL SCATTER(IPT,3,MLAYER(IPT),LAYER(IPT),DLAI,EXPDIF,ZEN(IHOUR),BEXT,DMULT2,SOMULT,&
+                        !                 BMULT,RADABV(IHOUR,3),                                              &
+                        !                 FBEAM(IHOUR,3),TAIR(IHOUR),PREVTSOIL, ARHO(LGP(IPT),3),             &
+                        !                 ATAU(LGP(IPT),3),RHOSOL(3),DIFUP,                                   &
+                        !                 DIFDN,SCLOST,DOWNTH)
+                  
+                        ! ! Lost scattered radiation for each tree (W m-2), averaged over the grid points.
+                        ! ! RAD June 2008.              
+                        ! SCLOSTTREE(ITAR,1) = SUM(SCLOST(1:NUMPNT,1)) / NUMPNT
+                        ! SCLOSTTREE(ITAR,2) = SUM(SCLOST(1:NUMPNT,2)) / NUMPNT
+                        ! !! Assume zero reflectance in TR waveband (Norman 1979)
+                        ! !SCLOSTTREE(ITAR,3) = 0.
+                        ! !???????
+                        ! SCLOSTTREE(ITAR,3) = SUM(SCLOST(1:NUMPNT,3)) / NUMPNT!STH 2015-1019
+                        ! !end ???????
+                        ! ! Downward thermal flux, averaged across grid points in this tree:
+                        ! DOWNTHTREE(ITAR) = SUM(DOWNTH) / NUMPNT
+                  
+                        ! ! Calculate absorbed radiation
+                        ! CALL ABSRAD(IPT,3,NZEN,DEXT,BEXT,BMULT,RELDF(IPT),RADABV(IHOUR,3),FBEAM(IHOUR,3),ZEN(IHOUR),&
+                        !             ABSRP(LGP(IPT),3),DIFDN(IPT,3),DIFUP(IPT,3),DFLUX,BFLUX,SCATFX)
+                        !dFlux is diffuse radiation flux absorbed @ ipt
+                        !bFlux is beam radiation absorbed @ ipt
+                        !print *, bFlux(ipt,1), BEXT, SUNLA, dFlux(ipt,1), UMOLPERJ, BFLUX(IPT,2), DFLUX(IPT,2)
+                        APAR = (BFLUX(IPT,1)*BEXT*SUNLA + DFLUX(IPT,1))*UMOLPERJ
+                        ANIR = BFLUX(IPT,2)*BEXT*SUNLA + DFLUX(IPT,2)
                         ATHR = DFLUX(IPT,3)
-                        rNet=ATHR!STH 2015-1019!???????
+                        !RNET = APAR/UMOLPERJ + ANIR + ATHR
+                        RNET = APAR/UMOLPERJ + ANIR - ATHR
+                        ! Absorbed thermal radiation
+                        !ATHR = DFLUX(IPT,3)
+                        !rNet=ATHR!STH 2015-1019!???????
                         DO IAGE = 1,NOAGEP ! Loop over age classes
                             AREA = DLI(IAGE,IPT) * VL(IPT)!m2
                             ! Call physiology routine
@@ -1368,6 +1414,10 @@ PROGRAM maespa
                     !END DO
                     
                 END IF ! If day or night
+                !print *, "hour ", "rNet ", "aPAR ", "aNIR ", "aTHR "
+                !print *, tair(iHour)
+                !print *, "emleaf: ", emleaf
+                !print *, ihour, rNet*UMOLPERJ, aPAR, aNIR*UMOLPERJ, aTHR*UMOLPERJ, tAIR(iHOUR)
 
                 ! Output information to layer flux file if required
                 !Moved the location of this output to fix a bug in writing PAR, PPS, and PTransp on first tree 

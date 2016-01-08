@@ -136,7 +136,7 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
     REAL theIREmittance, theROut !fraction, W/m2
     REAL STHRnet !W/m2
     REAL theBoundaryLayerThickness !m
-    REAL theDiffusionCoeffWaterVapour !m2 s-1
+    REAL theDWV !m2 s-1
     REAL CMOLAR, theBoundaryLayerConductance, theBoundaryLayerResistance !?mol/?, mol/m2*sec, m2*sec/mol 
     REAL Kair, theSensibleForced !W m-1 °C-1 for temps 20-25°C, W/m2
     REAL theWaterDiffusion, theFicksLatentHeat, thePenmanMonteithLatentHeat! W/m2, ?
@@ -416,7 +416,9 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
             !GV = NSIDES*(GBV*GSV)/(GBV+GSV) ! already one-sided value
             GV = (GBV*GSV)/(GBV+GSV)
             !  Call Penman-Monteith equation
+            !print *, "rnet: ",rnet
             ET = PENMON(PRESS,SLOPE,LHV,RNET,VPD,GH,GV)
+            !print *, "hour: ", ihour, "rnet: ",rnet, "e: ", ET
             ! End of subroutine if no iterations wanted.
             IF (ITERMAX.EQ.0) GOTO 200
             ! Otherwise, calculate new TLEAF, DLEAF, RHLEAF & CS
@@ -431,6 +433,7 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
                 t1 = (t1 + t2)/2  
                 tempk=tk(t1)!need to convert to K for S-B calculation
                 dR = 4.* EMLEAF * SIGMA * tempk ** 3  ! derivative of radiative dissipation; should be similar to dR = GRADN 
+                !dR = 8.* EMLEAF * SIGMA * tempk ** 3  ! derivative of radiative dissipation; should be similar to dR = GRADN 
                 ! H = sensible heat transfer to air(W m^-2)
                 ! molar specific heat of air (joules mol^-1 oC^-1)   
                 CPA = 25.9
@@ -440,7 +443,7 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
                 
                 LE = ET * LHV   !  LE = latent heat (W m^-2)
                 dLE = GV * LHV * (VPD/PATM)!  dle = derivative of LE    
-                
+                !print *, "hour: ", ihour, "rNet: ", rNet, "H: ", H, "LE: ", LE
                 Y = Rnet - H - LE!  Y = error in energy balance calculation                    
                 Dt = Y / (dR + dH + dLE)! Dt = Delta-temperature        
                 
@@ -455,6 +458,65 @@ SUBROUTINE PSTRANSP(iday,ihour,RDFIPT,TUIPT,TDIPT,RNET,WIND,PAR,TAIR,TMOVE,CA,RH
                 if(verbose.eq.2.)print *,"     Leaf temp convergence at iteration ", iter
                 GOTO 200
             endif    
+        elseif (tLeafCalc.eq.4) then
+            !!!!!!!!!!!!!!!!!!!!!!!!!!!
+            ! Boundary layer conductance for heat - single sided, free convection
+            GBHF = GBHFREE(TAIR,TLEAF,PRESS,WLEAF)
+            ! Total boundary layer conductance for heat
+            GBH = GBHU + GBHF
+            ! Total conductance for heat - two-sided
+            GH = 2.*(GBH + GRADN)
+            ! Total conductance for water vapour
+            GBV = GBVGBH*GBH    !GBVGBH is from maestcom.f90. Ratio of Gbw:Gbh magic number
+            !GSC is being modified in the photosyn function call. In photosyn GSC is called GS
+            !GSV should already be calculated elsewhere. STH 2015-1201
+            GSV = GSVGSC*GSC    !GSVGSC is from maestcom.f90. Ratio of Gsw:Gsc magic number
+            !GV = NSIDES*(GBV*GSV)/(GBV+GSV) ! already one-sided value
+            GV = (GBV*GSV)/(GBV+GSV)
+            !  Call Penman-Monteith equation
+            !print *, "rnet: ",rnet
+            ET = PENMON(PRESS,SLOPE,LHV,RNET,VPD,GH,GV)
+            !print *, "hour: ", ihour, "rnet: ",rnet, "e: ", ET
+            ! End of subroutine if no iterations wanted.
+            IF (ITERMAX.EQ.0) GOTO 200
+            ! Otherwise, calculate new TLEAF, DLEAF, RHLEAF & CS
+            GBC = GBH/GBHGBC
+            CS = CA - ALEAF/GBC
+            !****This is where differences from maestra start****
+                !start with guessing that t1 = TLEAF = TAIR
+                !initialize t2 to TAIR plus a small offset to prevent escape
+                !t2 = TAIR + TOL 
+
+                !TLEAF1 = (TLEAF1 + t2)/2  
+                dR = 4.* EMLEAF * SIGMA * tk(TLEAF) ** 3  ! derivative of radiative dissipation; should be similar to dR = GRADN 
+                !dR = 8.* EMLEAF * SIGMA * tempk ** 3  ! derivative of radiative dissipation; should be similar to dR = GRADN 
+                ! H = sensible heat transfer to air(W m^-2)
+                ! molar specific heat of air (joules mol^-1 oC^-1)   
+                CPA = 25.9
+                
+                H = CPA * (TLEAF - TAIR) *2 * GBH   
+                print *, H
+                print *, 2*(0.0259/(0.004*((wind/WLEAF)**0.5)))*(Tleaf-Tair)
+                H = 2*(0.0259/(0.004*((wind/WLEAF)**0.5)))*(Tleaf-Tair)
+                dH = CPA *2 * GBH ! dH = derivative of H; GBH should be the same as gb (total conductance to heat); multiply by 2 for 2-sided  
+                
+                LE = ET * LHV   !  LE = latent heat (W m^-2)
+                dLE = GV * LHV * (VPD/PATM)!  dle = derivative of LE    
+                !print *, "hour: ", ihour, "rNet: ", rNet, "H: ", H, "LE: ", LE
+                Y = Rnet - H - LE!  Y = error in energy balance calculation                    
+                TDIFF = Y / (dR + dH + dLE)! Delta-temperature         
+                TLEAF1 = TLEAF + TDIFF !  New guess for leaf temperature 
+            !***** fin de la modification
+            DLEAF = ET * PRESS / GV
+            RHLEAF = 1. - DLEAF/SATUR(TLEAF1)
+            VMLEAF = DLEAF/PRESS*1E-3
+            ! Check to see whether convergence achieved or failed
+            print *, iter, ABS(TLEAF-TLEAF1), TOL
+            IF (ABS(TLEAF - TLEAF1).LT.TOL) then
+                print *, "converged"
+                if(verbose.eq.2.)print *,"     Leaf temp convergence at iteration ", iter
+                GOTO 200
+            endif   
         endif
         IF (ITER.GT.ITERMAX) THEN
             write(errormessage, '(I4,A,I2,A)') IDAY,'  ', IHOUR, ' FAILED CONVERGENCE IN PSTRANSP'

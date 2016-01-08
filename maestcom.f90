@@ -39,7 +39,7 @@ MODULE maestcom
     REAL, PARAMETER :: TWOPI = 2.0 * PI    ! Two times Pi
     REAL, PARAMETER :: PID2 = PI / 2.0     ! Pi divided by two
     REAL, PARAMETER :: PID180 = PI / 180.0 ! Pi divided by 180 degrees
-    REAL, PARAMETER :: AIRMA = 29.e-3      ! mol mass air (kg/mol) !Was that 'A' a typo? Meant to be a 'W'?-STH 2015.0513
+    REAL, PARAMETER :: AIRMA = 29.e-3      ! mol mass air (kg/mol)
     REAL, PARAMETER :: PATM = 1.0125E5     ! atmospheric pressure - standard condns (Pa)
     REAL, PARAMETER :: CPAIR = 1010.0      ! heat capacity of air (J kg-1 K-1)
     REAL, PARAMETER :: CPH2O = 4.186E06    ! heat capacity of water (J kg-1 K-1)
@@ -56,9 +56,9 @@ MODULE maestcom
     REAL, PARAMETER :: H2OVW = 18.05e-6    ! partial molal volume of water at 20C (m3 mol-1)
     REAL, PARAMETER :: RCONST = 8.314      ! universal gas constant (J/mol/K)
     REAL, PARAMETER :: SIGMA = 5.67e-8     ! Steffan Boltzman constant (W/m2/K4)
-    REAL, PARAMETER :: GBHGBC = 1.32       ! Ratio of Gbh:Gbc
-    REAL, PARAMETER :: GSVGSC = 1.57       ! Ratio of Gsw:Gsc
-    REAL, PARAMETER :: GBVGBH = 1.075      ! Ratio of Gbw:Gbh
+    REAL, PARAMETER :: GBHGBC = 1.32       ! Ratio of Gbh:Gbc (boundary layer conductance for heat: boundary layer conductance for CO2)
+    REAL, PARAMETER :: GSVGSC = 1.57       ! Ratio of Gsw:Gsc (stomatal conductance for water vapour: stomatal conductance for CO2)
+    REAL, PARAMETER :: GBVGBH = 1.075      ! Ratio of Gbw:Gbh (boundary layer conductance for water vapour: boundary layer conductance for heat)
     REAL, PARAMETER :: ALPHAQ = 0.425      ! Quantum yield of RuBP regen (mol mol-1)
     REAL, PARAMETER :: SOLARC = 1370       ! Solar constant (J m-2 s-1) also (W m-2)
     REAL, PARAMETER :: GCPERMOL = 12.0     ! Grams ! per mol !
