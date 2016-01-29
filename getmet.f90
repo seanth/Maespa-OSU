@@ -868,7 +868,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     IF (METCOLS(MHRad).NE.MISSING) THEN
         if(verbose.ge.2)print *, "     Reading in incident total short-wave radiation (RAD)..."
         DO IHR = 1,KHRS
-            solarRad(IHR,1) = DATAIN(IHR,METCOLS(MHRad))
+            solarRad(IHR,1) = DATAIN(IHR,METCOLS(MHRad)) !in W m-2
             if ((solarRad(IHR,1).eq.-9999).OR.(solarRad(IHR,1).LE.-100)) then
                 if(verbose.ge.2)print *, "      Terminal error. Hour:",iHR-1
             end if
@@ -876,7 +876,8 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     ELSE IF (METCOLS(MHPAR).NE.MISSING) THEN
         if(verbose.ge.2)print *, "     Calculating incident total short-wave radiation (RAD) using incident photosynthetically active radiation(PAR)..."
         DO IHR = 1,KHRS
-            solarRad(IHR,1) = DATAIN(IHR,METCOLS(MHPAR)) / FPAR
+            !Convert PAR umol m-2 s -2 to PAR to W m-2 s-1. Convert W PAR to W RAD
+            solarRad(IHR,1) = DATAIN(IHR,METCOLS(MHPAR)) / UMOLPERJ / FPAR
             if ((solarRad(IHR,1).eq.-9999).OR.(solarRad(IHR,1).LE.-100)) then
                 if(verbose.ge.2)print *, "      Terminal error. Hour:",iHR-1
             end if
@@ -885,10 +886,11 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     !---STH 2015-0528
 
     ! Must have either PAR (umol m-2 s-1) or global radiation (W m-2)
+    !RADABV(1) is PAR in W/m2
     IF (METCOLS(MHPAR).NE.MISSING) THEN
         if(verbose.ge.2)print *, "     Reading in incident photosynthetically active radiation(PAR)..."
         DO IHR = 1,KHRS
-            RADABV(IHR,1) = DATAIN(IHR,METCOLS(MHPAR)) / UMOLPERJ
+            RADABV(IHR,1) = DATAIN(IHR,METCOLS(MHPAR)) / UMOLPERJ !convert umol m-2 s-1 to W m-2
             if ((RADABV(IHR,1).eq.-9999).OR.(RADABV(IHR,1).LE.-100)) then
                 if(verbose.ge.2)print *, "      Terminal error. Hour:",iHR-1
             end if
@@ -897,7 +899,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
         if(verbose.ge.2)print *, "     Calculating incident photosynthetically active radiation(PAR) from incident total short-wave radiation (RAD)..."
         DO IHR = 1,KHRS
             !RADABV(IHR,1) = DATAIN(IHR,METCOLS(MHRAD)) * FPAR
-            !Use already read-in data
+            !Need to convert the RAD W m-2 to PAR W m-2
             RADABV(IHR,1) = solarRad(IHR, 1) * FPAR
             if ((RADABV(IHR,1).eq.-9999).OR.(RADABV(IHR,1).LE.-100)) then
                 if(verbose.ge.2)print *, "      Terminal error. Hour:",iHR-1
@@ -922,9 +924,7 @@ SUBROUTINE GETMETHR(IDATE,ZEN,NOMETCOLS,METCOLS,CAK,PRESSK,SWMIN,SWMAX,DELTAT,AL
     ELSE
         if(verbose.ge.2)print *, "     Calculating fraction of incident PAR which is direct-beam..."
         DO IHR = 1,KHRS
-            !FBEAM(IHR,1) = CALCFBMH(IDATE,ZEN(IHR),RADABV(IHR,1))
-            !***STH 2015-0529. We have RAD. Use it instead of sending PAR and then converting to RAD
-            FBEAM(IHR,1) = CALCFBMH(IDATE,ZEN(IHR),solarRad(IHR,1))
+            FBEAM(IHR,1) = CALCFBMH(IDATE,ZEN(IHR),RADABV(IHR,1))
             ! 29/3     FBEAM(IHR,1) = CALCFBMH(IDATE,IHR,ALAT,DEC,RADABV(IHR,1))
             !          FBEAM(IHR,1) = CALCFBMWN(IDATE,IHR,ZEN(IHR),RADABV(IHR,1))
         END DO
