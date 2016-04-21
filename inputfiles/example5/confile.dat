@@ -1,4 +1,9 @@
 Bago BB gs
+
+&flocations
+fout_dir='example5_output_files/'
+fin_dir='example5_input_files/'
+/
 	
 flags to indicate which input  output files to use.
 &control
