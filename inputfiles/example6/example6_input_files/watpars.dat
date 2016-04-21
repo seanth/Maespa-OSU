@@ -1,0 +1,92 @@
+Parameterized for US-Me2. 2016 STH
+
+&watcontrol
+simtsoil = 1
+simsoilevap = 1
+reassignrain = 0
+retfunction = 1
+keepwet = 0
+!keepdry = 0 !This value is specified in the manual, but it crashes the program when used. STH 2016-0229.
+wsoilmethod = 1
+equaluptake = 0
+usemeaset = 0
+usemeassw = 0
+usestand = 1
+/
+
+&wattfall
+rutterb = 3.7 		![1][2]
+rutterd = 0.002 	![2][3]
+maxstorage = 1.0 	![1][2]
+throughfall = 0.7 	![1][2]
+/
+
+&watinfilt
+expinf = 0.25    	![3]
+/
+
+&soiletpars
+drythickmin = 0.001 ![1]
+tortpar = 2.5 		![1][6]
+/
+
+&rootpars
+rootrad = 0.0005 	![1]
+rootdens = 1680 	![1]
+rootmasstot = 1000 	![1]
+nrootlayer = 25 	![2] !nrootlayer must be <= nlayer
+rootbeta = 0.99 	![4]
+/
+
+&plantpars
+minleafwp = -2 		![1]
+minrootwp = -3 		![5]
+plantk = 4.0 		![7]
+/
+
+Variable soil water retention functions with depth.
+&soilret
+bpar = 2.1141004 	![9]
+psie = -0.0075715 	![9]
+ksat = 6.8 			![3]
+/
+
+&laypars
+nlayer = 25 		!nlayer must be >= nrootlayer												![2*]
+laythick = 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 	![8]
+porefrac = 0.67 0.66 0.65 0.63 0.61 0.58 0.56 0.54 0.52											![3]
+fracorganic = 0.009 0.009 0.004 0.004 0.002 0.002 0.002 0.002 0 0 0 0 0 0 0 0 0 0 0 0 0 		![8]
+/
+
+
+&initpars
+initwater = 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4  ![8]
+soiltemp = 1.85 1.85 1.85 1.85 1.85 2.225 2.6 2.975 3.35 3.725 4.1 4.475 4.85 5.225 5.6 5.975 6.35 6.725 7.1 7.475 7.85 ![8, conversted from K to C]
+/
+
+![1] 2001 Williams "Use of a simulation model and ecosystem 
+		!flux data to examine carbon–water interactions in ponderosa pine"
+![2] 1975 Rutter "A Predictive Model of Rainfall Interception in Forests. II. 
+		!Generalization of the Model and Comparison with Observations in Some 
+		!Coniferous and Hardwood Stands"
+![2*] nlayer must be greater than or equal to nrootlayer, which is from [2]
+![3] Maespa Tumbarumba example waterpars.dat. 
+		!https://bitbucket.org/remkoduursma/maespa/raw/
+		!d491b99b148a4f88e7833d3c8008844bcf2d49f8/inputfiles/example1/watpars.dat 
+		!Retrieved 2016.2029
+![4] 1996 Jackson "A global analysis of root distributions for terrestrial biomes"
+![5] MAESPA manual. http://maespa.github.io/manual.html#watparsdat Retrieved 2016-0229
+![6] 1988 Choudhury "A four-layer model for the heat budget of homogeneous land surfaces"
+![7] 2014 Bonan "Modeling stomatal conductance in the earth system: linking leaf 
+		!water-use efficiency and water transport along the soil–plant–atmosphere continuum"
+![8] Example evergreen soil input for SPA 2.6. https://svn.ecdf.ed.ac.uk/repo/geos/SPA/example_inputs/
+		!for_spa_v2.6_onwards/evergreen_soil.csv Retrieved 2016-0229
+![9] Data was extracted from 2014 Ruehr "Effects of heat and drought on carbon and water dynamics 
+		!in a regenerating semi-arid pine forest: a combined experimental and modeling approach", 
+		!supplemental 1. The analysis found values that for MAESPA's SOILWP = PSIE*(WATFRAC/POREFRAC)^-BPAR
+		!equation. r2=0.94
+
+
+
+
+

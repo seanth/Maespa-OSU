@@ -1,8 +1,9 @@
-Example using defined input and output directories
+Simulations for Metolius, Oregon. Ameriflux US-Me2
+Use as an example of a more complete confile parameterization
 
 &flocations
-fout_dir='output_files-Metolius/TempMethod-3/'
-fin_dir='input_files/'
+fout_dir='example6_output_files/'
+fin_dir='example6_input_files/'
 /
 	
 flags to indicate which input  output files to use.
@@ -10,10 +11,10 @@ flags to indicate which input  output files to use.
 iohrly=2
 iotutd=9       
 ioresp=1      
-iohist=1
+iohist=0
 isimus=0
 ipoints=0
-ISUNLA=1
+isunla=1
 verbose=1
 headers=0
 /
@@ -38,10 +39,10 @@ enddate = '21/06/14'
 	
 indicate which target tree(s) to use. 
 &treescon	
-!notrees = 1
-itargets = 1 
+!notrees = 904
+itargets = 24	34	36	42	52	55	57	58	71	72	76	81	91	98	102	105	123	133	135	155	161	164	166	173	177	183	188	192	198	199	206	211	226	229	258	275	276	279	281	289	310	314	333	343	347	348	354	365	379	391	414	417	420	444	445	450	469	480	481	487	517	521	524	532	534	537	551	569	570	571	575	581	588	589	593	597	618	623	635	636	637	673	694	701	705	720	725	728	738	744	752	755	769	806	823	833	839	850	861	892
 !edgedist= 50.000000
-/							
+/				
 
 
 number of angles and layers to integrate over. 
@@ -56,9 +57,11 @@ choice of submodels.
 &model
 modelgs = 2
 modelrd = 0
+modelrw = 0 			!If set to 1, need to parameterize &COLLWResp in phy.dat
 modeljm = 0
 itermax = 99
 modelss = 0
-tLeafCalc = 3
+tLeafCalc = 1
+allomCalc = 1
 /
 
