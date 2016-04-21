@@ -90,7 +90,7 @@ PROGRAM maespa
     ! Get input from control file
     if (verbose.ge.1)print *, "***Importing the control file settings****"
     CALL INPUTCON(ISTART, IEND, NSTEP,NUMPNT, NOLAY, PPLAY, NZEN, DIFZEN, NAZ,      &
-                    MODELGS, MODELJM, MODELRD, MODELSS, MODELRW, ITERMAX, tLeafCalc, IOHIST,   &
+                    MODELGS, MODELJM, MODELRD, MODELSS, MODELRW, ITERMAX, tLeafCalc, allomCalc, IOHIST,   &
                     BINSIZE,ICC, CO2INC, TINC,IOTC, TOTC, WINDOTC, PAROTC,          &
                     FBEAMOTC, IWATFILE, NSPECIES, SPECIESNAMES,   &
                     PHYFILES, STRFILES )
@@ -100,6 +100,8 @@ PROGRAM maespa
         if(tLeafCalc.eq.2)print *,"     Using Maespa w/o 'divide by 4' heat balance method"
         if(tLeafCalc.eq.3)print *,"     Using Paw U/Berry inspired heat balance method"
     endif
+    if(allomCalc.eq.0)print *,"     Calculating mass using mass=coefft*height*(diameter^expont)+wintrc"
+    if(allomCalc.eq.1)print *,"     Calculating mass using mass=coefft*(diameter^expont)+wintrc"
     
     ! Get input from canopy structure file
     if (verbose.ge.1)print *, "***Importing data from canopy structure file(s)****"
@@ -814,9 +816,9 @@ PROGRAM maespa
                 !   3.) root biomass
                 !Calls the same equation, feeding it different alpha and beta values.
                 !The 7th value in parameters passed to the function is what the end value is written to
-                CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),COEFFT,EXPONT,WINTERC,WBIOM,WBINC)     !Trunk biomass
-                CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),BCOEFFT,BEXPONT,BINTERC,BBIOM,BBINC)   !Branch biomass 
-                CALL CALCWBIOM(IDAY,RZ(1)+ZBC(1),DIAM(1),RCOEFFT,REXPONT,RINTERC,RBIOM,RBINC)   !Root biomass
+                CALL CALCWBIOM(allomCalc, IDAY,RZ(1)+ZBC(1),DIAM(1),COEFFT,EXPONT,WINTERC,WBIOM,WBINC)     !Trunk biomass
+                CALL CALCWBIOM(allomCalc, IDAY,RZ(1)+ZBC(1),DIAM(1),BCOEFFT,BEXPONT,BINTERC,BBIOM,BBINC)   !Branch biomass 
+                CALL CALCWBIOM(allomCalc, IDAY,RZ(1)+ZBC(1),DIAM(1),RCOEFFT,REXPONT,RINTERC,RBIOM,RBINC)   !Root biomass
                 
                 ! Calculate foliar biomass and increment
                 CALL CALCFBIOM(IDAY,NOSLADATES,FOLLAY,SLA,PROPP,NOLAY,NOAGEP,FBIOM,FBINC)
@@ -1196,6 +1198,8 @@ PROGRAM maespa
                                 END DO
                             END DO ! End loop over sunlit / shaded leaves
                         END IF ! Separating sunlit & shaded foliage, or not
+                        !print *, "Area: ",AREA
+                        !print *, "Farea: ",Farea
 
                         ! Write sunlit leaf area to file.
                         IF(ISUNLA.EQ.1)THEN

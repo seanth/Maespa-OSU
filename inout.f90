@@ -1067,7 +1067,7 @@ END SUBROUTINE CLOSEF
 !**********************************************************************
 SUBROUTINE INPUTCON(ISTART, IEND, NSTEP,                                    &
                     NUMPNT,NOLAY,PPLAY,NZEN,DIFZEN,NAZ,                     &
-                    MODELGS, MODELJM, MODELRD, MODELSS, MODELRW, ITERMAX, tLeafCalc,  &
+                    MODELGS, MODELJM, MODELRD, MODELSS, MODELRW, ITERMAX, tLeafCalc, allomCalc, &
                     IOHIST, BINSIZE, ICC, CO2INC, TINC,                     &
                     IOTC, TOTC, WINDOTC, PAROTC, FBEAMOTC,                  &
                     IWATFILE,                            &
@@ -1080,7 +1080,7 @@ SUBROUTINE INPUTCON(ISTART, IEND, NSTEP,                                    &
 
     REAL DIFZEN(MAXANG)
     INTEGER PPLAY,ISTART,IEND,NSTEP,NUMPNT,NOLAY,PPLY,NZEN,NAZ,MODELGS
-    INTEGER MODELJM,MODELRD,MODELSS,MODELRW,ITERMAX,tLeafCalc,NSPECIES
+    INTEGER MODELJM,MODELRD,MODELSS,MODELRW,ITERMAX,tLeafCalc,allomCalc,NSPECIES
     INTEGER IOTC,IOHIST,IWATFILE,ICC
     CHARACTER SPECIESNAMES(MAXSP)*30
     CHARACTER PHYFILES(MAXSP)*30
@@ -1092,7 +1092,7 @@ SUBROUTINE INPUTCON(ISTART, IEND, NSTEP,                                    &
     CALL READDATES(UCONTROL, ISTART, IEND, NSTEP)
     CALL READSPECIES(UCONTROL, NSPECIES, SPECIESNAMES,PHYFILES, STRFILES)
     CALL READZEN(UCONTROL, NUMPNT, NOLAY, PPLAY, NZEN, NAZ, DIFZEN)
-    CALL READMODEL(UCONTROL, MODELGS, MODELJM, MODELRD,MODELSS, MODELRW, ITERMAX, tLeafCalc)
+    CALL READMODEL(UCONTROL, MODELGS, MODELJM, MODELRD,MODELSS, MODELRW, ITERMAX, tLeafCalc, allomCalc)
     !print *, tLeafCalc
     CALL READHIST(UCONTROL,IOHIST,BINSIZE)
     CALL READCCSCEN(UCONTROL,ICC,CO2INC,TINC)
@@ -2952,16 +2952,17 @@ SUBROUTINE READALLOM(UFILE, COEFFTI, EXPONTI, WINTERCI,     &
     REAL REXPONTI,RINTERCI,FRFRACI
     NAMELIST /ALLOM/ COEFFT, EXPONT, WINTERC
     NAMELIST /ALLOMB/ BCOEFFT, BEXPONT, BINTERC
-    NAMELIST /ALLOMR/ RCOEFFT, REXPONT, RINTERC, FRFRAC
+    !NAMELIST /ALLOMR/ RCOEFFT, REXPONT, RINTERC, FRFRAC
+    namelist /allomr/ rcoefft, rexpont, rinterc, frfrac
     
     ! Default values
     COEFFT = 0.0
     WINTERC = 0.0
     EXPONT = 2.
-    RCOEFFT = 0.0
-    RINTERC = 0.0
-    REXPONT = 2.
-    FRFRAC = 1.0
+    rcoefft = 0.0
+    rinterc = 0.0
+    rexpont = 2.
+    frfrac = 1.0
     BCOEFFT = 0.0
     BEXPONT = 2.
 
@@ -2972,19 +2973,19 @@ SUBROUTINE READALLOM(UFILE, COEFFTI, EXPONTI, WINTERCI,     &
         !        CALL SUBERROR('CALCULATING WOODY RESPIRATION',
         !     &  IWARN,IOERROR)
     !END IF
+ 
+    REWIND (UFILE)
+    READ (UFILE, allomr, IOSTAT = IOERROR)
+    !IF (RCOEFFT.GT.0.0) THEN
+        !       CALL SUBERROR('CALCULATING ROOT RESPIRATION',
+        !    &  IWARN,IOERROR)
+    !END IF
 
     REWIND (UFILE)
     READ (UFILE, ALLOMB, IOSTAT = IOERROR)
     !IF (RCOEFFT.GT.0.0) THEN
         !        CALL SUBERROR('CALCULATING BRANCH RESPIRATION',
         !     &  IWARN,IOERROR)
-    !END IF
-
-    REWIND (UFILE)
-    READ (UFILE, ALLOMR, IOSTAT = IOERROR)
-    !IF (RCOEFFT.GT.0.0) THEN
-        !       CALL SUBERROR('CALCULATING ROOT RESPIRATION',
-        !    &  IWARN,IOERROR)
     !END IF
 
     COEFFTI = COEFFT
@@ -3147,7 +3148,7 @@ END SUBROUTINE READBETA
 
 !**********************************************************************
 SUBROUTINE READMODEL(UFILE, GSMODI, JMMODI, RDMODI, &
-                    SSMODI, RWMODI, ITERMAXI, tLeafCalci)
+                    SSMODI, RWMODI, ITERMAXI, tLeafCalci, allomCalci)
 ! Read in flags which control the physiological models used.
 ! MODELGS - controls model of stomatal conductance
 ! MODELJM - whether JMAX,VCMAX read in (0) or calculated from leaf N (1)
@@ -3159,12 +3160,12 @@ SUBROUTINE READMODEL(UFILE, GSMODI, JMMODI, RDMODI, &
 
     USE maestcom
     IMPLICIT NONE
-    INTEGER UFILE,GSMODI,JMMODI,RDMODI,SSMODI,RWMODI,ITERMAXI,tLeafCalci
+    INTEGER UFILE,GSMODI,JMMODI,RDMODI,SSMODI,RWMODI,ITERMAXI,tLeafCalci, allomCalci
     INTEGER MODELGS,MODELJM,MODELRD,MODELRW,MODELSS
-    INTEGER ITERMAX,tLeafCalc,IOERROR
+    INTEGER ITERMAX,tLeafCalc,allomCalc,IOERROR
     
     NAMELIST /MODEL/ MODELGS,MODELJM,MODELRD,MODELRW, &
-                        MODELSS,ITERMAX,tLeafCalc
+                        MODELSS,ITERMAX,tLeafCalc,allomCalc
     
 
     ! Default values
@@ -3175,6 +3176,7 @@ SUBROUTINE READMODEL(UFILE, GSMODI, JMMODI, RDMODI, &
     MODELSS = 0     ! sunlit & shade calculations separate
     ITERMAX = 0     ! The leaf temperature is not calculated
     tLeafCalc = 0   ! Method to calculate leaf temp
+    allomCalc = 0   ! Which allometric equation to use. m=b*h*(d^a)+w or m=b*(d^a)+w
 
     ! Read file
     REWIND (UFILE)
@@ -3189,6 +3191,7 @@ SUBROUTINE READMODEL(UFILE, GSMODI, JMMODI, RDMODI, &
     SSMODI = MODELSS
     ITERMAXI = ITERMAX
     tLeafCalci = tLeafCalc
+    allomCalci = allomCalc
 
     RETURN
 END SUBROUTINE READMODEL
