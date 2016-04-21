@@ -1,5 +1,10 @@
 Run a single tree in a 10x10 stand of trees.
 
+&flocations
+fout_dir='example2_output_files/'
+fin_dir='example2_input_files/'
+/
+
 &control
 iohrly=1       
 iotutd=1
