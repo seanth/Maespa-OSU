@@ -1,3 +1,8 @@
+&flocations
+fout_dir='example4_output_files/'
+fin_dir='example4_input_files/'
+/
+
 &control
 iohrly=1       
 iotutd=9       
