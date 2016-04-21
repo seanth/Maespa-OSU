@@ -1,5 +1,10 @@
 Tumbarumba example simulation.
 
+&flocations
+fout_dir='example1_output_files/'
+fin_dir='example1_input_files/'
+/
+
 &control
 iohrly=1       
 iotutd=9       
