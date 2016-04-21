@@ -87,9 +87,9 @@ DATESWLEAF = '01/01/99'
 !noages = 1
 !/
 
-&nfol
-dates = '01/01/50'
-values = -1
+!&nfol
+!dates = '01/01/50'
+!values = 2.5
 /
 	
 &jmaxcon			
@@ -99,7 +99,7 @@ nodates = 1
 /
 	
 &jmax
-values = 191
+values = 131.6 		![1]
 dates = '14/11/01'
 /
 
@@ -110,7 +110,7 @@ nodates = 1
 /
 	
 &vcmax
-values = 82
+values = 48.9 		![1]
 dates = '14/11/01'
 /
 
@@ -162,10 +162,11 @@ If RD is to be calculated from leaf N content RD = RDA * LEAFN + RDB
 !/
 
 &rdpars
-rtemp = 0.0
-q10f = 0.0575
-dayresp = 0.6
-effyrf = 0.4
+effyrf = 0.4 					![7]
+q10f = 0.083 					![2]
+rtemp = 25.0 					![2]
+dayresp = 1.0 					![5]
+tbelow = -100.0 				![6]
 /
 
 Foliage respiration Q10 can also be specified by date using the following namelist
@@ -182,18 +183,18 @@ nolayers = 1
 /
 	
 &sla
-values = 4.6
+values = 4.46							![8]
 dates = '14/11/01'
 /
 
 !&WResp
-!EFFY =
-!RM =
-!RMA =
-!RTemp =
-!Q10W =
-!StemForm =
-!/
+EFFY = 0.33							![2]
+RM = 0.0
+RMA = 0.08807							![2]
+RTemp = 15								![2]
+Q10W = 0.07 							![2]
+StemForm = 0.25 						![3]
+/
 
 !&COLLWResp
 !COLLA =
@@ -206,17 +207,26 @@ The wood respiration Q10 can also be specified by date using the following namel
 !ndates =
 !rates =
 !dates =
+!/
 
 !&BResp
-!RMB =
-!RTempB =
-!Q10B =
-!/
+RMB = 0.08807 							![2]
+RTempB = 15 							![2]
+Q10B = 0.07 							![2]
+/
 
 !&RResp
-!RMFP =
-!RMCR =
-!RTempR =
-!Q10R =
-!/
+RMFR = 0.08807
+RMCR = 0.08807
+RTempR = 15 							![2]
+Q10R = 4.1 							![4]
+/
 
+![1] 2004 Schwarz Climatic versus biotic constraints on carbon and water fluxes in seasonally drought-affected ponderosa pine ecosystems
+![2] Wang and Jarvis 1999
+![3] https://www.grc.nasa.gov/www/k-12/airplane/volume.html
+![4] Saiz et al 2006
+![5] Medlyn and Jarvis 1999
+![6] http://maespa.github.io/manual.html#phydat
+![7] https://bitbucket.org/remkoduursma/maespa/src/d1327db7f0382e0c8861eeec4677044f833d6273/inputfiles/example5/phy1.dat?at=master&fileviewer=file-view-default
+![8] Tobin 2006
