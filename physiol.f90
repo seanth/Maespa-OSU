@@ -1169,23 +1169,24 @@ REAL FUNCTION GBCANMS(WIND,ZHT,Z0HT,ZPD)
 END FUNCTION GBCANMS
 
 !**********************************************************************
-SUBROUTINE CALCWBIOM(IDAY,HT,DIAM,COEFFT,EXPONT,WINTERC,WBIOM,WBINC)
+SUBROUTINE CALCWBIOM(allomCalc, IDAY,HT,DIAM,COEFFT,EXPONT,WINTERC,WBIOM,WBINC)
 ! Calculate the woody biomass (kg DW) on the given day from the height
 ! (m) and diameter (m). Also calculate the increment in woody biomass
 ! since previous day (g DW). Needed to calculate woody respiration.
 !**********************************************************************
     IMPLICIT NONE
-    INTEGER IDAY
+    INTEGER IDAY, allomCalc
     REAL PREVWBIOM,HT,DIAM,COEFFT,EXPONT,WINTERC,WBIOM,WBINC
     
     PREVWBIOM = WBIOM
-    !WBIOM = COEFFT*HT*(DIAM**EXPONT) + WINTERC
-    !==edited out the exisiting equation. It appears to be quasi-geometric
-    !  with default values, not allometric. It's certainly allometric(scaling)
-    !  in form. Anyway, have woody biomass be proportional to diameter ^~2.6667
-    !STH
-    WBIOM = COEFFT*(DIAM**EXPONT) + WINTERC
-    !print *,wbiom
+    if (allomCalc.eq.0) then
+        !quasi geometric way of calculating mass from volume
+        WBIOM = COEFFT*HT*(DIAM**EXPONT) + WINTERC
+    end if
+    if (allomCalc.eq.1) then
+        !Huxley style equation compatable with allometric theory (WBE theory)
+        WBIOM = COEFFT*(DIAM**EXPONT) + WINTERC
+    end if
     IF (IDAY.EQ.0) PREVWBIOM = WBIOM
     WBINC = (WBIOM - PREVWBIOM)*1E3
 
@@ -1232,16 +1233,48 @@ REAL FUNCTION CALCRMW(MODELRW,COLLA,COLLK,STEMSDW,DIAM,HT,STEMFORM,RMWAREA,WBIOM
 
     USE maestcom
     IMPLICIT NONE
-    INTEGER MODELRW
-    REAL COLLA,COLLK,STEMSDW,DIAM,HT,STEMFORM,RMWAREA,WBIOM,RMW
-    REAL STEMAREA
-
+    INTEGER MODELRW, STEMFORM
+    !REAL COLLA,COLLK,STEMSDW,DIAM,HT,STEMFORM,RMWAREA,WBIOM,RMW
+    REAL COLLA,COLLK,STEMSDW,DIAM,HT,RMWAREA,WBIOM,RMW
+    REAL STEMAREA, stemVolume, theRadius
     IF (MODELRW.EQ.1) THEN
         RMW = COLLA*EXP(COLLK*DIAM*100.0)*STEMSDW
     ELSE IF (MODELRW.EQ.2) THEN
+        !Why is this called an area? Looks like it is a volume.
+        !If you follow the units through, they don't cancel correctly
+        !STH 2016.0406
         STEMAREA = STEMFORM*PI*(DIAM**2)*HT
         RMW = RMWAREA*STEMAREA/WBIOM
-    END IF
+        !!!!!!!!!!!!
+        !Consider changing stemForm to be a string so user can define CYL, CONE, PARA, or ELLIP
+        !CYL=0
+        !CONE=1
+        !PARA=2
+        !ELLIP=3
+        ! theRadius=DIAM/2.0
+        ! !Don't let the user enter parameters that will break it
+        ! ! if ((stemForm.gt.3).or.(stemForm.lt.0)) then
+        ! !     print *, "WARNING: STEMFORM has a value outside expected range (0,1,2, or 3)"
+        ! !     print *, "         STEMFORM will default to 0 (cylinder capped on one end)"
+        ! ! end if
+        ! if (stemForm.eq.1) then
+        !     !Surface area for a CONE
+        !     !stemArea=(pi*theRadius*SQRT((theRadius**2.0)+(HT**2.0)))+(pi*theRadius**2.0) !Includes the base
+        !     stemArea=(pi*theRadius*SQRT((theRadius**2.0)+(HT**2.0)))                      !Excludes the base
+        ! else if (stemForm.eq.2) then
+        !     !stemArea=((pi/6.0)*(theRadius/(HT**2.0))*(((((theRadius**2.0)+(4.0*ht**2)))**(3.0/2.0))-theRadius**3.0))+(pi*theRadius**2) !Includes the base
+        !     stemArea=((pi/6.0)*(theRadius/(HT**2.0))*(((((theRadius**2.0)+(4.0*ht**2)))**(3.0/2.0))-theRadius**3.0))                   !Excludes the base
+        ! else if (stemForm.eq.3) then
+        !     stemArea=2*pi*(((((HT**1.6075)*(theRadius**1.6075))+((HT**1.6075)*(theRadius**1.6075))+((theRadius**1.6075)*(theRadius**1.6075)))/3.0)**(1.0/1.6075))                     !Excludes the base
+        !     !stemArea=(2*pi*(((((HT**1.6075)*(theRadius**1.6075))+((HT**1.6075)*(theRadius**1.6075))+((theRadius**1.6075)*(theRadius**1.6075)))/3.0)**(1.0/1.6075)))+(pi*theRadius**2)!Includes the base
+        ! else 
+        !     !Surface are for a CYLINDER
+        !     !stemArea=(2*pi*theRadius*HT)+(2.0*pi*(theRadius**2.0))  !Included top and bottom
+        !     stemArea=(2.0*pi*theRadius*HT)+(pi*(theRadius**2.0))     !Includes only top
+        !     !stemArea=(2*pi*theRadius*HT)                            !Excludes top and bottom
+        ! end if 
+        ! RMW = RMWAREA*STEMAREA/WBIOM
+    end if
 
     CALCRMW = RMW
     RETURN
@@ -1515,6 +1548,7 @@ REAL FUNCTION PSILOBJFUN(PSILIN, EXTRAPARS, EXTRAINT)
         IDAY = EXTRAINT(7)
         IHOUR = EXTRAINT(8)
         tLeafCalc = EXTRAINT(9)
+
 
         RDFIPT =EXTRAPARS(1)
         TUIPT =EXTRAPARS(2)
