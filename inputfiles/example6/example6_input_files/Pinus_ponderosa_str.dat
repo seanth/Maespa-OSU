@@ -1,0 +1,56 @@
+Example structure file.
+	
+	!CSHAPE is a string indicating the shape of the crown: 'CONE' indicates a conical crown, 'ELIP' a half-ellipsoidal crown, 'PARA' a paraboloidal crown, 'ROUND' a full ellipsoid, 'CYL' an upright cylinder, 'BOX' a box shape (suitable for the mini-ecosystems, for example). Default: half-ellipsoidal.
+	&canopy					
+	cshape = 'PARA'					
+	/					
+	
+	&lia
+	!elp =		
+    avgang = 77.	
+    !falpha =		
+	nalpha = 5					
+	/	 
+	
+	&ladd
+	jleaf = 0
+	noagec = 1
+	!bpt =
+	random = 1.0
+	/					
+	
+	&aero
+	extwind = 1.0
+	/				
+	
+	&allom
+	!coefft = 91.4114
+	!expont = 1.741
+	!winterc = 0.0
+	coefft = 2608.159028							![1]
+	expont = 2.536339554							![1]
+	winterc = 0.0
+	/
+	
+	&allomb
+	!bcoefft = 8.9126
+	!bexpont = 2.341
+	!binterc = 0.0
+	bcoefft = 145.92965								![3]
+	bexpont = 1.303374								![3]
+	binterc = 0.0
+	/
+	
+	&allomr
+	!rcoefft = 8.9126
+	!rexpont = 1.341
+	!rinterc = 0.0
+	rcoefft = 1330.785556							![2]
+	rexpont = 2.368738513							![2]
+	rinterc = 0.0
+	frfrac = 0.4
+	/
+
+	![1] Derived by STH from a model. n=904, r2=0.9999, 95% CI for coefft (2.534240866, 2.538438242). Allometric theory predicts coefft should be ~2.6667
+	![2] Derived by STH using Cannell dataset. Gymnosperms alone. n=154, r2=0.9163, 95% CI for rexpont (2.2373, 2.5001). Allometric theory predicts rexpont=expont
+	![3] Derived by STH using Cannell dataset. Gymnosperms alone. n=308, r2=0.5394, 95% CI for bexpont (1.1981, 1.4087)
