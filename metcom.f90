@@ -1,4 +1,23 @@
-MODULE metcom
+!=======================================================================================
+! Copyright 2015 Remko Duursma, Belinda Medlyn, Mathias Christina, Guerric le Maire
+!---------------------------------------------------------------------------------------
+! this file is part of MAESPA.
+!
+! MAESPA is free software: you can redistribute it and/or modify
+! it under the terms of the gnu general public license as published by
+! the free software foundation, either version 2 of the license, or
+! (at your option) any later version.
+!
+! MAESPA is distributed in the hope that it will be useful,
+! but without any warranty; without even the implied warranty of
+! merchantability or fitness for a particular purpose.  see the
+! gnu general public license for more details.
+!
+! you should have received a copy of the gnu general public license
+! along with MAESPA.  if not, see <http://www.gnu.org/licenses/>.
+!=======================================================================================
+    
+    MODULE metcom
     ! IMPLICIT NONE
     ! Numbers of columns of met data
 
@@ -18,6 +37,7 @@ MODULE metcom
     INTEGER, PARAMETER :: MDSWP  = 12
     INTEGER, PARAMETER :: MDSWC  = 13      
     INTEGER, PARAMETER :: MDET   = 14
+    INTEGER, PARAMETER :: MDTHR   = 15
 
     INTEGER, PARAMETER :: MHDATE =  1
     INTEGER, PARAMETER :: MHTIME =  2
@@ -39,6 +59,7 @@ MODULE metcom
     INTEGER, PARAMETER :: MHSWP  = 18       ! SOIL WATER POTENTIAL (MPa)
     INTEGER, PARAMETER :: MHSWC  = 19       ! VOLUMETRIC (M3 M-3)
     INTEGER, PARAMETER :: MHET   = 20
+    INTEGER, PARAMETER :: MHTHR   = 21      ! TEST rayonnement thermique incident
 
     INTEGER, PARAMETER :: POTENTIAL = 1     ! SOIL MOISTURE DATA IS POTENTIAL (MPa)
     INTEGER, PARAMETER :: DEFICIT   = 2     ! SOIL MOISTURE DATA IS DEFICIT (DIMNLESS)

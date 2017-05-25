@@ -16,7 +16,7 @@
 ! you should have received a copy of the gnu general public license
 ! along with MAESPA.  if not, see <http://www.gnu.org/licenses/>.
 !=======================================================================================
-
+    
 SUBROUTINE default_conditions(in_path, out_path)
     USE SWITCHES
     IMPLICIT NONE

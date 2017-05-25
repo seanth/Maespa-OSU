@@ -1,5 +1,25 @@
 !**********************************************************************
 ! INOUT.FOR
+
+!=======================================================================================
+! Copyright 2015 Remko Duursma, Belinda Medlyn, Mathias Christina, Guerric le Maire
+!---------------------------------------------------------------------------------------
+! this file is part of MAESPA.
+!
+! MAESPA is free software: you can redistribute it and/or modify
+! it under the terms of the gnu general public license as published by
+! the free software foundation, either version 2 of the license, or
+! (at your option) any later version.
+!
+! MAESPA is distributed in the hope that it will be useful,
+! but without any warranty; without even the implied warranty of
+! merchantability or fitness for a particular purpose.  see the
+! gnu general public license for more details.
+!
+! you should have received a copy of the gnu general public license
+! along with MAESPA.  if not, see <http://www.gnu.org/licenses/>.
+!=======================================================================================
+    
 ! This file contains all the subroutines for reading and writing to
 ! input and output files.
 ! The main subroutines (called externally) are:
@@ -197,7 +217,7 @@ END SUBROUTINE OPENINPUTF
 
 
 !**********************************************************************
-SUBROUTINE open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,&
+SUBROUTINE OPEN_OUTPUT_FILES(ISIMUS,CTITLE,TTITLE,PTITLE,&
                             STITLE,MTITLE,VTITLE,WTITLE,    &
                             NSPECIES,SPECIESNAMES,OUT_PATH,ISMAESPA,NOLAY)
 ! NOLAY added STH 2015.03.30
@@ -215,90 +235,90 @@ SUBROUTINE open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,&
     LOGICAL ISMAESPA
     CHARACTER SPECIESNAMES(MAXSP)*30
     
-    CALL open_file(trim(out_path)//'Met_out.dat', UMETOUT, 'write', 'asc', 'replace')
+    CALL OPEN_FILE(trim(out_path)//'Met_out.dat', UMETOUT, 'write', 'asc', 'replace')
 
     ! Output file with daily fluxes
     IF (IODAILY .GT. 0 .AND. IOFORMAT .EQ. 0) THEN
-        CALL open_file(trim(out_path)//'Dayflx.dat', UDAILY, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'Dayflx.dat', UDAILY, 'write', 'asc', 'replace')
     ELSE IF (IODAILY .GT. 0 .AND. IOFORMAT .EQ. 1) THEN
-        CALL open_file(trim(out_path)//'Dayflx.bin', UDAILY, 'write', 'bin', 'replace')
-        CALL open_file(trim(out_path)//'Dayflx.hdr', UDAYHDR, 'write', 'asc', 'replace')  
+        CALL OPEN_FILE(trim(out_path)//'Dayflx.bin', UDAILY, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'Dayflx.hdr', UDAYHDR, 'write', 'asc', 'replace')  
     END IF
     
     ! Output file with hourly fluxes (if required).
     IF (IOHRLY.GT.0 .AND. IOFORMAT .EQ. 0) THEN
-        CALL open_file(trim(out_path)//'hrflux.dat', UHRLY, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'hrflux.dat', UHRLY, 'write', 'asc', 'replace')
     ELSE IF (IOHRLY.GT.0 .AND. IOFORMAT .EQ. 1) THEN
-        CALL open_file(trim(out_path)//'hrflux.bin', UHRLY, 'write', 'bin', 'replace')
-        CALL open_file(trim(out_path)//'hrflux.hdr', UHRLYHDR, 'write', 'asc', 'replace')  
+        CALL OPEN_FILE(trim(out_path)//'hrflux.bin', UHRLY, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'hrflux.hdr', UHRLYHDR, 'write', 'asc', 'replace')  
     ENDIF
     
     ! Output file with layer fluxes (if required).
     IF (IOHRLY.GT.1 .AND. IOFORMAT .EQ. 0) THEN
-        CALL open_file(trim(out_path)//'layflx.dat', ULAY, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'layflx.dat', ULAY, 'write', 'asc', 'replace')
     ELSE IF (IOHRLY.GT.1 .AND. IOFORMAT .EQ. 1) THEN
-        CALL open_file(trim(out_path)//'layflx.bin', ULAY, 'write', 'bin', 'replace')
-        CALL open_file(trim(out_path)//'layflx.hdr', ULAYHDR, 'write', 'asc', 'replace')   
+        CALL OPEN_FILE(trim(out_path)//'layflx.bin', ULAY, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'layflx.hdr', ULAYHDR, 'write', 'asc', 'replace')   
     ENDIF
 
     ! Output file with histogram (if required).
     IF (IOHIST.EQ.1 .AND. IOFORMAT .EQ. 0) THEN
-        CALL open_file(trim(out_path)//'histo.dat', UHIST, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'histo.dat', UHIST, 'write', 'asc', 'replace')
     ELSE IF (IOHIST.EQ.1 .AND. IOFORMAT .EQ. 1) THEN
-        CALL open_file(trim(out_path)//'histo.bin', UHIST, 'write', 'bin', 'replace')
-        CALL open_file(trim(out_path)//'histo.hdr', UHISTHDR, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'histo.bin', UHIST, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'histo.hdr', UHISTHDR, 'write', 'asc', 'replace')
     END IF
 
     ! Output file for respiration (if required).
     IF (IORESP.EQ.1 .AND. IOFORMAT .EQ. 0) THEN
-        CALL open_file(trim(out_path)//'resp.dat', URESP, 'write', 'asc', 'replace')
-        CALL open_file(trim(out_path)//'resphr.dat', URESPHR, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'resp.dat', URESP, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'resphr.dat', URESPHR, 'write', 'asc', 'replace')
     ELSE IF (IORESP .EQ. 1 .AND. IOFORMAT .EQ. 1) THEN
-        CALL open_file(trim(out_path)//'resp.bin', URESP, 'write', 'bin', 'replace')
-        CALL open_file(trim(out_path)//'resp.hdr', URESPHDR, 'write', 'asc', 'replace')
-        CALL open_file(trim(out_path)//'resphr.bin', URESPHR, 'write', 'bin', 'replace')
-        CALL open_file(trim(out_path)//'resphr.hdr', URESPHRHDR, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'resp.bin', URESP, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'resp.hdr', URESPHDR, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'resphr.bin', URESPHR, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'resphr.hdr', URESPHRHDR, 'write', 'asc', 'replace')
     END IF
     
-    CALL open_file(trim(out_path)//'wattest.dat', UWATTEST, 'write', 'asc', 'replace')
+    CALL OPEN_FILE(trim(out_path)//'wattest.dat', UWATTEST, 'write', 'asc', 'replace')
     
     ! Output file for water balance (if requested by setting IOWATBAL = 1 in confile.dat).
     IF (ISMAESPA .AND. IOFORMAT .EQ. 0) THEN
-        CALL open_file(trim(out_path)//'watbal.dat', UWATBAL, 'write', 'asc', 'replace')
-        CALL open_file(trim(out_path)//'watlay.dat', UWATLAY, 'write', 'asc', 'replace')
-        CALL open_file(trim(out_path)//'swplay.dat', USWPLAY, 'write', 'asc', 'replace')    ! mathias décembre 2012
-        CALL open_file(trim(out_path)//'watsoilt.dat', USOILT, 'write', 'asc', 'replace')
-        !CALL open_file(trim(out_path)//'wattest.dat', UWATTEST, 'write', 'asc', 'replace')
-        CALL open_file(trim(out_path)//'watupt.dat', UWATUPT, 'write', 'asc', 'replace')
-        CALL open_file(trim(out_path)//'watbalday.dat', UWATDAY, 'write', 'asc', 'replace')   
+        CALL OPEN_FILE(trim(out_path)//'watbal.dat', UWATBAL, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watlay.dat', UWATLAY, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'swplay.dat', USWPLAY, 'write', 'asc', 'replace')    ! mathias décembre 2012
+        CALL OPEN_FILE(trim(out_path)//'watsoilt.dat', USOILT, 'write', 'asc', 'replace')
+        !CALL OPEN_FILE(trim(out_path)//'wattest.dat', UWATTEST, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watupt.dat', UWATUPT, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watbalday.dat', UWATDAY, 'write', 'asc', 'replace')   
     ELSE IF (ISMAESPA .AND. IOFORMAT .EQ. 1) THEN
-        CALL open_file(trim(out_path)//'watbal.bin', UWATBAL, 'write', 'bin', 'replace')
-        CALL open_file(trim(out_path)//'watbal.hdr', UWATBALHDR, 'write', 'asc', 'replace')
-        CALL open_file(trim(out_path)//'watlay.bin', UWATLAY, 'write', 'bin', 'replace')
-        CALL open_file(trim(out_path)//'watlay.hdr', UWATLAYHDR, 'write', 'asc', 'replace')
-        CALL open_file(trim(out_path)//'watsoilt.bin', USOILT, 'write', 'bin', 'replace')
-        CALL open_file(trim(out_path)//'watsoilt.hdr', USOILTHDR, 'write', 'asc', 'replace')
-        CALL open_file(trim(out_path)//'wattest.bin', UWATTEST, 'write', 'bin', 'replace')
-        !CALL open_file(trim(out_path)//'wattest.hdr', UWATTESTHDR, 'write', 'asc', 'replace')
-        CALL open_file(trim(out_path)//'watupt.bin', UWATUPT, 'write', 'bin', 'replace')
-        CALL open_file(trim(out_path)//'watupt.hdr', UWATUPTHDR, 'write', 'asc', 'replace')
-        CALL open_file(trim(out_path)//'watbalday.bin', UWATDAY, 'write', 'bin', 'replace')
-        CALL open_file(trim(out_path)//'watbalday.hdr', UWATDAYHDR, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watbal.bin', UWATBAL, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watbal.hdr', UWATBALHDR, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watlay.bin', UWATLAY, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watlay.hdr', UWATLAYHDR, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watsoilt.bin', USOILT, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watsoilt.hdr', USOILTHDR, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'wattest.bin', UWATTEST, 'write', 'bin', 'replace')
+        !CALL OPEN_FILE(trim(out_path)//'wattest.hdr', UWATTESTHDR, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watupt.bin', UWATUPT, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watupt.hdr', UWATUPTHDR, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watbalday.bin', UWATDAY, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'watbalday.hdr', UWATDAYHDR, 'write', 'asc', 'replace')
     END IF
     
     ! Write to sunla flux     !!!!!
       IF(ISUNLA.EQ.1)THEN               ! Mathias 27/11/12
-        CALL open_file(trim(out_path)//'Canopy_points_out.dat', USUNLA, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'Canopy_points_out.dat', USUNLA, 'write', 'asc', 'replace')
       ENDIF
 
       
     IF(ISIMUS.EQ.1 .AND. IOFORMAT .EQ. 0) THEN
-        CALL open_file(trim(out_path)//'uspar.dat', UPARUS, 'write', 'asc', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'uspar.dat', UPARUS, 'write', 'asc', 'replace')
     ELSE IF(ISIMUS.EQ.1 .AND. IOFORMAT .EQ. 1) THEN
-        CALL open_file(trim(out_path)//'uspar.bin', UPARUS, 'write', 'bin', 'replace')
+        CALL OPEN_FILE(trim(out_path)//'uspar.bin', UPARUS, 'write', 'bin', 'replace')
     ENDIF
 
-    CALL write_header_information(NSPECIES,SPECIESNAMES, &
+    CALL WRITE_HEADER_INFORMATIO(NSPECIES,SPECIESNAMES, &
                                   CTITLE,TTITLE,PTITLE,STITLE, &
                                   MTITLE,WTITLE,VTITLE,ISMAESPA,ISIMUS,nolay) !STH 2015.03.30 added NOLAY
 
@@ -306,7 +326,7 @@ SUBROUTINE open_output_files(ISIMUS,CTITLE,TTITLE,PTITLE,&
 END SUBROUTINE open_output_files
 
 !**********************************************************************
-SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
+SUBROUTINE WRITE_HEADER_INFORMATIO(NSPECIES,SPECIESNAMES, &
                                     CTITLE,TTITLE,PTITLE,STITLE,MTITLE,WTITLE,VTITLE, &
                                     ISMAESPA,ISIMUS,nolay)
 !**********************************************************************
@@ -982,7 +1002,7 @@ SUBROUTINE write_header_information(NSPECIES,SPECIESNAMES, &
     208           FORMAT('hrPSus : photosynthesis for the understorey point (mu mol m-2 s-1)')            
     209           FORMAT('hrETus : transpiration for the understorey point (If zero it is not calculated) (mmol m-2 s-1)')
 
-END SUBROUTINE write_header_information
+END SUBROUTINE WRITE_HEADER_INFORMATIO
 
 
 
@@ -5231,7 +5251,7 @@ INTEGER FUNCTION INEDGES(DX,DY,XMAX,YMAX,EDGEDIST)
 END FUNCTION INEDGES
 
 !**********************************************************************
-SUBROUTINE open_file(fname, unit, action, file_format, status)
+SUBROUTINE OPEN_FILE(fname, unit, action, file_format, status)
 ! More general file interface, opening files...
 ! MGDK, Nov. 2010.
 !**********************************************************************    
@@ -5263,7 +5283,7 @@ SUBROUTINE open_file(fname, unit, action, file_format, status)
         WRITE(*,*) 'Error opening file, dont understand the format:', TRIM(file_format)
     END SELECT
 
-    END SUBROUTINE open_file
+    END SUBROUTINE OPEN_FILE
 
     
     

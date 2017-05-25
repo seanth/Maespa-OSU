@@ -1,3 +1,22 @@
+!=======================================================================================
+! Copyright 2015 Remko Duursma, Belinda Medlyn, Mathias Christina, Guerric le Maire
+!---------------------------------------------------------------------------------------
+! this file is part of MAESPA.
+!
+! MAESPA is free software: you can redistribute it and/or modify
+! it under the terms of the gnu general public license as published by
+! the free software foundation, either version 2 of the license, or
+! (at your option) any later version.
+!
+! MAESPA is distributed in the hope that it will be useful,
+! but without any warranty; without even the implied warranty of
+! merchantability or fitness for a particular purpose.  see the
+! gnu general public license for more details.
+!
+! you should have received a copy of the gnu general public license
+! along with MAESPA.  if not, see <http://www.gnu.org/licenses/>.
+!=======================================================================================
+    
 MODULE MAINDECLARATIONS
 ! Array declarations.
     
@@ -13,6 +32,7 @@ MODULE MAINDECLARATIONS
     REAL RXTABLE1(maxdate,MAXT),RYTABLE1(maxdate,MAXT)
     REAL RZTABLE1(maxdate,MAXT),ZBCTABLE1(maxdate,MAXT)
     REAL FOLTABLE1(maxdate,MAXT),DIAMTABLE1(maxdate,MAXT)
+    
     ! Tree positions and dimensions - sorted trees, all dates
     REAL RXTABLE(maxdate,MAXT),RYTABLE(maxdate,MAXT)
     REAL RZTABLE(maxdate,MAXT),ZBCTABLE(maxdate,MAXT)
@@ -20,9 +40,11 @@ MODULE MAINDECLARATIONS
     
     REAL DIAMTABLE(maxdate,MAXT)
     INTEGER IT(MAXT),ITUUS(MAXT),ITP(MAXT) ! Sorted tree numbers.
+    
     ! Dates for tree dimensions
     INTEGER DATESX(maxdate),DATESY(maxdate),DATESZ(maxdate)
     INTEGER DATEST(maxdate),DATESLA(maxdate),DATESD(maxdate)
+    
     ! Tree dimensions on simulation date (by interpolation)
     REAL DXT(MAXT),DYT(MAXT),DZT(MAXT)
     REAL RX(MAXT),RY(MAXT),RZ(MAXT),ZBC(MAXT)
@@ -32,7 +54,6 @@ MODULE MAINDECLARATIONS
     ! Positions of grid points, associated volume & leaf area, etc
     REAL XL(MAXP),YL(MAXP),ZL(MAXP),VL(MAXP),DLT(MAXP),DLI(MAXC,MAXP)
     REAL XL2(MAXP),YL2(MAXP),ZL2(MAXP),VL2(MAXP)
-    !REAL DLT2(MAXP),DLI2(MAXC,MAXP) 
     
     INTEGER LGP(MAXP),LAYER(MAXP),MLAYER(MAXP),PPLAY
     REAL FOLLAY(MAXLAY),WINDLAY(MAXLAY)
@@ -158,7 +179,6 @@ MODULE MAINDECLARATIONS
     REAL DEXTT(MAXT,MAXANG),DEXTTUS(MAXT,MAXANG)
     REAL BEXTSPEC(MAXSP),BEXTANGSPEC(MAXSP,MAXANG)
     REAL BEXTANGT(MAXT,MAXANG),BEXTANGTUS(MAXT,MAXANG),BEXTANGUS(MAXANG)
-
     REAL BEXTT(MAXT),BEXTTUS(MAXT)
     REAL RCOEFFTSPEC(MAXSP),REXPONTSPEC(MAXSP)
     REAL RINTERCSPEC(MAXSP),FRFRACSPEC(MAXSP)
@@ -196,8 +216,8 @@ MODULE MAINDECLARATIONS
     REAL GSJASPEC(MAXSP), GSJBSPEC(MAXSP), T0SPEC(MAXSP)
     REAL TREFSPEC(MAXSP), TMAXSPEC(MAXSP), SMD1SPEC(MAXSP)
     REAL SMD2SPEC(MAXSP), WC1SPEC(MAXSP), WC2SPEC(MAXSP)
-    REAL SWPEXPSPEC(MAXSP),  D0LSPEC(MAXSP)  ! G0SPEC(MAXSP),
-    REAL GAMMASPEC(MAXSP), WLEAFSPEC(MAXSP)   ! G1SPEC(MAXSP), 
+    REAL SWPEXPSPEC(MAXSP),  D0LSPEC(MAXSP)  
+    REAL GAMMASPEC(MAXSP), WLEAFSPEC(MAXSP)  
     REAL SFSPEC(MAXSP),PSIVSPEC(MAXSP)
     !REAL :: TOTLAI(MAXT)
     INTEGER NOJDATESSPEC(MAXSP),NOVDATESSPEC(MAXSP)
@@ -224,6 +244,7 @@ MODULE MAINDECLARATIONS
     INTEGER DATESGS(maxdate), DATESWLEAF(maxdate),DATESKP(maxdate),DATESROOT(maxdate),DATESLIA(maxdate,maxsp),DATESLAD(maxdate,maxsp)
     REAL G0TABLE(maxdate),G1TABLE(maxdate),WLEAFTABLE(maxdate)
     REAL PLANTKTABLE(maxdate),ROOTRADTABLE(maxdate),ROOTDENSTABLE(maxdate),ROOTMASSTOTTABLE(maxdate)
+    
     
     REAL TARGETFOLS(MAXT)
     REAL ABSRPU, AJQU, ALAT, ALEAF, ANIR, APAR, APP, AREA, ATHR
@@ -286,9 +307,9 @@ MODULE MAINDECLARATIONS
     INTEGER IPTEST
       
     ! Outputs for PAR histogram
-    REAL HISTO(MAXT,MAXHISTO)  ! Note dim change (RAD Sept. 08).
+    REAL HISTO(MAXT,MAXHISTO)  
    
-    ! mgdk...
+    ! 
     INTEGER NSPECIES
 
     !
@@ -316,8 +337,41 @@ MODULE MAINDECLARATIONS
     REAL VPARASPEC(MAXSP),VPARBSPEC(MAXSP),VPARCSPEC(MAXSP)
     REAL VPARA,VPARB,VPARC
     INTEGER VFUN,VFUNSPEC(MAXSP)
+    
+    ! Supplementary M. CHristina
+    REAL TAIRABOVE, TAIRNEW, VPDNEW, DELTA, RHNEW, VPDABOVE, tcan2, AREATOT, TSOILSURFACE
+    REAL TLEAFTABLE(MAXT,MAXP),EMSKY(MAXHRS),TREEH
+    INTEGER ITERTAIR,ILAY, IDIPT,IDTAR,IZEN,ITERTAIRMAX
+    REAL APARTABLE(MAXT,MAXP),ETTABLE(MAXT,MAXP),GSCTABLE(MAXT,MAXP),PSILTABLE(MAXT,MAXP),GCANOP, DMEAN
+    REAL ANIRTABLE(MAXT,MAXP),ATHRTABLE(MAXT,MAXP),HTABLE(MAXT,MAXP)
+    REAL RGLOBUND1, RGLOBUND2 
+    REAL PREVTAIRCAN, PREVVPDCAN,DOWNTHAV
 
     ! New species dependent parameters
     REAL MINLEAFWPSPEC(MAXSP),MINLEAFWP
+    
+    !New gs model where two conductance are calculated
+    INTEGER NEWTUZET
+    REAL G02, G02TABLE(maxdate), G02TABLESPEC(maxdate,maxsp)
+    REAL G12, G12TABLE(maxdate), G12TABLESPEC(maxdate,maxsp)
+    
+    ! for water table and capilarity rising
+    INTEGER ISIMWATTAB, IWATTABLAYER
+    REAL PLATDRAIN, WATCAPIL
+
+    !maximum rooting depth
+    INTEGER RFAGEBEGIN(maxsp),ROOTFRONTLIMIT
+    REAL RFPAR1(maxsp),RFPAR2(maxsp),RFPAR3(maxsp),ROOTFRONT(maxsp)
+    
+    ! soil dry thermal conductivity
+    REAL DRYTHERM
+    
+    ! Plant water storage
+    REAL STORECOEF, STOREEXP, CAPAC
+    REAL ETDEFICIT, ETCANDEFICIT(MAXT,MAXHRS)
+    INTEGER SIMSTORE, STOPSIMONEMPTY
+    REAL PLANTWATER(MAXT), PLANTWATER0(MAXT),PLANTWMINVAL
+    REAL XYLEMPSI(MAXT), WATFLUX
+    INTEGER DEADALIVE(MAXT)
     
 END MODULE

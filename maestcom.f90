@@ -1,4 +1,23 @@
-MODULE maestcom
+!=======================================================================================
+! Copyright 2015 Remko Duursma, Belinda Medlyn, Mathias Christina, Guerric le Maire
+!---------------------------------------------------------------------------------------
+! this file is part of MAESPA.
+!
+! MAESPA is free software: you can redistribute it and/or modify
+! it under the terms of the gnu general public license as published by
+! the free software foundation, either version 2 of the license, or
+! (at your option) any later version.
+!
+! MAESPA is distributed in the hope that it will be useful,
+! but without any warranty; without even the implied warranty of
+! merchantability or fitness for a particular purpose.  see the
+! gnu general public license for more details.
+!
+! you should have received a copy of the gnu general public license
+! along with MAESPA.  if not, see <http://www.gnu.org/licenses/>.
+!=======================================================================================
+    
+    MODULE maestcom
     IMPLICIT NONE
     
     CHARACTER(LEN=3), PARAMETER :: format_ascii = 'asc' 
@@ -7,17 +26,18 @@ MODULE maestcom
     ! Maximum dimensions of arrays
     INTEGER, PARAMETER :: MAXT = 15000        ! Maximum no. of trees in plot. Changed from 1500 by STH 2015.03.23
     INTEGER, PARAMETER :: MAXLAY = 15         ! Maximum no. of layers for radiation
-    INTEGER, PARAMETER :: MAXSOILLAY = 75    ! Maximum no. of layers of soil (RAD)
-    INTEGER, PARAMETER :: MAXSP = 3          ! Maximum no. of species (RAD).
-    INTEGER, PARAMETER :: MAXP = 1500        ! Maximum no. of gridpoints -- MUST BE EQUAL TO OR LARGER THAN MAXT !!!!
+    INTEGER, PARAMETER :: MAXSOILLAY = 75     ! Maximum no. of layers of soil (RAD)
+    INTEGER, PARAMETER :: MAXSP = 3           ! Maximum no. of species (RAD).
+    INTEGER, PARAMETER :: MAXP = 1500         ! Maximum no. of gridpoints -- MUST BE EQUAL TO OR LARGER THAN MAXT !!!!
     INTEGER, PARAMETER :: MAXC = 3            ! Maximum no. of leaf area distributions
-    INTEGER, PARAMETER :: MAXANG = 20          ! Maximum no. of zenith & leaf angles
+    INTEGER, PARAMETER :: MAXANG = 20         ! Maximum no. of zenith & leaf angles
     INTEGER, PARAMETER :: MAXD = 13           ! For resp prog
-    INTEGER, PARAMETER :: MAXDATE = 3      ! Maximum no. of dates for tree or physiol parameters
+    INTEGER, PARAMETER :: MAXDATE = 200!30    ! Maximum no. of dates for tree or physiol parameters
+    INTEGER, PARAMETER :: MAXECHLAYER = 250   ! Maximum number of elementary layers in equiv. horizontal canopy (EHC,ASSIGN,CHART)
     !INTEGER, PARAMETER :: maxdate = 5        ! Maximum no. of dates for physiol parameters
-    !INTEGER, PARAMETER :: MAXMET = 18         ! Maximum columns in met data file
+    !INTEGER, PARAMETER :: MAXMET = 18        ! Maximum columns in met data file
     ! changed by mgdk, just to try and compile, not 18 but MHET has 20?!!
-    INTEGER, PARAMETER :: MAXMET = 20         ! Maximum columns in met data file
+    INTEGER, PARAMETER :: MAXMET = 21         ! Maximum columns in met data file
     INTEGER, PARAMETER :: MAXHISTO = 200      ! Maximum bins in PAR histogram
     REAL, PARAMETER    :: TOL = 0.02          ! Tolerance for leaf temp iteration
     INTEGER, PARAMETER :: MAXDAY =   900      ! For sumtrees program
@@ -60,7 +80,7 @@ MODULE maestcom
     REAL, PARAMETER :: GSVGSC = 1.57       ! Ratio of Gsw:Gsc (stomatal conductance for water vapour: stomatal conductance for CO2)
     REAL, PARAMETER :: GBVGBH = 1.075      ! Ratio of Gbw:Gbh (boundary layer conductance for water vapour: boundary layer conductance for heat)
     REAL, PARAMETER :: ALPHAQ = 0.425      ! Quantum yield of RuBP regen (mol mol-1)
-    REAL, PARAMETER :: SOLARC = 1370       ! Solar constant (J m-2 s-1) also (W m-2)
+    REAL, PARAMETER :: SOLARC = 1370       ! Solar constant (J m-2 s-1)
     REAL, PARAMETER :: GCPERMOL = 12.0     ! Grams ! per mol !
     REAL, PARAMETER :: CPERDW = 0.5        ! fraction per DW
     REAL, PARAMETER :: VONKARMAN = 0.41    ! von Karman's constant
@@ -100,8 +120,8 @@ MODULE maestcom
     INTEGER, PARAMETER :: UPARUS = 33         ! uspar.dat
     INTEGER, PARAMETER :: UWATDAY = 34        ! watbalday.dat
     INTEGER, PARAMETER :: UDAYHDR = 35        ! Dayflx_hdr.asc
-    INTEGER, PARAMETER :: UMET = 36            ! Met.dat
-    INTEGER, PARAMETER :: UTUTD = 37           ! Tutd.dat
+    INTEGER, PARAMETER :: UMET = 36           ! Met.dat
+    INTEGER, PARAMETER :: UTUTD = 37          ! Tutd.dat
     INTEGER, PARAMETER :: UHRLYHDR = 38 
     INTEGER, PARAMETER :: ULAYHDR = 39 
     INTEGER, PARAMETER :: UHISTHDR = 40
@@ -113,9 +133,9 @@ MODULE maestcom
     INTEGER, PARAMETER :: UWATUPTHDR = 46
     INTEGER, PARAMETER :: UWATDAYHDR = 47
     INTEGER, PARAMETER :: URESPHDR = 48
-    INTEGER, PARAMETER :: USUNLA = 49    ! modification Mathias 27/11/12
-    INTEGER, PARAMETER :: USWPLAY = 50    ! modification Mathias décembre 2012
-    INTEGER, PARAMETER :: UMETOUT = 51     !STH 2015.0727
+    INTEGER, PARAMETER :: USUNLA = 49         ! modification Mathias 27/11/12
+    INTEGER, PARAMETER :: USWPLAY = 50        ! modification Mathias decembre 2012
+    INTEGER, PARAMETER :: UMETOUT = 51        !STH 2015.0727
     
     
 
@@ -134,7 +154,6 @@ MODULE maestcom
     ! Flags to indicate which program it is
     INTEGER, PARAMETER :: INORMAL = 0         ! Maestra, Maeshr
     INTEGER, PARAMETER :: ITEST = 1           ! Maestest
-
 	  
     !COMMON /HRS/ HHRS, KHRS, SPERHR ! Make KHRS and HHRS available throughout the program
 !    INTEGER, PARAMETER :: KHRS = 24                  ! Number of time intervals in a day

@@ -1,6 +1,25 @@
 !**********************************************************************
 ! UTILS.FOR
+
+!=======================================================================================
+! Copyright 2015 Remko Duursma, Belinda Medlyn, Mathias Christina, Guerric le Maire
+!---------------------------------------------------------------------------------------
+! this file is part of MAESPA.
 !
+! MAESPA is free software: you can redistribute it and/or modify
+! it under the terms of the gnu general public license as published by
+! the free software foundation, either version 2 of the license, or
+! (at your option) any later version.
+!
+! MAESPA is distributed in the hope that it will be useful,
+! but without any warranty; without even the implied warranty of
+! merchantability or fitness for a particular purpose.  see the
+! gnu general public license for more details.
+!
+! you should have received a copy of the gnu general public license
+! along with MAESPA.  if not, see <http://www.gnu.org/licenses/>.
+!=======================================================================================
+    
 ! This file contains all the 'utility' functions which are called throughout
 ! the other files. I have set the files up so that, when writing a test program
 ! which calls one of the program subroutines in file xxx.for, the program
@@ -123,7 +142,7 @@ SUBROUTINE SUBERROR(MESSAGE,IFLAG,IOERROR)
 
     WRITE(UERROR,*) MESSAGE
     IF (IOERROR.NE.0.AND.IOERROR.NE.-1) WRITE(UERROR,20) IOERROR
-    10    FORMAT (A80)
+    10    FORMAT (A90)
     20    FORMAT ('FORTRAN ERROR CODE NO: ',I10)
 
     IF (IFLAG.EQ.IFATAL) THEN
@@ -301,6 +320,7 @@ END FUNCTION RHOFUN
 ! Bisection routine; finds the root of FUNC in the interval (X1,X2)
 !**********************************************************************
     USE maestcom
+    USE switches
     IMPLICIT NONE
 
     INTEGER ITMAX,ITER
@@ -318,9 +338,11 @@ END FUNCTION RHOFUN
     IF((FA.GT.0..AND.FB.GT.0.).OR.(FA.LT.0..AND.FB.LT.0.))THEN
         FA=FUNC(A, EXTRAPARS, EXTRAINT)
         FB=FUNC(B, EXTRAPARS, EXTRAINT)
-        !WRITE(*,*)' 	    FA		  FB		  X1		    X2'
-        !WRITE(*,*)FA,FB,X1,X2
-        !WRITE(*,*)'ROOT MUST BE BRACKETED FOR ZBRENT'
+        IF(VERBOSE.GE.3)THEN
+            WRITE(*,*)' 	    FA		  FB		  X1		    X2'
+            WRITE(*,*)FA,FB,X1,X2
+            WRITE(*,*)'ROOT MUST BE BRACKETED FOR ZBRENT'
+        ENDIF
         FA=FUNC(A, EXTRAPARS, EXTRAINT)
         FB=FUNC(B, EXTRAPARS, EXTRAINT)
     ENDIF
@@ -380,7 +402,7 @@ END FUNCTION RHOFUN
         ENDIF
         FB=FUNC(B, EXTRAPARS, EXTRAINT)
     END DO
-    !WRITE(*,*) 'ZBRENT EXCEEDING MAXIMUM ITERATIONS'
+    IF(VERBOSE.GE.3)WRITE(*,*) 'ZBRENT EXCEEDING MAXIMUM ITERATIONS'
     ZBRENT=B
     RETURN
 END FUNCTION ZBRENT
@@ -395,6 +417,7 @@ SUBROUTINE ODEINT(YSTART,NVAR,X1,X2,EPS,H1,HMIN,NOK,NBAD,DERIVS,EXTRAPARS)
 !**********************************************************************
 
     USE maestcom
+    USE switches
     IMPLICIT NONE
 
     INTEGER NBAD,NOK,NVAR
@@ -454,7 +477,9 @@ SUBROUTINE ODEINT(YSTART,NVAR,X1,X2,EPS,H1,HMIN,NOK,NBAD,DERIVS,EXTRAPARS)
         ENDIF
         RETURN
     ENDIF
-    IF(ABS(HNEXT).LT.HMIN) WRITE(*,*)'STEPSIZE SMALLER THAN MINIMUM IN ODEINT'
+    IF(ABS(HNEXT).LT.HMIN.AND.VERBOSE.GE.3)THEN
+        WRITE(*,*)'STEPSIZE SMALLER THAN MINIMUM IN ODEINT'
+    ENDIF
         H=HNEXT
     END DO
     RETURN
@@ -504,6 +529,7 @@ SUBROUTINE RKQS(Y,DYDX,N,X,HTRY,EPS,YSCAL,HDID,HNEXT,DERIVS,EXTRAPARS)
 !**********************************************************************
 
     USE maestcom
+    USE switches
     IMPLICIT NONE                                                            
     INTEGER N                                                                     
     REAL EPS,HDID,HNEXT,HTRY,X,DYDX(N),Y(N),YSCAL(N)                              
@@ -533,7 +559,7 @@ SUBROUTINE RKQS(Y,DYDX,N,X,HTRY,EPS,YSCAL,HDID,HNEXT,DERIVS,EXTRAPARS)
         H=SIGN(MAX(ABS(HTEMP),0.1*ABS(H)),H)
         XNEW=X+H
         IF(XNEW.EQ.X)THEN
-            WRITE(*,*) 'STEPSIZE UNDERFLOW IN RKQS'
+            IF(VERBOSE.GE.3)WRITE(*,*) 'STEPSIZE UNDERFLOW IN RKQS'
         ENDIF
         GOTO 111
     ELSE
